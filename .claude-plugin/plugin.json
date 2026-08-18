@@ -1,0 +1,16 @@
+{
+  "name": "databrill-core",
+  "version": "0.3.0",
+  "description": "Explore Databrill data, answer commerce questions, and build reports with hosted MCP tools and read-only Deno helpers.",
+  "author": { "name": "Databrill" },
+  "mcpServers": "./.mcp.json",
+  "userConfig": {
+    "mcp_url": {
+      "type": "string",
+      "title": "Databrill MCP URL",
+      "description": "Leave empty for the default user-scoped URL, which covers every workspace your Databrill login can access. Enter a workspace- or organization-scoped URL supplied by Databrill to narrow it.",
+      "required": false,
+      "default": "https://mcp.databrill.com/mcp/user"
+    }
+  }
+}

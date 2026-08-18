@@ -1,0 +1,13 @@
+{
+  "lock": false,
+  "tasks": {
+    "check": "deno check scripts/catalog.ts scripts/query.ts",
+    "test": "deno test scripts/query_test.ts",
+    "ok": "deno fmt --check . && deno task check && deno task test"
+  },
+  "fmt": {
+    "lineWidth": 120,
+    "proseWrap": "preserve",
+    "exclude": ["docs/table-catalog.md"]
+  }
+}
