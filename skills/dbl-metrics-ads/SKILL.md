@@ -19,7 +19,7 @@ pass its `wsid`. Query workspaces separately and keep currencies separate.
 
 `loadAds` parameters:
 
-- **`stores`** (required) — country code (`US`, `DE`), region (`na`, `eu`,
+- **`stores`** (required) — country code (e.g. `US`, `DE`), region (`na`, `eu`,
   `fe`), a marketplaceId, `*`, or `{merchantId}-{scope}`.
 - **`when`** (required) — ISO 8601 interval or duration:
   `2026-04-13/2026-04-19`, `P7D`, `P4W/2026-04-19`.
