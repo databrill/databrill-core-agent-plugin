@@ -9,6 +9,9 @@ metadata:
 
 # How much Shopify stock is there?
 
+Cross-cutting shape and traps for every `shopify_*` table:
+`${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md`.
+
 There is no dedicated MCP tool for Shopify. Answer with the `core` MCP server's
 `executeSql` against **`shopify_inventory_v1__InventoryLevel`**, one row per
 `(shopId, locationId, inventoryItemId)`.
@@ -110,6 +113,12 @@ WHERE v."tracked"
 GROUP BY l."name", l."hasActiveInventory"
 ORDER BY "available" DESC;
 ```
+
+## Follow-ups
+
+`dbl-metrics-shopify-sales` for store performance,
+`dbl-metrics-shopify-orders` for what sold, `dbl-metrics-shopify-catalog` for the
+catalogue and prices.
 
 ## Three networks, never one number
 

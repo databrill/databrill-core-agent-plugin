@@ -79,9 +79,12 @@ contain:
   with `amzfact_sku_identity` for the seller-SKU mapping) — the only correct
   source for a units total, per marketplace;
 - FBA inventory planning and per-seller-SKU inventory summaries;
-- Shopify stock levels, orders, products, customers, discounts, locations and
-  the daily sales/sessions reports (`shopify_*_v1__*`) — no dedicated MCP tool;
-  see `dbl-metrics-shopify-inventory` for the stock read and its `tracked` trap;
+- Shopify stock levels, orders and line items, products and variants, customers,
+  discounts, locations, and the daily sales/sessions reports (`shopify_*_v1__*`)
+  — no dedicated MCP tool. `dbl-metrics-shopify-sales`,
+  `dbl-metrics-shopify-orders`, `dbl-metrics-shopify-catalog` and
+  `dbl-metrics-shopify-inventory` cover them, over the shared shape and trap
+  reference in `docs/shopify-data-shape.md`;
 - Amazon notification streams;
 - Walmart orders, order lines, inventory, and account profile;
 - The Fulfillment Lab orders, shipments, monthly inventory movements, ASNs, and

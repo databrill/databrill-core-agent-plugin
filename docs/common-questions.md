@@ -121,6 +121,35 @@ Database fallback: run `scripts/examples/tfl-inventory.sql`. Use
 beginning/ending values and shipped/received/adjustment measures are
 window-relative and must not be confused with the daily warehouse snapshot.
 
+## Shopify
+
+`${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` covers the shape and the
+traps for every table below. There is no dedicated Shopify MCP tool; all of it
+goes through `executeSql`.
+
+Question: How is the Shopify store doing?
+
+Preferred path: `shopify_reports_v1__SalesDaily` and
+`shopify_reports_v1__SessionsDaily` — see `dbl-metrics-shopify-sales`. LEFT JOIN
+sessions to sales: a missing sales day means zero sales, not missing data, and an
+INNER JOIN drops the store's worst days. Rates are unit fractions and are the
+source's own; `discounts` and `returns` are already negative.
+
+Question: What sold on Shopify, and what was refunded?
+
+Preferred path: `shopify_orders_v1__Order` with
+`shopify_orders_v1__OrderLineItem` — see `dbl-metrics-shopify-orders`. Filter
+`NOT "test"`, use the `*ShopAmount` columns, and use `currentQuantity` for units
+sold. This family reaches back years further than the daily reports and counts
+differently from them; name which source you used.
+
+Question: What products, variants and prices exist on Shopify?
+
+Preferred path: `shopify_products_v1__Product` with
+`shopify_products_v1__ProductVariant` — see `dbl-metrics-shopify-catalog`. It is
+a current snapshot, not a history; for a price at the time of sale use the line
+item.
+
 Question: What stock does the Shopify store hold?
 
 Preferred path: `executeSql` against `shopify_inventory_v1__InventoryLevel` —

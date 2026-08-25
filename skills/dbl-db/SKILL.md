@@ -33,7 +33,10 @@ for a reusable script — `${CLAUDE_PLUGIN_ROOT}/docs/deno.md` and
 back as a saved script.
 
 For product families and the empty-`brand_ontology_*` trap, read
-`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`.
+`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`. For any `shopify_*` table,
+read `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first — that connector's
+money columns, refresh markers and sparse report days each produce a plausible
+wrong number rather than an error.
 
 Do not guess columns. Do not interpolate values into SQL. Do not use database
 data from one workspace to answer for another. Do not average rates or monetary
