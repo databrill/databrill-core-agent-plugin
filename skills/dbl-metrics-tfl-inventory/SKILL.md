@@ -41,6 +41,26 @@ whole account when `meta.isTruncated` is true.
 If `meta.missingTables` is non-empty, the TFL pipeline is unavailable in that
 workspace. Do not treat it as zero stock.
 
+## SQL fallback
+
+If `loadTflInventory` is absent but the TFL tables are present, query
+`tfl_products_v1__WarehouseInventory` at its latest day per connector — the
+shape in `${CLAUDE_PLUGIN_ROOT}/scripts/examples/tfl-inventory.sql`. Its date
+column is `localdate`; `snapshotDate` is the tool's output name, not a column.
+Take the latest day per `connectorId` separately, never one global `MAX`, or a
+lagging connector drops out. `tfl_products_v1__Inventory` carries the same
+current on-hand without the warehouse split and can hold products that have no
+warehouse row, so the two row counts differ legitimately.
+
+Amazon FBA stock is a different fulfilment network: see
+`dbl-metrics-amazon-inventory`. Never add TFL and Amazon units into one figure
+without labelling which network each part comes from.
+
+Shopify is a third source, and it may be describing THIS warehouse rather than a
+separate one: on a live workspace on 2026-08-25 every Shopify location was a TFL
+location, and the two still reported 72,375 against 35,395 available. See
+`dbl-metrics-shopify-inventory`; do not treat either as a check on the other.
+
 ## Monthly movements
 
 The MCP tool returns daily stock levels, not monthly movements. For beginning

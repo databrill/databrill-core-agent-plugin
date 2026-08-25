@@ -2,6 +2,13 @@
 
 This file is generated from `REMOTE_TABLES` (106 tables) and `REMOTE_VIEWS` (13 views) in `services/libs/database/src/initTablesRemote.ts`.
 
+Not everything a live database holds is listed here. Tables created lazily on
+first write are absent from `REMOTE_TABLES` and therefore from this file —
+notably `amzfact_fnsku_fbaInventory` and `amzfact_sku_identity`, which are the
+correct source for Amazon FBA unit counts (see `dbl-metrics-amazon-inventory`).
+Always confirm against the live schema with `listTables` or `scripts/catalog.ts`
+rather than treating this catalog as exhaustive.
+
 `workspace` in the SQL below is a placeholder. A live database may use `public` or a `w{wsid}` schema. A declared relation is not proof that its pipeline is configured, populated, or current in a particular workspace. Run `scripts/catalog.ts` against that workspace before writing a query.
 
 Column and relation identifiers are case-sensitive where shown and must be double-quoted in hand-written SQL. JSON/JSONB columns are source documents; select only the fields needed. The generated DDL includes primary keys, constraints, indexes, and view definitions.

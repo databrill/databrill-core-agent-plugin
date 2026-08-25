@@ -89,10 +89,24 @@ is better. Compare like categories; a product can have several category ranks.
 
 ## Inventory
 
+Question: How many units of Amazon FBA stock do we hold?
+
+Preferred path: `executeSql` against `amzfact_fnsku_fbaInventory`, one row per
+`(merchantId, marketplaceId, fnsku)` — see `dbl-metrics-amazon-inventory`.
+Always filter to one marketplace; FNSKUs overlap across marketplaces, so a
+cross-marketplace total double counts. Never total
+`amzspapi_fbaInventory_v1__InventorySummary` or the
+`amazon_fba_inventory_summary` view: they are keyed by seller SKU and repeat a
+commingled pool once per label. Measured on a live US store on 2026-08-25,
+that overstates fulfillable units by 87% (126,103 against 67,345).
+
 Question: Should advertising change because of Amazon inventory?
 
 Preferred path: `inventoryPacing`. It combines Amazon FBA inventory runway and
-ad spend. Call out the worst-variant caveat and any inbound stock.
+ad spend. Call out the worst-variant caveat and any inbound stock. Its unit
+counts come from the per-seller-SKU table and are overstated where stock is
+commingled, so confirm a `hold` or `ramp` against
+`amzfact_fnsku_fbaInventory` before acting.
 
 Question: What stock is held by The Fulfillment Lab?
 
@@ -107,11 +121,28 @@ Database fallback: run `scripts/examples/tfl-inventory.sql`. Use
 beginning/ending values and shipped/received/adjustment measures are
 window-relative and must not be confused with the daily warehouse snapshot.
 
+Question: What stock does the Shopify store hold?
+
+Preferred path: `executeSql` against `shopify_inventory_v1__InventoryLevel` —
+see `dbl-metrics-shopify-inventory`. Filter `WHERE "tracked"`; untracked levels
+are the majority and their numbers do not move with sales. Freshness is
+`fetchedAt`, never `shopifyUpdatedAt`. Negative quantities are real.
+
+Question: How much stock do we have in total, across Amazon, TFL and Shopify?
+
+There is no one number. The three are separate sources with separate grains and
+clocks, and Shopify's locations can BE the TFL warehouse rather than a separate
+pool — measured on a live workspace on 2026-08-25, where the two still reported
+72,375 against 35,395 available. Give three labelled figures with their
+timestamps and say a combined total would be an estimate.
+
 Question: Which products are at risk of storage fees or overstock?
 
-Amazon path: start with `inventoryPacing`, then inspect
-`amzreport_FBA_INVENTORY_PLANNING` or `amazon_fba_inventory_summary` if the MCP
-does not return the required age/storage-fee detail.
+Amazon path: take unit counts from `amzfact_fnsku_fbaInventory` and the ads
+decision from `inventoryPacing`. Inspect `amzreport_FBA_INVENTORY_PLANNING` for
+inventory age and storage-fee detail, which the fact table does not carry — but
+do not take its unit totals over the fact table's. `amazon_fba_inventory_summary`
+is per seller SKU and must not be totalled.
 
 ## Listings and catalog
 

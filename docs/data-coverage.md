@@ -45,7 +45,10 @@ organic-channel signals.
 ### `inventoryPacing`
 
 Joins Amazon FBA inventory runway with current advertising spend and recommends
-pause, throttle, hold, or ramp by product family.
+pause, throttle, hold, or ramp by product family. It reads the per-seller-SKU
+inventory table, so its unit counts and runways are overstated wherever stock is
+commingled; take the units themselves from `amzfact_fnsku_fbaInventory` via
+`executeSql`. There is no dedicated MCP tool for FBA stock levels yet.
 
 ### `loadTflInventory`
 
@@ -72,7 +75,13 @@ contain:
 - returns, reimbursements, removals, storage fees, coupons, and promotions;
 - settlement, ledger, transaction, posting, and projected-profit data;
 - advertising campaign/entity exports and Amazon Marketing Stream events;
-- FBA inventory planning and inventory summaries;
+- FBA stock levels at the physical-pool grain (`amzfact_fnsku_fbaInventory`,
+  with `amzfact_sku_identity` for the seller-SKU mapping) — the only correct
+  source for a units total, per marketplace;
+- FBA inventory planning and per-seller-SKU inventory summaries;
+- Shopify stock levels, orders, products, customers, discounts, locations and
+  the daily sales/sessions reports (`shopify_*_v1__*`) — no dedicated MCP tool;
+  see `dbl-metrics-shopify-inventory` for the stock read and its `tracked` trap;
 - Amazon notification streams;
 - Walmart orders, order lines, inventory, and account profile;
 - The Fulfillment Lab orders, shipments, monthly inventory movements, ASNs, and
@@ -80,10 +89,12 @@ contain:
 - brand ontology and product-family configuration;
 - exchange rates and marketplace/store dimensions.
 
-Use the read-only Deno or n8n path for these sources when a direct credential is
-available. `loadTflInventory` reads TFL daily warehouse stock.
-`inventoryPacing` remains a separate tool that reads Amazon FBA inventory; do
-not present either source as the other.
+Use `executeSql`, or the read-only Deno or n8n path, for these sources.
+`loadTflInventory` reads TFL daily warehouse stock. `inventoryPacing` remains a
+separate tool that reads Amazon FBA inventory; do not present either source as
+the other, and never add Amazon, TFL and Shopify units together without saying
+which network each figure belongs to — Shopify's locations may be the TFL
+warehouse rather than a separate pool.
 
 ## Declared does not mean ingested
 
@@ -102,7 +113,8 @@ Prefer these views for human-authored SQL where they fit:
 
 - `amazon_sales_and_traffic`
 - `amazon_orders_by_day_and_sku`
-- `amazon_fba_inventory_summary`
+- `amazon_fba_inventory_summary` (per seller SKU — for labels only, never for a
+  units total; use `amzfact_fnsku_fbaInventory` for units)
 - `amazon_listing_all` and `amazon_listing_open`
 - `amazon_ads_campaign`, `amazon_ads_adgroup`, `amazon_ads_ad`, and
   `amazon_ads_target`
