@@ -61,8 +61,8 @@ Amazon FBA stock is a different fulfilment network: see
 without labelling which network each part comes from.
 
 Shopify is a third source, and it may be describing THIS warehouse rather than a
-separate one: on a live workspace on 2026-08-25 every Shopify location was a TFL
-location, and the two still reported 72,375 against 35,395 available. See
+separate one: a workspace can have every Shopify location mapped to a TFL
+warehouse, and the two sources still report different available quantities. See
 `dbl-metrics-shopify-inventory`; do not treat either as a check on the other.
 
 ## Monthly movements

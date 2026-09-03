@@ -22,11 +22,10 @@ There is no dedicated MCP tool for Shopify. Answer with the `core` MCP server's
 ## Filter to tracked items or the number is wrong
 
 `tracked` says whether a quantity means anything. Shopify keeps returning levels
-for untracked items, and their numbers do not move with sales. Most levels are
-untracked: measured on a live store on 2026-08-25, 119 of 514. Including the
-untracked rows moved available stock from 72,375 to 62,916 — a 9,459-unit error
-in the _opposite_ direction from what you would guess, because untracked rows
-carry large negative values.
+for untracked items, and their numbers do not move with sales. Untracked levels
+are a large enough share of a store's rows to change any total, and including
+them moves the available figure in the _opposite_ direction from what you would
+guess, because untracked rows carry large negative values.
 
 **Put `WHERE "tracked"` on every stock total**, and say so when you report the
 figure. If the user genuinely wants the untracked rows, report the two groups
@@ -69,8 +68,8 @@ separately rather than in one sum.
 
 ## More than one shop
 
-`shopId` is part of the key and a workspace can hold several shops (a live
-workspace had 3 shops across 7 locations on 2026-08-25). Group by `shopId`, or
+`shopId` is part of the key and a workspace can hold several shops, each with
+several locations of its own. Group by `shopId`, or
 state which shop a figure covers. Do not present a multi-shop total as one
 store's stock. Join `shopify_shop_v1__Shop` for the name.
 
@@ -133,12 +132,9 @@ combined position, and then say which part came from where and as of when —
 units can also be physically the same stock seen twice where TFL fulfils Shopify
 orders, so a combined total is an estimate, not a measurement.
 
-That overlap is not hypothetical. On a live workspace on 2026-08-25 every
-Shopify location was a TFL location ("The Fulfillment Lab", "The Fulfillment Lab
-
-- GFS", and two more), so the Shopify levels describe TFL's warehouse, not a
-  separate pool — and the two sources still disagreed: 72,375 available in Shopify
-  against 35,395 in TFL's own snapshot the day before. Do not reconcile them by
-  arithmetic and do not present one as a check on the other. Report each with its
-  source and its timestamp, and say the gap is unexplained if the user needs one
-  number.
+That overlap is not hypothetical. A workspace can have every Shopify location
+mapped to a TFL warehouse, so the Shopify levels describe TFL's stock rather
+than a separate pool — and the two sources still disagree, because they are read
+on different clocks. Do not reconcile them by arithmetic and do not present one
+as a check on the other. Report each with its source and its timestamp, and say
+the gap is unexplained if the user needs one number.

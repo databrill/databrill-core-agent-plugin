@@ -1,8 +1,8 @@
 # Product families and the catalogue hierarchy
 
 Most Databrill catalogues are large and organised into **families** — groups of
-variants of the same item. A workspace with ~1,500 selling ASINs can map them
-into a few hundred families, and one family can hold 90+ child ASINs.
+variants of the same item. A workspace with over a thousand selling ASINs can map
+them into a few hundred families, and one family can hold 90+ child ASINs.
 
 Family is very often the right level to analyse at. A single variant may sell
 two units a week — far too few to conclude anything from — while its family
@@ -53,14 +53,9 @@ Use `a."family"` alone when you only need the key; join
 
 `brand_ontology_amazon_asin` and `brand_ontology_amazon_family` are the
 better-named objects, and they are frequently empty while the `brand_config_*`
-tables underneath are fully populated. In a verified workspace:
-
-| Relation                       | Rows  |
-| ------------------------------ | ----- |
-| `brand_config_amazon_asin`     | 2,295 |
-| `brand_config_amazon_family`   | 155   |
-| `brand_ontology_amazon_asin`   | 0     |
-| `brand_ontology_amazon_family` | 0     |
+tables underneath are fully populated — `brand_config_amazon_asin` and
+`brand_config_amazon_family` carrying a full mapping while both
+`brand_ontology_*` views return no rows at all.
 
 The cause is in the view definitions, not the data.
 `brand_ontology_amazon_family` inner-joins `brand_config_ontology_category`, and

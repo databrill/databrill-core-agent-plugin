@@ -34,10 +34,10 @@ and types of any `shopify_*` table, read
    days. `average_session_duration` is in seconds.
 4. **`day` is the shop's local calendar day**, not UTC.
 
-`conversion_rate` will not always agree with the day's own order count —
-measured on one store, a day with 20 sessions and 1 order reported a
-`conversion_rate` of 0. It credits a session, not an order. Do not put the two
-side by side as though they must reconcile.
+`conversion_rate` will not always agree with the day's own order count — a day
+with sessions and orders can still report a `conversion_rate` of 0. It credits a
+session, not an order. Do not put the two side by side as though they must
+reconcile.
 
 ## Which shop
 
@@ -95,9 +95,9 @@ say which.
 
 ## Check coverage before quoting a period
 
-These tables can start well after the store did — measured on one workspace they
-held 2026-07-24 onward only, roughly a month. Establish the range first and state
-it; do not present a partial window as a full one:
+These tables can start well after the store did, sometimes holding only the last
+few weeks. Establish the range first and state it; do not present a partial
+window as a full one:
 
 ```sql
 SELECT "shopId", MIN("day") AS "from", MAX("day") AS "to", COUNT(*) AS "days"

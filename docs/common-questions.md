@@ -96,8 +96,8 @@ Always filter to one marketplace; FNSKUs overlap across marketplaces, so a
 cross-marketplace total double counts. Never total
 `amzspapi_fbaInventory_v1__InventorySummary` or the
 `amazon_fba_inventory_summary` view: they are keyed by seller SKU and repeat a
-commingled pool once per label. Measured on a live US store on 2026-08-25,
-that overstates fulfillable units by 87% (126,103 against 67,345).
+commingled pool once per label, which overstates fulfillable units
+substantially.
 
 Question: Should advertising change because of Amazon inventory?
 
@@ -160,9 +160,9 @@ Question: How much stock do we have in total, across Amazon, TFL and Shopify?
 
 There is no one number. The three are separate sources with separate grains and
 clocks, and Shopify's locations can BE the TFL warehouse rather than a separate
-pool — measured on a live workspace on 2026-08-25, where the two still reported
-72,375 against 35,395 available. Give three labelled figures with their
-timestamps and say a combined total would be an estimate.
+pool — where that happens the two still report substantially different available
+quantities. Give three labelled figures with their timestamps and say a combined
+total would be an estimate.
 
 Question: Which products are at risk of storage fees or overstock?
 

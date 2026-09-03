@@ -1,6 +1,6 @@
 {
 	"name": "databrill-core",
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"description": "Explore Databrill data, answer commerce questions, and build reports with hosted MCP tools and read-only Deno helpers.",
 	"author": { "name": "Databrill" },
 	"mcpServers": "./.mcp.json",
@@ -8,7 +8,7 @@
 		"mcp_url": {
 			"type": "string",
 			"title": "Databrill MCP URL",
-			"description": "Leave empty for the default user-scoped URL, which covers every workspace your Databrill login can access. Enter a workspace- or organization-scoped URL supplied by Databrill to narrow it.",
+			"description": "Leave empty for the default user-scoped URL, which covers every workspace your Databrill login can access. Enter a workspace- or organization-scoped URL supplied by Databrill to narrow it. Every URL is read-only unless it ends in /rw, which adds the tool for editing brand configuration.",
 			"required": false,
 			"default": "https://mcp.databrill.com/mcp/user"
 		}

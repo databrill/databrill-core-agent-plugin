@@ -54,6 +54,33 @@ The connector exposes `listWorkspaces`. Data tools accept an optional `wsid`.
 Choose this when the intended workspaces are in one Databrill organization and
 unrelated user memberships should remain outside the Claude session.
 
+### Read-write: add `/rw` to any of the three
+
+Any of the URLs above can carry a trailing mode segment:
+
+```text
+https://mcp.databrill.com/mcp/user/rw
+https://mcp.databrill.com/mcp/workspace/{wsid}/rw
+https://mcp.databrill.com/mcp/org/{orgId}/rw
+```
+
+The mode is a path segment, always last, and never a query parameter. A URL with
+no trailing `ro` or `rw` segment — every form shown above this section — is
+read-only. The segment is matched exactly and in lower case, so `RO`, `readonly`
+and a trailing slash are rejected rather than corrected.
+
+`/rw` is a selector, not a permission grant: it chooses among the capabilities
+the signed-in user already has, and grants nothing new. `ro` is the other
+direction, withholding the write tools from a user who could otherwise use them.
+This is why the plugin's default stays read-only — a session gets write tools
+only when the URL asks for them.
+
+On a read-only session the write tools are not listed at all. So "the write tool
+is missing" is a statement about the URL, not about permissions or about the
+plugin version, and calling such a tool by hand on a read-only session is refused
+anyway. Writing configuration is what these tools are for; the skill that uses
+them is `dbl-brand-config`.
+
 ## Multi-workspace query rules
 
 `listWorkspaces` returns workspace ids, labels, merchants, and countries. For

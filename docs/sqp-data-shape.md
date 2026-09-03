@@ -29,9 +29,9 @@ when we had no event of that type.
 
 The `total*` numbers are the same market figure copied onto every one of our
 ASIN rows for that query and week. `SUM(totalQueryImpressionCount)` inflates the
-market by however many of our ASINs happened to appear on the term — in a
-verified week, 151 rows for one query, so a 151× overstatement, and the derived
-"impression share" collapses to nonsense.
+market by however many of our ASINs happened to appear on the term — often by
+two orders of magnitude on a popular query — and the derived "impression share"
+collapses to nonsense.
 
 Take `MAX` within (search query, period) first, then sum across periods:
 
@@ -65,11 +65,9 @@ All four key columns are required — see the index note in
 ## Trap 2: `totalClickRate` is not a click-through rate
 
 `totalClickRate`, `totalCartAddRate` and `totalPurchaseRate` are divided by
-`searchQueryVolume` (distinct searches), **not** by impressions. On a verified
-week the term "garlic press" reported `totalClickRate` 32.01 while the real
-market click-through rate — 49,977 clicks over 4,226,486 impressions — was
-1.18%. Using the field as a CTR overstates it by roughly 27×, and the factor
-varies by term, so it cannot be corrected with a constant.
+`searchQueryVolume` (distinct searches), **not** by impressions. Reading one as
+a click-through rate overstates it by a large factor, and the factor varies by
+term, so it cannot be corrected with a constant.
 
 Compute market rates yourself from the counts:
 

@@ -41,12 +41,15 @@ for a reusable script — `${CLAUDE_PLUGIN_ROOT}/docs/deno.md` and
 back as a saved script.
 
 For product families and the empty-`brand_ontology_*` trap, read
-`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`. For any `shopify_*` table,
-read `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first — that connector's
+`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`. To _change_ a
+`brand_config_*` table — families, ASIN mapping, the ontology layer, or an
+effective-dated cost or rate — use `dbl-brand-config`; reading them stays here.
+For any `shopify_*` table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first — that connector's
 money columns, refresh markers and sparse report days each produce a plausible
 wrong number rather than an error.
 
 Do not guess columns. Do not interpolate values into SQL. Do not use database
 data from one workspace to answer for another. Do not average rates or monetary
 ratios across rows; aggregate their numerators and denominators. Do not claim
-that a declared table is populated without live evidence.
+that a declared table is populated without checking it in the database.

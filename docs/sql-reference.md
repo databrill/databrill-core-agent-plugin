@@ -89,9 +89,9 @@ aggregate it correctly once it responds.
 ## FBA inventory fans out — filter, then aggregate
 
 `amazon_fba_inventory_summary` holds one row per (merchant, marketplace, SKU),
-so one ASIN legitimately appears many times: in a live workspace the busiest
-ASIN returned 425 rows across 7 marketplaces, 60 SKUs and 2 merchants. Filter
-merchant and marketplace together, then sum over SKUs:
+so one ASIN legitimately appears many times: a busy ASIN can return hundreds of
+rows, spread across several marketplaces, many SKUs and more than one merchant.
+Filter merchant and marketplace together, then sum over SKUs:
 
 ```sql
 SELECT "asin", sum("fulfillable") AS fulfillable, sum("total") AS total
@@ -117,14 +117,14 @@ like the advertising performance table. It is not. Reach for
 `search_asin_placement__byDay` when the question needs campaign, ad format,
 placement, or search term.
 
-`product_overview_ad_asin__day` is the same rollup that `loadAds` reads. On a
-verified week it matched `loadAds` exactly — spend `25782.34`, revenue
-`102247.47`, 56,350 clicks, 1,768,695 impressions, 3,528 orders. Its
-`ad_revenue` is total attributed sales, which **includes** halo sales on other
-ASINs (`sales` = `salesPromoted` + `salesHalo` in the source table). It is not
-inflated and does not double-count, but do not add `loadAds`'s `revenueHaloOut`
-on top of `revenue` — that is a breakdown of it, not an addition to it. For
-promoted-ASIN-only revenue, subtract `revenueHaloOut`.
+`product_overview_ad_asin__day` is the same rollup that `loadAds` reads, and
+over a checked week it matched `loadAds` exactly on spend, revenue, clicks,
+impressions and orders. Its `ad_revenue` is total attributed sales, which
+**includes** halo sales on other ASINs (`sales` = `salesPromoted` + `salesHalo`
+in the source table). It is not inflated and does not double-count, but do not
+add `loadAds`'s `revenueHaloOut` on top of `revenue` — that is a breakdown of
+it, not an addition to it. For promoted-ASIN-only revenue, subtract
+`revenueHaloOut`.
 
 Note also that `adProduct` can be an empty string on a small number of rows;
 treat `''` as "unclassified", not as a fifth ad format.

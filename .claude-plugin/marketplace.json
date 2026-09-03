@@ -9,7 +9,7 @@
 			"name": "databrill-core",
 			"source": "./",
 			"description": "Explore Databrill data, answer commerce questions, and build reports with hosted MCP tools and read-only Deno helpers.",
-			"version": "0.6.0"
+			"version": "0.6.1"
 		}
 	]
 }

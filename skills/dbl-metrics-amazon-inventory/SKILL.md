@@ -22,8 +22,8 @@ other table for a units total.
 `amazon_fba_inventory_summary` view are keyed by _seller SKU_. A commingled pool
 is repeated once per seller SKU pointing at it, each repetition carrying the
 same quantities, so summing them counts the same physical units several times.
-Measured on a live US store on 2026-08-25: 171,115 units per seller SKU against
-92,207 per FNSKU — an 87% overstatement, and 126,103 fulfillable against 67,345.
+On a catalogue with commingled stock the per-seller-SKU total, on-hand and
+fulfillable alike, runs substantially above the per-FNSKU total.
 
 Never total the per-seller-SKU tables. Use them only when the question is
 genuinely about a label (which SKU is which), and get identity from

@@ -58,13 +58,14 @@ two traps produce confidently wrong numbers:
 
 - **Market totals repeat, they don't add up.** Each row is one ASIN × one query
   × one period, and the `total*` figures are the same market number copied onto
-  every one of our ASIN rows. Summing them inflated the market 151× on one term.
-  Take `MAX` within (search query, period), then sum across periods; our own
-  `asin*` counts are summed normally.
+  every one of our ASIN rows. Summing them inflates the market by however many
+  of our ASINs appeared on the term, often by two orders of magnitude. Take
+  `MAX` within (search query, period), then sum across periods; our own `asin*`
+  counts are summed normally.
 - **`totalClickRate` is not a click-through rate.** It is divided by
-  `searchQueryVolume`, not impressions — 32.01 reported against a real market
-  CTR of 1.18% on a verified week. Compute market CTR as
-  `totalClickCount ÷ totalQueryImpressionCount` yourself.
+  `searchQueryVolume`, not impressions, so it reads far above the real market
+  CTR. Compute market CTR as `totalClickCount ÷ totalQueryImpressionCount`
+  yourself.
 
 Source: `amzreport_SEARCH_QUERY_PERFORMANCE` (`impressionData`, `clickData`,
 `cartAddData`, `purchaseData` JSONB; `timeUnit`, `merchantId`, `marketplaceId`,

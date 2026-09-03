@@ -22,16 +22,16 @@ declared columns and types of any `shopify_*` table, read
 
 - **`WHERE NOT "test"`.** Test orders are real rows.
 - **Use the `*ShopAmount` columns**, not `*Presentment`, and check the matching
-  `*ShopCurrency`. A measured store carried USD on 49,897 rows and AUD on 188, so
-  an unfiltered `SUM` adds two currencies together. Filter or group by currency.
+  `*ShopCurrency`. One shop can carry rows in more than one currency, so an
+  unfiltered `SUM` adds two currencies together. Filter or group by currency.
 - **Net revenue is `"totalPriceShopAmount" - "totalRefundedShopAmount"`.** The
   refund column is 0, never null, on an unrefunded order.
-- **Decide on cancellations.** `shopifyCancelledAt` is filled on about 1.66% of
-  orders. Exclude them or say you did not.
+- **Decide on cancellations.** `shopifyCancelledAt` is filled on a small
+  percentage of orders. Exclude them or say you did not.
 - **These totals will not match `shopify_reports_v1__SalesDaily`**, by design —
-  measured 51,885.43 here against 49,685.19 there over the same 24 days, and 977
-  order rows against the report's 967. Pick the source the question is about and
-  name it. See `dbl-metrics-shopify-sales`.
+  over the same window the two disagree on revenue and on the number of orders.
+  Pick the source the question is about and name it. See
+  `dbl-metrics-shopify-sales`.
 
 ## Which date column
 
@@ -76,19 +76,19 @@ Note the join carries `shopId` on both sides. `orderId` alone is not unique
 across shops.
 
 **Exclude add-on services before presenting a ranking.** They sell as ordinary
-line items — on a measured store "Shipping Protection" ranked third by units in a
-month, above real products, on $283.71 of revenue. Check the titles, drop the
+line items, and a shipping-protection or warranty line can outrank real products
+by units in a month on very little revenue. Check the titles, drop the
 non-products, and say you did.
 
 ## Joining to the catalogue
 
 `productId` and `variantId` on a line item are **nullable, and null is
-meaningful** — Shopify severs the reference when a product is deleted (2,275 of
-78,124 measured rows). `LEFT JOIN` to `shopify_products_v1__Product` /
-`shopify_products_v1__ProductVariant` and report the unmatched rows as "deleted
-products" rather than dropping them. The line item keeps `title`, `sku` and
-`vendor` as they were at the time of sale, which is often the better source for a
-historical report anyway.
+meaningful** — Shopify severs the reference when a product is deleted, on a
+small but steady fraction of rows. `LEFT JOIN` to
+`shopify_products_v1__Product` / `shopify_products_v1__ProductVariant` and
+report the unmatched rows as "deleted products" rather than dropping them. The
+line item keeps `title`, `sku` and `vendor` as they were at the time of sale,
+which is often the better source for a historical report anyway.
 
 ## Geography
 
@@ -103,8 +103,8 @@ or removed customer). That table carries `numberOfOrders`, `lastOrderId`,
 `amountSpent` and `state`.
 
 **Do not reconcile `amountSpent` against a sum of the customer's order totals.**
-Measured on one store, every `amountSpent` was USD while the orders corpus
-carried AUD on some rows, so the two are in different currencies with no
+`amountSpent` is in one currency for every customer while the orders corpus can
+carry more than one, so the two can be in different currencies with no
 conversion available. Store-level repeat-customer rates are better taken from
 `shopify_reports_v1__SalesDaily.returning_customer_rate`, which is the source's
 own.
@@ -132,22 +132,23 @@ them, which is **not the same as an empty value**. `nodeType` is the coarse
 code-versus-automatic split, derived from the GID independently of
 `discountType`, so the two can be checked against each other.
 
-Measured on a live workspace, 202 discounts: 181 `DiscountCodeBasic`, 8
-`DiscountAutomaticApp`, 8 `DiscountCodeBxgy`, 4 `DiscountCodeFreeShipping`, 1
-`DiscountCodeApp`.
+In practice `DiscountCodeBasic` is the overwhelming majority of the rows, and
+the other members appear in small numbers or not at all — so a report that only
+ever sees Basic rows has still not been tested against the union.
 
 The nulls that will mislead a report:
 
 - **`usageLimit` is null for two indistinguishable reasons** — an automatic
   discount does not declare the field at all, and a code discount declares it
-  null meaning _unlimited_. Non-null on only 14 of the 202 measured. Never render
-  a null as "unlimited" without checking `nodeType` first.
-- **`summary` is absent on the two App members**, so it was null on all 9 App
-  rows. For those, `appDiscountTypeTitle` is the closest thing to a description.
+  null meaning _unlimited_. It is non-null on only a small minority of rows.
+  Never render a null as "unlimited" without checking `nodeType` first.
+- **`summary` is absent on the two App members**, so it is null on every App
+  row. For those, `appDiscountTypeTitle` is the closest thing to a description.
 - **`shortSummary` is declared only by the Basic and FreeShipping members** —
   null on every Bxgy and App row.
-- **`totalSalesAmount` null means never redeemed**, not missing: non-null on 109
-  of 202. Paired with `totalSalesCurrency`, null exactly when it is.
+- **`totalSalesAmount` null means never redeemed**, not missing: it is non-null
+  on roughly half the rows. Paired with `totalSalesCurrency`, null exactly when
+  it is.
 - **`endsAt` null means no end date.**
 - **`appliesOncePerCustomer` null means the discount is automatic.**
 - **`codeCount` is null on automatic discounts** and, where present, equals the

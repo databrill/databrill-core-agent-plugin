@@ -26,8 +26,9 @@ There is no dedicated Shopify MCP tool. Everything goes through `executeSql`.
 ## Trap 1: a workspace holds more than one shop
 
 `shopId` is part of every key. A workspace can carry several unrelated
-storefronts — one live workspace holds three (Pure Dogs Co, Pure Micronutrients,
-Blyss Nutrition), and the discounts table covers only two of them.
+storefronts, and a table is not guaranteed to cover all of them — the discounts
+table in particular can be populated for some shops in a workspace and empty for
+others.
 
 Group by `shopId` or filter to one, and name the shop in the answer. Join
 `shopify_shop_v1__Shop` for `name`, `myshopifyDomain`, `currencyCode` and
@@ -46,10 +47,10 @@ Orders promote both halves of Shopify's `MoneyBag`:
 Line items carry **shopMoney only** — there is no presentment pair there.
 
 `Order.currencyCode` is metadata about the order, **not** the denomination of
-any column. Every amount has its own currency column beside it. On a measured
-store the shop half was USD on 49,897 rows and AUD on 188, so
-`SUM("totalPriceShopAmount")` across all rows adds two currencies into one
-meaningless number. Either filter on the currency column or group by it.
+any column. Every amount has its own currency column beside it. A single shop
+can carry rows in more than one currency, so `SUM("totalPriceShopAmount")`
+across all rows adds two currencies into one meaningless number. Either filter
+on the currency column or group by it.
 
 `ProductVariant.price` is different again: Shopify's scalar `Money` carries no
 code, so `currencyCode` there is the shop's currency captured at import time.
@@ -60,13 +61,8 @@ All money is an exact decimal string in NUMERIC. Never cast to float.
 
 `shopify_reports_v1__SalesDaily` is ShopifyQL's `sales` dataset — the numbers
 the merchant sees in their own admin. It uses different inclusion rules from a
-row count over the orders table. Measured on Pure Micronutrients,
-2026-08-01 to 2026-08-24:
-
-|        | Report    | Orders table |
-| ------ | --------- | ------------ |
-| sales  | 49,685.19 | 51,885.43    |
-| orders | 967       | 977          |
+row count over the orders table, so over the same window the report and the
+orders table disagree on both revenue and the number of orders.
 
 Neither is wrong. Pick the one the question is about — the merchant's own
 reported revenue, or the orders you can break down by product and geography —
@@ -78,9 +74,9 @@ counts sessions, not orders.
 ## Trap 4: a missing day in SalesDaily means zero sales, not missing data
 
 ShopifyQL returns no row for a day with no sales, so `SalesDaily` is sparse
-while `SessionsDaily` is dense. Measured over 2026-07-24 to 2026-08-24: Pure
-Micronutrients had 32 sales days of 32, Pure Dogs Co 27, Blyss Nutrition 24 —
-and every absent day had sessions and zero orders.
+while `SessionsDaily` is dense. How sparse it is varies by shop: over one date
+range, one shop can have a sales row for every day while another is missing
+several, and every absent day has sessions and zero orders.
 
 Consequences:
 
@@ -90,11 +86,11 @@ Consequences:
 - A `COUNT(*)` over `SalesDaily` is not a number of days elapsed.
 
 `conversion_rate` also disagrees with a day's own order count more often than
-you would expect: measured on Blyss Nutrition, 2026-08-20 carried 20 sessions,
-1 order and a `conversion_rate` of 0. It attributes a completed checkout to a
-session, and an order can be placed in a session the report does not credit.
-Report it as returned and do not present it beside an order count as though the
-two must agree.
+you would expect: a day can carry sessions and orders and still report a
+`conversion_rate` of 0. It attributes a completed checkout to a session, and an
+order can be placed in a session the report does not credit. Report it as
+returned and do not present it beside an order count as though the two must
+agree.
 
 ## Trap 5: `day` is a shop-local calendar day
 
@@ -111,16 +107,16 @@ and call the result a daily sales report.
 
 ## Trap 6: signs and units in the report measures
 
-- `discounts` and `returns` are **negative** in normal operation — measured
-  negative on 1,195 and 557 of 1,201 days. Do not negate them again, and do not
-  `ABS()` them into a positive "discount total" without saying so.
+- `discounts` and `returns` are **negative** in normal operation, on nearly
+  every day that carries either. Do not negate them again, and do not `ABS()`
+  them into a positive "discount total" without saying so.
 - `taxes` and `cost_of_goods_sold` admit either sign.
 - Every rate is a **unit fraction**: `bounce_rate` 0.7658 means 76.58%, and
   `returning_customer_rate` likewise. Multiply by 100 for display.
 - `average_session_duration` is in **seconds**, the only column in that family
   that is not money, a count or a fraction.
-- `gross_margin` can exceed 1.0 when the merchant's cost data is incomplete
-  (1.215 was measured). It is stored as returned rather than clamped.
+- `gross_margin` can exceed 1.0 when the merchant's cost data is incomplete. It
+  is stored as returned rather than clamped.
 - `average_order_value`, `gross_margin`, `returning_customer_rate`,
   `bounce_rate` and `conversion_rate` are **derived by the source**. Report them
   as returned; do not recompute them from the columns beside them, and never
@@ -164,9 +160,10 @@ two different facts that the column cannot tell apart. See
 
 ## Trap 9: null is not zero, and a severed reference is not a bug
 
-- `OrderLineItem.productId` is null on 2,275 of 78,124 measured rows. That is the
-  fingerprint of a **deleted product**, not a dangling id. `variantId` likewise.
-  Use `LEFT JOIN` and report the unmatched rows rather than dropping them.
+- `OrderLineItem.productId` is null on a small but steady fraction of rows. That
+  is the fingerprint of a **deleted product**, not a dangling id. `variantId`
+  likewise. Use `LEFT JOIN` and report the unmatched rows rather than dropping
+  them.
 - `Order.customerId` is null on a small number of orders. Guest or removed
   customer.
 - Inventory's `reserved`, `safetyStock`, `damaged` and `qualityControl` are null
@@ -175,19 +172,19 @@ two different facts that the column cannot tell apart. See
 ## Trap 10: test and cancelled orders are real rows
 
 `Order.test` is a real boolean with real `true` rows. Filter `WHERE NOT "test"`
-on any revenue question. `shopifyCancelledAt` is filled on about 1.66% of orders
-and `totalRefundedShopAmount` is 0 rather than null on an unrefunded order, so
-net revenue is `totalPriceShopAmount - totalRefundedShopAmount` and needs no
-COALESCE.
+on any revenue question. `shopifyCancelledAt` is filled on a small percentage of
+orders and `totalRefundedShopAmount` is 0 rather than null on an unrefunded
+order, so net revenue is `totalPriceShopAmount - totalRefundedShopAmount` and
+needs no COALESCE.
 
 ## Trap 11: not every line item is a product
 
-Add-on services sell as ordinary line items. On a measured store "Shipping
-Protection" (SKU `NVDPROTECTION-…`) ranked third by units in a month, above real
-products. A best-seller list that does not exclude these is wrong in the way the
-client will notice first. Its `productId` is usually null, so it also inflates any
-"deleted product" count. Check the titles before presenting a ranking, exclude
-non-products, and say that you did.
+Add-on services sell as ordinary line items, and a shipping-protection or
+warranty line can outrank real products in a units ranking. A best-seller list
+that does not exclude these is wrong in the way the client will notice first.
+Its `productId` is usually null, so it also inflates any "deleted product"
+count. Check the titles before presenting a ranking, exclude non-products, and
+say that you did.
 
 ## Trap 12: `quantity` is not `currentQuantity`
 

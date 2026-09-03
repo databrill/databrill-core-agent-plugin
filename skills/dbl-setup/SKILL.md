@@ -31,4 +31,7 @@ When troubleshooting, inspect connector status first, then distinguish URL
 configuration, OAuth authentication, authorization membership, and unsupported
 data coverage. Do not solve an authorization error by widening the scope, either
 by clearing the URL or by switching to the user-scoped one: the missing piece is
-membership, which a wider URL cannot supply.
+membership, which a wider URL cannot supply. When the write tool is not listed,
+or the user says they cannot edit configuration, the cause is the URL's mode
+rather than membership: every URL is read-only unless it ends in `/rw`, which
+grants nothing new but does announce the write tool.
