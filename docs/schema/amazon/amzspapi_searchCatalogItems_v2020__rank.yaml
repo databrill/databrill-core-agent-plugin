@@ -1,0 +1,26 @@
+name: "amzspapi_searchCatalogItems_v2020__rank"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "One ranked ASIN per SP-API searchCatalogItems scrape, keyed (targetId, scrapeTime, rank). Deliberately lean — per-ASIN metadata lives in amzspapi_searchCatalogItems_v2020__asin. Partitioned monthly by scrapeTime."
+primaryKey:
+  - "targetId"
+  - "scrapeTime"
+  - "rank"
+columns: |
+  name	type	description
+  targetId	BIGINT	Signed BIGINT; the scrape unit this rank belongs to (see __target)
+  scrapeTime	TIMESTAMPTZ	When the scrape ran (TIMESTAMPTZ); the monthly partition key and part of the PK
+  rank	INTEGER	1-based rank, continuous across page boundaries
+  asin	TEXT	The ranked ASIN at this position
+indexes:
+  - name: "amzspapi_searchCatalogItems_v2020__rank__asin__targetId__scrapeTime"
+    columns:
+      - "asin"
+      - "targetId"
+      - "scrapeTime"
+partition:
+  type: "RANGE"
+  columns:
+    - "scrapeTime"
+  rangeInterval: "MONTH"

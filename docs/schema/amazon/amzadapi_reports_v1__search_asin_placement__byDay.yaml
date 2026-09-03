@@ -1,0 +1,102 @@
+name: "amzadapi_reports_v1__search_asin_placement__byDay"
+kind: "table"
+access: "read"
+category: "Amazon Ads API"
+description: "Daily Amazon Ads search-term and placement report: one row per day, ad entity, target, search term and placement, with impressions, clicks, cost, purchases, units sold and sales."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "date"
+  - "adProduct"
+  - "campaignId"
+  - "adGroupId"
+  - "adId"
+  - "advertisedProductId"
+  - "targetMatchType"
+  - "target"
+  - "searchTerm"
+  - "placementClassification"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  date	DATE
+  adProduct	TEXT
+  campaignId	TEXT
+  adGroupId	TEXT
+  adId	TEXT
+  advertisedProductId	TEXT
+  advertisedProductSku	TEXT
+  targetMatchType	TEXT
+  target	TEXT
+  searchTerm	TEXT
+  placementClassification	TEXT
+  budgetCurrency	TEXT
+  impressions	INTEGER
+  clicks	INTEGER
+  viewableImpressions	INTEGER
+  purchases	INTEGER
+  purchasesFromClicks	INTEGER
+  purchasesFromViews	INTEGER
+  purchasesPromoted	INTEGER
+  purchasesFromClicksPromoted	INTEGER
+  purchasesFromViewsPromoted	INTEGER
+  purchasesHalo	INTEGER
+  purchasesFromClicksHalo	INTEGER
+  purchasesFromViewsHalo	INTEGER
+  unitsSold	INTEGER
+  unitsSoldFromClicks	INTEGER
+  unitsSoldFromViews	INTEGER
+  unitsSoldPromoted	INTEGER
+  unitsSoldFromClicksPromoted	INTEGER
+  unitsSoldFromViewsPromoted	INTEGER
+  unitsSoldHalo	INTEGER
+  unitsSoldFromClicksHalo	INTEGER
+  unitsSoldFromViewsHalo	INTEGER
+  newToBrandPurchases	INTEGER
+  newToBrandPurchasesFromClicks	INTEGER
+  newToBrandPurchasesFromViews	INTEGER
+  newToBrandPurchasesPromoted	INTEGER
+  newToBrandPurchasesHalo	INTEGER
+  newToBrandUnitsSold	INTEGER
+  newToBrandUnitsSoldFromClicks	INTEGER
+  newToBrandUnitsSoldFromViews	INTEGER
+  newToBrandUnitsSoldPromoted	INTEGER
+  newToBrandUnitsSoldHalo	INTEGER
+  detailPageViews	INTEGER
+  detailPageViewsFromClicks	INTEGER
+  detailPageViewsFromViews	INTEGER
+  detailPageViewsPromoted	INTEGER
+  detailPageViewsHalo	INTEGER
+  addToCart	INTEGER
+  addToCartFromClicks	INTEGER
+  addToCartFromViews	INTEGER
+  addToCartPromoted	INTEGER
+  brandedSearches	INTEGER
+  brandedSearchesFromClicks	INTEGER
+  brandedSearchesFromViews	INTEGER
+  totalCost	NUMERIC
+  sales	NUMERIC
+  salesFromClicks	NUMERIC
+  salesFromViews	NUMERIC
+  salesPromoted	NUMERIC
+  salesFromClicksPromoted	NUMERIC
+  salesFromViewsPromoted	NUMERIC
+  salesHalo	NUMERIC
+  salesFromClicksHalo	NUMERIC
+  salesFromViewsHalo	NUMERIC
+  newToBrandSales	NUMERIC
+  newToBrandSalesFromClicks	NUMERIC
+  newToBrandSalesFromViews	NUMERIC
+  newToBrandSalesPromoted	NUMERIC
+  newToBrandSalesHalo	NUMERIC
+indexes:
+  - name: "amzadapi_reports_v1__search_asin_placement__byDay__date_plus"
+    columns:
+      - "date"
+      - "merchantId"
+      - "marketplaceId"
+      - "campaignId"
+    include:
+      - "impressions"
+      - "totalCost"

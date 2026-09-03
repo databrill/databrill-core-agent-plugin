@@ -1,0 +1,18 @@
+name: "amzspstream_B2B_ANY_OFFER_CHANGED"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon B2B_ANY_OFFER_CHANGED notifications, one row per message, carrying the affected ASIN and the full notification in payload. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 = generateDeterministicUuidV7(eventTime, notificationId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification EventTime
+  merchantId	TEXT	Seller id from B2BAnyOfferChangedNotification.SellerId
+  marketplaceId	TEXT	Marketplace id from OfferChangeTrigger.MarketplaceId
+  asin	TEXT	ASIN from OfferChangeTrigger.ASIN
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API NotificationVersion from the envelope
+  payloadVersion	TEXT	SP-API PayloadVersion from the envelope
+  payload	JSONB	Unwrapped B2BAnyOfferChangedNotification with SellerId stripped (JSONB)

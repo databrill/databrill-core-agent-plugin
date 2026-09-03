@@ -8,20 +8,20 @@ There is no dedicated Shopify MCP tool. Everything goes through `executeSql`.
 
 ## The tables
 
-| Table | Grain | Refresh |
-| --- | --- | --- |
-| `shopify_shop_v1__Shop` | one shop | whole set, nothing deleted |
-| `shopify_orders_v1__Order` | `(shopId, id)` | incremental; nothing deleted |
-| `shopify_orders_v1__OrderLineItem` | `(shopId, id)`, parent `orderId` | whole set **per parent order** |
-| `shopify_products_v1__Product` | `(shopId, id)` | whole set per shop |
-| `shopify_products_v1__ProductVariant` | `(shopId, id)`, parent `productId` | whole set per shop |
-| `shopify_inventory_v1__InventoryLevel` | `(shopId, locationId, inventoryItemId)` | whole set per shop |
-| `shopify_locations_v1__Location` | `(shopId, id)` | whole set per shop |
-| `shopify_customers_v1__Customer` | `(shopId, id)` | incremental |
-| `shopify_discounts_v1__Discount` | `(shopId, id)` | whole set per shop |
-| `shopify_discounts_v1__DiscountRedeemCode` | `(shopId, id)` | whole set per shop |
-| `shopify_reports_v1__SalesDaily` | `(shopId, day)` | time series, never deleted |
-| `shopify_reports_v1__SessionsDaily` | `(shopId, day)` | time series, never deleted |
+| Table                                      | Grain                                   | Refresh                        |
+| ------------------------------------------ | --------------------------------------- | ------------------------------ |
+| `shopify_shop_v1__Shop`                    | one shop                                | whole set, nothing deleted     |
+| `shopify_orders_v1__Order`                 | `(shopId, id)`                          | incremental; nothing deleted   |
+| `shopify_orders_v1__OrderLineItem`         | `(shopId, id)`, parent `orderId`        | whole set **per parent order** |
+| `shopify_products_v1__Product`             | `(shopId, id)`                          | whole set per shop             |
+| `shopify_products_v1__ProductVariant`      | `(shopId, id)`, parent `productId`      | whole set per shop             |
+| `shopify_inventory_v1__InventoryLevel`     | `(shopId, locationId, inventoryItemId)` | whole set per shop             |
+| `shopify_locations_v1__Location`           | `(shopId, id)`                          | whole set per shop             |
+| `shopify_customers_v1__Customer`           | `(shopId, id)`                          | incremental                    |
+| `shopify_discounts_v1__Discount`           | `(shopId, id)`                          | whole set per shop             |
+| `shopify_discounts_v1__DiscountRedeemCode` | `(shopId, id)`                          | whole set per shop             |
+| `shopify_reports_v1__SalesDaily`           | `(shopId, day)`                         | time series, never deleted     |
+| `shopify_reports_v1__SessionsDaily`        | `(shopId, day)`                         | time series, never deleted     |
 
 ## Trap 1: a workspace holds more than one shop
 
@@ -63,10 +63,10 @@ the merchant sees in their own admin. It uses different inclusion rules from a
 row count over the orders table. Measured on Pure Micronutrients,
 2026-08-01 to 2026-08-24:
 
-| | Report | Orders table |
-| --- | --- | --- |
-| sales | 49,685.19 | 51,885.43 |
-| orders | 967 | 977 |
+|        | Report    | Orders table |
+| ------ | --------- | ------------ |
+| sales  | 49,685.19 | 51,885.43    |
+| orders | 967       | 977          |
 
 Neither is wrong. Pick the one the question is about — the merchant's own
 reported revenue, or the orders you can break down by product and geography —
@@ -145,11 +145,24 @@ Three different conventions live in this schema:
   family is ever deleted. Reading it tells you which days are still being
   revised. On `SessionsDaily` a completed day has never been observed to change,
   so an old `updatedAt` there is normal.
-- `shopify_inventory_v1__InventoryLevel` uses `fetchedAt` for the run marker,
-  and its `shopifyUpdatedAt` does not always move when a quantity does. Use
-  `fetchedAt`.
+- Three tables have **no `updatedAt` column at all** and use `fetchedAt` as the
+  run marker: `shopify_inventory_v1__InventoryLevel`,
+  `shopify_discounts_v1__Discount` and
+  `shopify_discounts_v1__DiscountRedeemCode`. On inventory this matters twice
+  over, because its `shopifyUpdatedAt` does not always move when a quantity
+  does.
 
-## Trap 8: null is not zero, and a severed reference is not a bug
+## Trap 8: on the discounts table, most nulls mean "this member does not declare it"
+
+`Discount` is a union of eight member types discriminated by `discountType`, and
+only eleven fields are declared by all of them. A null on any other column is
+usually the member not declaring the field rather than an empty value. The one
+that actively misleads is `usageLimit`, which is null both for an automatic
+discount (no such field) and for a code discount with no limit (_unlimited_) —
+two different facts that the column cannot tell apart. See
+`dbl-metrics-shopify-orders` for the full list.
+
+## Trap 9: null is not zero, and a severed reference is not a bug
 
 - `OrderLineItem.productId` is null on 2,275 of 78,124 measured rows. That is the
   fingerprint of a **deleted product**, not a dangling id. `variantId` likewise.
@@ -159,7 +172,7 @@ Three different conventions live in this schema:
 - Inventory's `reserved`, `safetyStock`, `damaged` and `qualityControl` are null
   when the merchant's plan does not enable that state.
 
-## Trap 9: test and cancelled orders are real rows
+## Trap 10: test and cancelled orders are real rows
 
 `Order.test` is a real boolean with real `true` rows. Filter `WHERE NOT "test"`
 on any revenue question. `shopifyCancelledAt` is filled on about 1.66% of orders
@@ -167,7 +180,7 @@ and `totalRefundedShopAmount` is 0 rather than null on an unrefunded order, so
 net revenue is `totalPriceShopAmount - totalRefundedShopAmount` and needs no
 COALESCE.
 
-## Trap 10: not every line item is a product
+## Trap 11: not every line item is a product
 
 Add-on services sell as ordinary line items. On a measured store "Shipping
 Protection" (SKU `NVDPROTECTION-…`) ranked third by units in a month, above real
@@ -176,7 +189,7 @@ client will notice first. Its `productId` is usually null, so it also inflates a
 "deleted product" count. Check the titles before presenting a ranking, exclude
 non-products, and say that you did.
 
-## Trap 11: `quantity` is not `currentQuantity`
+## Trap 12: `quantity` is not `currentQuantity`
 
 `OrderLineItem.quantity` is what was ordered. `currentQuantity` is what remains
 after refunds and removals. "Units sold" almost always means `currentQuantity`;
@@ -185,7 +198,10 @@ after refunds and removals. "Units sold" almost always means `currentQuantity`;
 ## Ids
 
 Every id is a numeric string in a `BIGINT` column — the REST `legacyResourceId`,
-not a GID. The full GID is `gid://shopify/<Type>/<id>` and is not stored because
+not a GID — **except the discounts family**, where `Discount.id` and
+`DiscountRedeemCode.id` are full GID strings
+(`gid://shopify/DiscountCodeNode/<n>`, `gid://shopify/DiscountAutomaticNode/<n>`)
+and `DiscountRedeemCode.discountGid` joins on one. The full GID is `gid://shopify/<Type>/<id>` and is not stored because
 nothing here rebuilds one. The exception is `OrderLineItem.id`, which is the
 numeric tail of the LineItem GID.
 

@@ -1,0 +1,19 @@
+name: "tfl_products_v1__Inventory"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "Current The Fulfillment Lab (GFS) product inventory per (connectorId, productId) — quantity, allocated and available — overwritten each cycle. This is the durable product dimension and holds the only clean product-id-to-product-name mapping the API exposes. It keeps no history; the daily on-hand series is in tfl_products_v1__WarehouseInventory."
+primaryKey:
+  - "connectorId"
+  - "productId"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this product
+  productId	INTEGER		`product.productId`, GFS's own product id. Unique
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
+  productName	TEXT	true	`product.productName`. The only clean product name in the API, and distinct per product as observed. Nullable per the connector-wide rule that a promoted string is nullable unless the data proves otherwise, since a NOT NULL violation would abort the whole snapshot page rather than one row
+  quantity	INTEGER		`product.quantity`, total on hand. MEASURED integral
+  allocated	INTEGER		`product.allocated`, reserved against open orders. MEASURED integral
+  available	INTEGER		`product.available`, sellable on hand. MEASURED integral
+  doc	JSONB		The full verbatim product payload from the API; persisted as JSONB. Typed `Unknown` because no vendored API type exists to pin a struct against

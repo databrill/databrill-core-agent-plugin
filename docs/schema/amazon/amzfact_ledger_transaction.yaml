@@ -1,0 +1,39 @@
+name: "amzfact_ledger_transaction"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "One Amazon Finances document as a balanced double-entry transaction: the resolved, deduplicated, flattened form of the source document. Its postings live in amzfact_ledger_posting and its per-SKU dimension in amzfact_ledger_item."
+primaryKey:
+  - "transactionId"
+columns: |
+  name	type	nullable	check	description
+  transactionId	TEXT			Amazon's Finances document id; the whole primary key, since one document is one transaction
+  projectionVersion	INTEGER		"projectionVersion" > 0	Which compiled projection logic wrote this row; the first version is 1. Without wholesale rebuilds, rows written by older logic persist after a change and this is the only thing that marks them.
+  kind	TEXT		"kind" IN ('sale', 'refund', 'adjustment', 'expense', 'titleTransfer', 'retrocharge', 'payout', 'ledgerAdjustment', 'chargebackRefund', 'debtRecovery', 'advertisingPayment', 'removalShipment')	Which economic event this is, read from transactionType and description together
+  transactionType	TEXT			Amazon's own transactionType, carried as metadata rather than folded into an account name
+  transactionStatus	TEXT	true		Amazon's transactionStatus: RELEASED, DEFERRED, DEFERRED_RELEASED
+  description	TEXT			Amazon's document description; part of what decides the kind
+  merchantId	TEXT			Amazon sellingPartnerId; the account names carry exactly this value
+  marketplaceId	TEXT			Marketplace the document belongs to. Never an attribution here: every posting names its own marketplace through the account's Amazon:<sp>:<mp> scope segments.
+  currency	TEXT			ISO currency of every money column on the row and on its postings. The document's own code where it states one, the marketplace default otherwise.
+  status	TEXT		"status" IN ('provisional', 'authoritative')	Whether the amounts are Amazon's forecast or the settled figure. Authoritative exactly when transactionStatus is RELEASED, so provisional IS the deferred state; it is the only carrier of that.
+  postedAt	TEXT			Finances postedDate of the surviving emission, as the exact string the export writes: YYYY-MM-DDTHH:MM:SSZ. TEXT, not a timestamp — see the table docblock.
+  bookedDate	DATE			Marketplace-local date of postedAt, YYYY-MM-DD. This is what a period filters on.
+  provisionalAt	TEXT	true		postedDate of the superseded provisional emission, or null when we hold none
+  authoritativeAt	TEXT	true		postedDate of the released emission, or null while still deferred
+  supersededTransactionId	TEXT	true		Document id this emission supersedes (Amazon's DEFERRED_TRANSACTION_ID), or null. This is what the writer deletes by, instead of deleting a date range.
+  orderId	TEXT			Amazon order id; the empty string on a document that names no order
+  groupId	TEXT			SHIPMENT_ID for a sale, REFUND_ID for a refund, the document id otherwise. Refunds never carry a shipment id, so the discriminator has to be per-kind or partial refunds merge.
+  groupIdName	TEXT	true		Which identifier supplied groupId; null when the document carries none
+  settlementId	TEXT	true
+  financialEventGroupId	TEXT	true
+  deferredTransactionId	TEXT	true		Amazon's DEFERRED_TRANSACTION_ID as the document carries it
+  shipmentId	TEXT	true
+  refundId	TEXT	true
+  totalAmount	DOUBLE PRECISION			The document's own totalAmount, UNNEGATED: what the settlement leg posts. Amazon published it independently of the breakdown tree, which is why the two agreeing is a fact being checked.
+  residual	DOUBLE PRECISION			Sum of every posting. Zero exactly when totalAmount agrees with the breakdown tree AND every leaf found an account; non-zero names the size of whichever failed. A document is UNBALANCED when abs(residual) >= 0.005, which is how that diagnostic is derived rather than stored twice.
+indexes:
+  - name: "amzfact_ledger_transaction__merchantId__bookedDate"
+    columns:
+      - "merchantId"
+      - "bookedDate"

@@ -1,0 +1,38 @@
+name: "shopify_discounts_v1__Discount"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify discount per (shopId, id), where id is a DiscountCodeNode or DiscountAutomaticNode GID. `discount` is a union of eight member types and `discountType` is the discriminator; only the eleven fields every member declares are NOT NULL. Read as a whole set on every run with no watermark; fetchedAt marks which rows the latest successful run returned and older rows are deleted."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	TEXT		Full Shopify GID of the discount node. One of exactly two namespaces — `gid://shopify/DiscountCodeNode/<n>` or `gid://shopify/DiscountAutomaticNode/<n>` — never `DiscountNode`, which is the GraphQL type name and not an id namespace
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field
+  fetchedAt	TIMESTAMPTZ		OUR row bookkeeping AND the whole-set refresh marker: every row of a successful run carries that run's single instant WHETHER OR NOT ANY VALUE CHANGED, and rows older than it are deleted for this shop. Not a Shopify field
+  nodeType	TEXT		The type segment of `id`: `DiscountCodeNode` or `DiscountAutomaticNode`. It is the coarse code-versus-automatic split, and it is derived from the GID rather than from `discountType` so the two can be checked against each other
+  discountType	TEXT		`discount.__typename`, the union discriminator, and the column that says which shape `doc` has. One of eight: DiscountCodeBasic, DiscountCodeBxgy, DiscountCodeFreeShipping, DiscountCodeApp, DiscountAutomaticBasic, DiscountAutomaticBxgy, DiscountAutomaticFreeShipping, DiscountAutomaticApp. Five occurred on 2026-08-18 — 153 / 5 / 3 / 1 / 7 respectively, with the three automatic non-app members absent. A ninth value is a decode failure, not a new row
+  title	TEXT		`discount.title`; `String!` on all eight members. The merchant-facing name, which on a code discount is usually but not always the code itself
+  status	TEXT		`discount.status`; `DiscountStatus!` on all eight members. The enum is ACTIVE, EXPIRED, SCHEDULED. Stored as text rather than a Literal union so a new enum member is a row rather than a failure
+  discountClasses	JSONB		`discount.discountClasses`; `[DiscountClass!]!` on all eight members. Persisted as JSONB because it is a small closed-enum ARRAY — PRODUCT, ORDER and SHIPPING — and splitting it into booleans would invent a shape Shopify does not have
+  asyncUsageCount	INTEGER		`discount.asyncUsageCount`; `Int!` on all eight members. Redemptions counted asynchronously. DO NOT TREAT IT AS A FRESHNESS SIGNAL: whether a redemption moves `shopifyUpdatedAt` has never been observed
+  combinesWithOrderDiscounts	BOOLEAN		`discount.combinesWith.orderDiscounts`; `DiscountCombinesWith!` on all eight members, so the object is always present
+  combinesWithProductDiscounts	BOOLEAN		`discount.combinesWith.productDiscounts`; always present, as on `combinesWithOrderDiscounts`
+  combinesWithShippingDiscounts	BOOLEAN		`discount.combinesWith.shippingDiscounts`; always present, as on `combinesWithOrderDiscounts`
+  summary	TEXT	true	`discount.summary`; `String!` on the six non-app members and ABSENT from DiscountCodeApp and DiscountAutomaticApp, so null means the member does not declare it rather than that the value was empty. Shopify's own rendering of what the discount does, e.g. `10% off one-time purchase products • One use per customer`. It is the stand-in for the deep value and condition unions this row deliberately does not select: descending into them risks a single denied or misspelled field nulling the whole export rather than just that field
+  shortSummary	TEXT	true	`discount.shortSummary`; `String!` on the four Basic and FreeShipping members only, absent from both Bxgy and both App members
+  usageLimit	INTEGER	true	`discount.usageLimit`; `Int` on the four code members only. NULL FOR TWO INDISTINGUISHABLE REASONS: automatic discounts do not declare the field, and most code discounts declare it as null meaning unlimited
+  appliesOncePerCustomer	BOOLEAN	true	`discount.appliesOncePerCustomer`; `Boolean!` on the four code members and absent from the four automatic ones, so null means automatic
+  codeCount	INTEGER	true	`discount.codesCount.count`; `Count` on the four code members, absent from the automatic ones. EQUAL to the number of `shopify_discounts_v1__DiscountRedeemCode` rows for the discount — the importer checks that rather than assuming it. `codesCount.precision` is not promoted; an APPROXIMATE precision would make this an estimate and lives in `doc`
+  totalSalesAmount	NUMERIC	true	`discount.totalSales.amount`; `MoneyV2` (nullable) on the four code members and on DiscountAutomaticFreeShipping, absent from the other three automatic members. Null is a discount that has never been redeemed. NUMERIC column via the postgresType override
+  totalSalesCurrency	TEXT	true	`discount.totalSales.currencyCode`, paired with `totalSalesAmount` and null exactly when it is
+  appDiscountTypeTitle	TEXT	true	`discount.appDiscountType.title`; declared only by DiscountCodeApp and DiscountAutomaticApp. For an app-function discount this is the closest thing to a `summary`, which those two members do not declare
+  appDiscountTypeAppKey	TEXT	true	`discount.appDiscountType.appKey`; the app that owns the function. Declared only by the two App members
+  appDiscountTypeFunctionId	TEXT	true	`discount.appDiscountType.functionId`; declared only by the two App members
+  shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `discount.createdAt`; `DateTime!` on all eight members
+  shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `discount.updatedAt`; `DateTime!` on all eight members. It has been observed not to move at all across a multi-hour window. NOT USED AS A FILTER, and that is a statement about pointlessness rather than about correctness: the whole discount set is re-exported on every run in about five seconds, so filtering on it would save nothing. Nothing observed here says this family's `updatedAt` lies
+  startsAt	TIMESTAMPTZ		SOURCE instant: `discount.startsAt`; `DateTime!` on all eight members
+  endsAt	TIMESTAMPTZ	true	SOURCE instant: `discount.endsAt`; `DateTime` (nullable) on all eight members. Null is a discount with no end date rather than a missing value
+  doc	JSONB		The verbatim validated discount node from the bulk JSONL, persisted as JSONB, including `__typename` and every member-specific field no column promotes. It does NOT contain the redeem codes — those arrive as their own JSONL lines and become `shopify_discounts_v1__DiscountRedeemCode` rows. Typed `Unknown` because no vendored Shopify type exists

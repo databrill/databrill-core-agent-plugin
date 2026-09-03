@@ -1,0 +1,30 @@
+name: "amzreport_FBA_CUSTOMER_RETURNS"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Customer returns received at Amazon fulfillment centres, from GET_FBA_FULFILLMENT_CUSTOMER_RETURNS_DATA, one row per returned unit group keyed (merchant, return date, order, FNSKU, index), with the disposition, reason and status of the return."
+primaryKey:
+  - "merchant_id"
+  - "return_date"
+  - "order_id"
+  - "fnsku"
+  - "index"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  return_date	TIMESTAMPTZ
+  order_id	TEXT
+  fnsku	TEXT
+  index	INTEGER
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  marketplace_id	TEXT
+  sku	TEXT	true
+  asin	TEXT	true
+  quantity	NUMERIC	true
+  fulfillment_center_id	TEXT	true
+  detailed_disposition	TEXT	true
+  reason	TEXT	true
+  status	TEXT	true
+  license_plate_number	TEXT	true
+  customer_comments	TEXT	true

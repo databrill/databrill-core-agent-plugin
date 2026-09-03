@@ -1,0 +1,15 @@
+name: "amazon_country"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "Reference table of the countries Amazon operates in: one row per ISO 3166-1 alpha-2 country code, with its display name, region and time zone."
+primaryKey:
+  - "country_code"
+columns: |
+  name	type
+  country_code	CHAR(2)
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  country_name	TEXT
+  region	CHAR(2)
+  time_zone	TEXT

@@ -1,0 +1,22 @@
+name: "shopify_reports_v1__SessionsDaily"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One shop-local day of the Shopify ShopifyQL `sessions` dataset per (shopId, day). A TIME SERIES, upserted over a trailing re-fetch window and never deleted. Sessions and pageviews cannot be derived from orders, which is why this family exists. Every measure is an exact decimal string in NUMERIC; rates are unit fractions and average_session_duration is in seconds."
+primaryKey:
+  - "shopId"
+  - "day"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  day	DATE		The ShopifyQL `day` dimension: a SHOP-LOCAL calendar day as `YYYY-MM-DD`. `Schema.String` plus postgresType DATE and NOT `Schema.DateTimeUtc`, for the reason given in `shopify_reports_v1__SalesDaily.ts`. Joins to `shopify_reports_v1__SalesDaily.day` for the same shop, which is how sessions and sales are read together
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this day was FIRST written. Excluded from the upsert's update columns. Not a Shopify field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping, and it means WHEN THIS DAY'S NUMBERS LAST CHANGED rather than when they were last read — the writer keeps `dbRunUpsert`'s default distinct guard. See `shopify_reports_v1__SalesDaily.ts` for why that is safe here and required to be otherwise everywhere else in this connector. On this dataset a completed day has never been observed to change at all, so an `updatedAt` far behind the day itself is the NORMAL state here and an unusual one in the sales table. Not a Shopify field
+  sessions	NUMERIC		`INTEGER`, carried as an exact decimal string in NUMERIC like every other measure here. The measure this whole family was built to reach: it cannot be derived from orders
+  pageviews	NUMERIC		`INTEGER`. Note the spelling — the dataset rejects `page_views`
+  bounce_rate	NUMERIC	true	`PERCENT` as a UNIT FRACTION: 0.7658102766798419 means 76.58%. Measured at up to 17 decimal places. NULLABLE because it is a quotient over `sessions`: a day with no sessions has no bounce rate, and that is not the same fact as a bounce rate of zero
+  conversion_rate	NUMERIC	true	`PERCENT` as a UNIT FRACTION, measured at up to 19 decimal places. The SOURCE'S ratio — do not recompute it from the columns beside it, and do not confuse it with orders per session computed against `shopify_reports_v1__SalesDaily`, whose order count uses a different inclusion rule again. NULLABLE for the same reason as `bounce_rate`
+  sessions_with_cart_additions	NUMERIC		`INTEGER`. The first step of the funnel this table records
+  sessions_that_reached_checkout	NUMERIC		`INTEGER`. The second funnel step
+  sessions_that_completed_checkout	NUMERIC		`INTEGER`. The last funnel step. It is NOT the same as `shopify_reports_v1__SalesDaily.orders` and the two should not be expected to agree: one counts sessions, the other counts orders on ShopifyQL's own inclusion rule
+  average_session_duration	NUMERIC	true	`SECOND_DURATION`: a duration in SECONDS as an exact decimal string, measured at up to 15 decimal places. The only column in this family whose unit is not money, a count or a fraction, so a display that treats it as one of those will be wrong by orders of magnitude. NULLABLE because it is a MEAN over `sessions`, so a day with none has no average

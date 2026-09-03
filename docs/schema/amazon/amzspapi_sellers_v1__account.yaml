@@ -1,0 +1,13 @@
+name: "amzspapi_sellers_v1__account"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "The seller account as SP-API Sellers v1 reports it, one row per merchant: business type, selling plan, primary contact and registered business details, all in doc."
+primaryKey:
+  - "merchantId"
+columns: |
+  name	type
+  merchantId	TEXT
+  doc	JSONB
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ

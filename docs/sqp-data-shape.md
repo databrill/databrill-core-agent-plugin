@@ -14,12 +14,12 @@ Columns: `merchantId`, `marketplaceId`, `timeUnit` (`WEEK` / `MONTH`),
 Each block holds **our** counts for that ASIN and the **whole market's** totals
 for that search query:
 
-| Block | Ours | Market |
-| --- | --- | --- |
-| `impressionData` | `asinImpressionCount`, `asinImpressionShare` | `totalQueryImpressionCount` |
-| `clickData` | `asinClickCount`, `asinClickShare`, `asinMedianClickPrice` | `totalClickCount`, `totalClickRate`, `totalMedianClickPrice`, `total{One,Two,Same}Day…ClickCount` |
-| `cartAddData` | `asinCartAddCount`, `asinCartAddShare`, `asinMedianCartAddPrice` | `totalCartAddCount`, `totalCartAddRate`, `totalMedianCartAddPrice` |
-| `purchaseData` | `asinPurchaseCount`, `asinPurchaseShare`, `asinMedianPurchasePrice` | `totalPurchaseCount`, `totalPurchaseRate`, `totalMedianPurchasePrice` |
+| Block            | Ours                                                                | Market                                                                                            |
+| ---------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `impressionData` | `asinImpressionCount`, `asinImpressionShare`                        | `totalQueryImpressionCount`                                                                       |
+| `clickData`      | `asinClickCount`, `asinClickShare`, `asinMedianClickPrice`          | `totalClickCount`, `totalClickRate`, `totalMedianClickPrice`, `total{One,Two,Same}Day…ClickCount` |
+| `cartAddData`    | `asinCartAddCount`, `asinCartAddShare`, `asinMedianCartAddPrice`    | `totalCartAddCount`, `totalCartAddRate`, `totalMedianCartAddPrice`                                |
+| `purchaseData`   | `asinPurchaseCount`, `asinPurchaseShare`, `asinMedianPurchasePrice` | `totalPurchaseCount`, `totalPurchaseRate`, `totalMedianPurchasePrice`                             |
 
 `*Share` fields are percentages, already computed as ours ÷ market.
 `*MedianPrice` fields are `{ "amount": …, "currencyCode": … }` and can be null

@@ -1,0 +1,24 @@
+name: "brand_config_business_attributes"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable workspace-level business attributes, such as business age, employee count and valuation multiple. One row is one attribute value over one effective-dated interval, where dateLast is inclusive and NULL means still in force. Unlike brand_config_amazon_attributes these describe the business itself, so there is no merchant or country scope."
+primaryKey:
+  - "scope"
+  - "scopeId"
+  - "attribute"
+  - "dateFirst"
+columns: |
+  name	type	nullable	default	description
+  scope	TEXT
+  scopeId	TEXT
+  attribute	TEXT
+  dateFirst	DATE
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  dateLast	DATE	true
+  value	NUMERIC
+  currency	TEXT	true
+  source	TEXT			ACTUAL | INFERRED | DEFAULT
+  confidence	TEXT			HIGH | MED | LOW
+  notes	TEXT	true

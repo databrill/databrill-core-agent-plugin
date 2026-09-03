@@ -2,15 +2,18 @@
 name: dbl-metrics-shopify-inventory
 description: Report Shopify stock — available, on hand, committed, incoming — by SKU, variant, location, or shop. Use when the user asks what stock the Shopify store holds, what is available on the website, stock at a Shopify location or warehouse, or which Shopify products are low. Do not use for Amazon FBA stock or The Fulfillment Lab stock.
 metadata:
-  type: metric
-  audience: client
-  tool: executeSql
+    type: metric
+    audience: client
+    tool: executeSql
 ---
 
 # How much Shopify stock is there?
 
 Cross-cutting shape and traps for every `shopify_*` table:
-`${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md`.
+`${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md`. For the declared columns and
+types of any `shopify_*` table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/shopify/index.tsv` and then that table's
+`.yaml` beside it.
 
 There is no dedicated MCP tool for Shopify. Answer with the `core` MCP server's
 `executeSql` against **`shopify_inventory_v1__InventoryLevel`**, one row per
@@ -22,7 +25,7 @@ There is no dedicated MCP tool for Shopify. Answer with the `core` MCP server's
 for untracked items, and their numbers do not move with sales. Most levels are
 untracked: measured on a live store on 2026-08-25, 119 of 514. Including the
 untracked rows moved available stock from 72,375 to 62,916 — a 9,459-unit error
-in the *opposite* direction from what you would guess, because untracked rows
+in the _opposite_ direction from what you would guess, because untracked rows
 carry large negative values.
 
 **Put `WHERE "tracked"` on every stock total**, and say so when you report the
@@ -132,9 +135,10 @@ orders, so a combined total is an estimate, not a measurement.
 
 That overlap is not hypothetical. On a live workspace on 2026-08-25 every
 Shopify location was a TFL location ("The Fulfillment Lab", "The Fulfillment Lab
+
 - GFS", and two more), so the Shopify levels describe TFL's warehouse, not a
-separate pool — and the two sources still disagreed: 72,375 available in Shopify
-against 35,395 in TFL's own snapshot the day before. Do not reconcile them by
-arithmetic and do not present one as a check on the other. Report each with its
-source and its timestamp, and say the gap is unexplained if the user needs one
-number.
+  separate pool — and the two sources still disagreed: 72,375 available in Shopify
+  against 35,395 in TFL's own snapshot the day before. Do not reconcile them by
+  arithmetic and do not present one as a check on the other. Report each with its
+  source and its timestamp, and say the gap is unexplained if the user needs one
+  number.

@@ -1,0 +1,43 @@
+name: "amzspapi_finances_v20240619__TransactionItemSummary"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Normalized projection of one items entry of an amzspapi_finances_v20240619__Transaction row, keyed by its zero-based itemIndex. The parent transaction stays authoritative for type, status, time, marketplace and order; the amounts here pre-sum top-level breakdowns only, so nothing is double counted. Trust these rows only when the merchant's projection state is READY for your extractor version."
+primaryKey:
+  - "merchantId"
+  - "transactionKey"
+  - "itemIndex"
+columns: |
+  name	type	nullable	check	description
+  merchantId	TEXT			Amazon Seller ID; parent-key member
+  transactionKey	TEXT			Parent amzspapi_finances_v20240619__Transaction.transactionKey
+  itemIndex	INTEGER		"itemIndex" >= 0	Zero-based position of this item in the source doc.items array
+  contextType	TEXT	true
+  sku	TEXT	true
+  asin	TEXT	true
+  quantityShipped	INTEGER	true
+  amazonFeesAmount	DOUBLE PRECISION			Sum of every top-level AmazonFees breakdown amount; zero when none
+  digitalServicesFeeAmount	DOUBLE PRECISION			Sum of every top-level DigitalServicesFee breakdown amount; zero when none
+  allTopLevelBreakdownsAmount	DOUBLE PRECISION			Sum of every top-level breakdown amount; zero when none
+  feeCurrencyCodes	TEXT[]			Sorted distinct non-empty currency codes seen on the relevant fee breakdowns
+  topLevelCurrencyCodes	TEXT[]			Sorted distinct non-empty currency codes seen on all top-level breakdowns
+  feeBreakdownCount	INTEGER		"feeBreakdownCount" >= 0	Count of top-level AmazonFees + DigitalServicesFee breakdowns
+  topLevelBreakdownCount	INTEGER		"topLevelBreakdownCount" >= 0	Count of all top-level breakdowns
+  feeMissingCurrencyCount	INTEGER		"feeMissingCurrencyCount" >= 0	Relevant fee breakdowns whose amount carried no currency code
+  topLevelMissingCurrencyCount	INTEGER		"topLevelMissingCurrencyCount" >= 0	Top-level breakdowns whose amount carried no currency code
+  refundPhaseKey	TEXT	true
+  extractorVersion	INTEGER		"extractorVersion" > 0	Version of the pure extractor that produced this row; first version is 1
+  sourceUpdatedAt	TIMESTAMPTZ			The parent Transaction updatedAt value this row was extracted from
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+foreignKeys:
+  - columns:
+      - "merchantId"
+      - "transactionKey"
+    references:
+      table: "amzspapi_finances_v20240619__Transaction"
+      columns:
+        - "merchantId"
+        - "transactionKey"
+    onDelete: "CASCADE"
+    onUpdate: "CASCADE"

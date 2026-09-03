@@ -1,0 +1,13 @@
+name	kind	access	columns	category	description
+tfl_asns_v1__Asn	table	read	20	The Fulfillment Lab	One The Fulfillment Lab (GFS) advance shipping notice header per (connectorId, id), with carrier, tracking, container and the expected, received and delivered quantities.
+tfl_asns_v1__AsnItem	table	read	10	The Fulfillment Lab	One element of a The Fulfillment Lab (GFS) ASN detail's products, inserts or containers array, keyed (connectorId, asnId, kind, id), where kind discriminates the three.
+tfl_inventorySummary_v1__ProductWarehouse	table	read	16	The Fulfillment Lab	The Fulfillment Lab (GFS) inventory movement aggregates for one product at one warehouse over one calendar month, keyed (connectorId, startDate, endDate, productName, warehouseName).
+tfl_orders_v1__Order	table	read	24	The Fulfillment Lab	One The Fulfillment Lab (GFS) order header per (connectorId, id).
+tfl_orders_v1__OrderItem	table	read	12	The Fulfillment Lab	One line of a The Fulfillment Lab (GFS) order, keyed (connectorId, id), joining to tfl_orders_v1__Order by orderId.
+tfl_otsShipments_v1__OtsShipment	table	read	16	The Fulfillment Lab	One The Fulfillment Lab (GFS) off-the-shelf shipment header per (connectorId, id), with its warehouse, status, category and reference identifiers.
+tfl_otsShipments_v1__OtsShipmentItem	table	read	8	The Fulfillment Lab	One line of a The Fulfillment Lab (GFS) off-the-shelf shipment, keyed (connectorId, otsShipmentId, productId).
+tfl_products_v1__Inventory	table	read	9	The Fulfillment Lab	Current The Fulfillment Lab (GFS) product inventory per (connectorId, productId) — quantity, allocated and available — overwritten each cycle.
+tfl_products_v1__Sku	table	read	6	The Fulfillment Lab	One The Fulfillment Lab (GFS) SKU header per (connectorId, sku), with its vendor-assigned type.
+tfl_products_v1__SkuProduct	table	read	8	The Fulfillment Lab	Maps a The Fulfillment Lab (GFS) SKU to the products it ships, one row per (connectorId, sku, productId), with qtyMultiplier expressing bundles.
+tfl_products_v1__WarehouseInventory	table	read	11	The Fulfillment Lab	Daily snapshot of The Fulfillment Lab (GFS) warehouse inventory per (connectorId, localdate, productId, warehouseId).
+tfl_shipments_v1__Shipment	table	read	11	The Fulfillment Lab	One The Fulfillment Lab (GFS) shipment per (connectorId, id), with its fulfilment, container, shipping and total charges.

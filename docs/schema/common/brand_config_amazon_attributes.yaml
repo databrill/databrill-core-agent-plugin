@@ -1,0 +1,28 @@
+name: "brand_config_amazon_attributes"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable, Amazon-keyed scoped attributes — unit costs, VAT rates, unsellable-return loss, the brand-registry flag and inventory-planning inputs. One row is one attribute value for one scope node over one effective-dated interval, where dateLast is inclusive and NULL means still in force. Resolution takes the most specific scope covering a date: SKU, then ASIN, family, store, country."
+primaryKey:
+  - "merchantId"
+  - "scope"
+  - "scopeId"
+  - "country"
+  - "attribute"
+  - "dateFirst"
+columns: |
+  name	type	nullable	default	description
+  merchantId	TEXT
+  scope	TEXT
+  scopeId	TEXT
+  country	TEXT
+  attribute	TEXT
+  dateFirst	DATE
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  dateLast	DATE	true
+  value	NUMERIC
+  currency	TEXT	true
+  source	TEXT			ACTUAL | INFERRED | DEFAULT
+  confidence	TEXT			HIGH | MED | LOW
+  notes	TEXT	true

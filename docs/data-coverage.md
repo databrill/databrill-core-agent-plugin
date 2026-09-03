@@ -101,16 +101,17 @@ warehouse rather than a separate pool.
 
 ## Declared does not mean ingested
 
-[The complete table catalog](table-catalog.md) lists every relation Databrill is
-designed to create in a client target database. A particular workspace may lack
-a relation, have an empty relation, or have stale data because the corresponding
-pipeline is not configured. Inspect the live schema with `scripts/catalog.ts`
-and check the maximum source date before interpreting results.
+The [declared schema](schema/README.md) lists every table and view Databrill is
+designed to create in a client target database, one index per channel group. A
+particular workspace may lack a relation, have an empty relation, or have stale
+data because the corresponding pipeline is not configured. Inspect the live
+schema with `scripts/catalog.ts` and check the maximum source date before
+interpreting results.
 
-A workspace may also hold rollup tables that the catalog does not declare —
-`product_overview_ad_asin__day` (the per-ASIN daily ad rollup behind `loadAds`)
-and various `custom_report_*` / `r26*_*` relations. `listTables` for the
-workspace is authoritative in both directions.
+A workspace may also hold rollup tables that the declared schema does not
+declare — `product_overview_ad_asin__day` (the per-ASIN daily ad rollup behind
+`loadAds`) and various `custom_report_*` / `r26*_*` relations. `listTables` for
+the workspace is authoritative in both directions.
 
 Prefer these views for human-authored SQL where they fit:
 
@@ -130,5 +131,4 @@ see [Product families](product-hierarchy.md).
 
 JSON/document columns preserve source payloads and can be large. Select only the
 fields needed for the question. Relations beginning `op_` are operational state,
-not business facts; the current client-target catalog contains no `op_`
-relation.
+not business facts; the declared schema contains no `op_` table.

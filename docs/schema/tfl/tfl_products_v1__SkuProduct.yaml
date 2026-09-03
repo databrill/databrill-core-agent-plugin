@@ -1,0 +1,19 @@
+name: "tfl_products_v1__SkuProduct"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "Maps a The Fulfillment Lab (GFS) SKU to the products it ships, one row per (connectorId, sku, productId), with qtyMultiplier expressing bundles. productName is a convenience copy and must not be joined on — two different product ids already share one name. Upserts never delete, so a withdrawn mapping lingers."
+primaryKey:
+  - "connectorId"
+  - "sku"
+  - "productId"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this mapping
+  sku	TEXT		The parent SKU's `sku.sku`, joining to `tfl_products_v1__Sku.sku`
+  productId	INTEGER		`sku.products[].productId`, joining to `tfl_products_v1__Inventory.productId`. Keyed on the id rather than the name because two productIds were MEASURED sharing one name
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
+  productName	TEXT	true	`sku.products[].productName`, promoted for readability only. NOT an identity and NOT joinable: two productIds have been seen sharing one name inside this array. Use `productId` and `tfl_products_v1__Inventory` for anything real
+  qtyMultiplier	INTEGER		`sku.products[].qtyMultiplier` — how many units of this product one unit of the SKU ships, i.e. how bundles are expressed. MEASURED integral
+  doc	JSONB		The verbatim `products[]` element from the SKU payload; persisted as JSONB. Typed `Unknown` because no vendored API type exists to pin a struct against

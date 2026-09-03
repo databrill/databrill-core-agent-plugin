@@ -1,0 +1,21 @@
+name: "tfl_shipments_v1__Shipment"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "One The Fulfillment Lab (GFS) shipment per (connectorId, id), with its fulfilment, container, shipping and total charges. cartOrderIds is an array because GFS can join several orders into one shipment, and it must not be reduced to a single id."
+primaryKey:
+  - "connectorId"
+  - "id"
+columns: |
+  name	type	description
+  connectorId	TEXT	The Databrill connector id of The Fulfillment Lab connector that fetched this shipment
+  id	INTEGER	`shipment.id`, GFS's own shipment id. Unique
+  createdAt	TIMESTAMPTZ	OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ	OUR row bookkeeping: when this row was last written. Not a GFS field
+  cartOrderIds	TEXT[]	`shipment.cartOrderIds` — the MERCHANT cart order ids this shipment covers, stored as TEXT[]. A shipment can carry more than one id, so multi-order shipments occur and the array must not be flattened. Joins to `tfl_orders_v1__Order.cartOrderId`
+  fulfillmentCharge	DOUBLE PRECISION	`shipment.fulfillmentCharge`. MEASURED non-integral; DOUBLE PRECISION
+  containerCharge	DOUBLE PRECISION	`shipment.containerCharge`. MEASURED non-integral; DOUBLE PRECISION
+  shippingCharge	DOUBLE PRECISION	`shipment.shippingCharge`. MEASURED non-integral; DOUBLE PRECISION
+  totalCharge	DOUBLE PRECISION	`shipment.totalCharge`. MEASURED non-integral; DOUBLE PRECISION
+  shipDate	TIMESTAMPTZ	SOURCE ZONE: US EASTERN WALL TIME (America/New_York), localised on ingestion. `shipment.shipDate` carries NO offset designator, so nothing in the value reveals its zone; MEASURED to sit in the Eastern family alongside `order.shipDate`. The raw string survives in `doc`, so the decision is reversible without a re-fetch
+  doc	JSONB	The full verbatim shipment payload from the API; persisted as JSONB, including the raw `shipDate` string. Typed `Unknown` because no vendored API type exists to pin a struct against

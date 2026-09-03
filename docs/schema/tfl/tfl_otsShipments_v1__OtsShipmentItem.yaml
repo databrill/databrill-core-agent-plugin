@@ -1,0 +1,19 @@
+name: "tfl_otsShipments_v1__OtsShipmentItem"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "One line of a The Fulfillment Lab (GFS) off-the-shelf shipment, keyed (connectorId, otsShipmentId, productId). The payload carries no line id, so a product that repeats within one shipment is aggregated into a single row with the quantities summed. Items are populated only by the OTS detail route."
+primaryKey:
+  - "connectorId"
+  - "otsShipmentId"
+  - "productId"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this OTS item
+  otsShipmentId	INTEGER		The parent shipment's `otsShipment.id`, joining to `tfl_otsShipments_v1__OtsShipment.id`
+  productId	INTEGER		`items[].productId`, joining to `tfl_products_v1__Inventory.productId`. It is in the key because the payload carries NO line id — there is no alternative — which is why a repeated productId must be aggregated by the transform rather than written twice
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
+  productName	TEXT	true	`items[].productName`, promoted for readability only. NOT an identity: `tfl_products_v1__Inventory` is the authoritative product dimension and `productId` is the join key
+  quantity	INTEGER		`items[].quantity`, MEASURED integral. Holds the SUM across every `items[]` entry sharing this productId within the shipment, because the payload has no line id to separate them by
+  doc	JSONB		The verbatim `items[]` element from the OTS detail payload; persisted as JSONB. When several elements were aggregated into one row this holds the LAST of them, so the aggregated `quantity` column can exceed the quantity inside `doc` — the only place in this connector where a column and `doc` legitimately disagree. Typed `Unknown` because no vendored API type exists to pin a struct against

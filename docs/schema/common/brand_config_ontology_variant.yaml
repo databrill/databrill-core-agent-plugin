@@ -1,0 +1,24 @@
+name: "brand_config_ontology_variant"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable ontology variants: one row per merchant SKU, assigned to a category, holding the authored property values in data and the inherited-and-resolved values in dataResolved."
+primaryKey:
+  - "msku"
+columns: |
+  name	type	default
+  msku	TEXT
+  createdAt	TIMESTAMPTZ	now()
+  updatedAt	TIMESTAMPTZ	now()
+  category	TEXT
+  data	JSONB
+  dataResolved	JSONB	'{}'::jsonb
+foreignKeys:
+  - columns:
+      - "category"
+    references:
+      table: "brand_config_ontology_category"
+      columns:
+        - "category"
+    onDelete: "RESTRICT"
+    onUpdate: "CASCADE"

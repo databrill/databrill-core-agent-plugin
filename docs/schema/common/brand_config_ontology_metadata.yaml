@@ -1,0 +1,16 @@
+name: "brand_config_ontology_metadata"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Declares the ontology properties available to category and variant configuration: one row per property, with its value type, allowed values and whether it applies to categories, variants or both. Customer-editable."
+primaryKey:
+  - "property"
+columns: |
+  name	type	nullable	default	check
+  property	TEXT
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  description	TEXT	true
+  valueType	TEXT
+  valuesAllowed	JSONB	true
+  appliesTo	TEXT		'BOTH'	"appliesTo" IN ('CATEGORY', 'VARIANT', 'BOTH')

@@ -1,0 +1,27 @@
+name: "shopify_customers_v1__Customer"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify Customer per (shopId, id), where id is the customer's legacyResourceId. Loaded once in full and then swept incrementally by updatedAt; UPSERT-ONLY, so no sweep ever deletes a customer. Lifetime spend is an exact decimal string in NUMERIC with its own currency code beside it. This is a table of PEOPLE: name, email, phone and every address stay in doc and are never promoted to columns."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	BIGINT		`Customer.legacyResourceId`, the REST Admin API id that appears in the merchant's admin URLs; `UnsignedInt64!`. THE KEY: the full GID is `gid://shopify/Customer/<this>` and is not stored, because nothing here rebuilds one. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written by a sweep. NOT a refresh marker — nothing in this table is ever deleted for being stamped earlier, because an incremental sweep returns only what changed. Not a Shopify field
+  shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `Customer.createdAt`; `DateTime!`. Prefixed `shopify` so it cannot be confused with our own `createdAt` bookkeeping column
+  shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `Customer.updatedAt`; `DateTime!`. This is the field the incremental sweep filters on, but it is NOT the durable watermark: Shopify returns it TRUNCATED TO THE SECOND, so treating a returned value as an exact instant loses up to a second of rows. The sweep keeps its own watermark with an explicit overlap
+  numberOfOrders	INTEGER		`Customer.numberOfOrders`; `UnsignedInt64!` on the wire (a STRING, like every UnsignedInt64). Stored as INTEGER because real values are nowhere near needing more, and the decoder REFUSES a value that would not fit rather than silently truncating it. THIS is the field that answers 'has this customer ever ordered' — not the lifetime spend, which can be 0.00 on customers that do have orders
+  amountSpentAmount	NUMERIC		`Customer.amountSpent.amount`, lifetime spend; the bag is `MoneyV2!`, so always present. NOT reconcilable against a sum of this customer's order totals: orders can carry a different currency from `amountSpent`, with no conversion Shopify shows us. Store it, do not derive from it
+  amountSpentCurrency	TEXT		`Customer.amountSpent.currencyCode`. The denomination of the column above and of nothing else. `MoneyV2` carries its OWN code, so the shop-currency substitution `shopify_products_v1__ProductVariant` uses for the scalar `Money` has no place here and must not be introduced. A single value per shop so far, not a guarantee
+  state	TEXT		`Customer.state`; `CustomerState!` (ENABLED, DISABLED, INVITED among others). Schema.String and NOT Schema.Literal: the enum declares more members than have been seen and Shopify may add one in any quarterly version, which a Literal would turn into an ingest failure on a row we could otherwise have stored
+  verifiedEmail	BOOLEAN		`Customer.verifiedEmail`; `Boolean!`
+  taxExempt	BOOLEAN		`Customer.taxExempt`; `Boolean!`. It is a real field and is stored, but a store may never exercise the true branch, so any logic keyed on it can ship untested
+  lastOrderId	BIGINT	true	The last order's numeric id, parsed out of `Customer.lastOrder.id`, and the join key into `shopify_orders_v1__Order.id`. `Order` is nullable, and its null agrees exactly with `numberOfOrders = 0`. No declared foreign key
+  defaultCity	TEXT	true	`Customer.defaultAddress.city`; nullable, as is the address itself. Geography only — the rest of the address stays in `doc`
+  defaultProvinceCode	TEXT	true	`Customer.defaultAddress.provinceCode`; nullable
+  defaultCountryCodeV2	TEXT	true	`Customer.defaultAddress.countryCodeV2`; nullable
+  doc	JSONB		The verbatim validated Customer node from the bulk JSONL, persisted as JSONB. Holds every identifying field — `email`, `phone`, `firstName`, `lastName`, `displayName`, `note`, `tags`, the full `defaultAddress` and the whole `addresses` array — and everything else the pinned query returns but does not promote, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` because no vendored Shopify type exists to pin a struct against. Never logged

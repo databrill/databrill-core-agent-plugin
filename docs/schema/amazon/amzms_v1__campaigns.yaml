@@ -1,0 +1,21 @@
+name: "amzms_v1__campaigns"
+kind: "table"
+access: "read"
+category: "Amazon Marketing Stream"
+description: "Latest Amazon Marketing Stream state of one advertising campaign, per (advertiser, marketplace, campaign). Stream events carry the complete entity with a monotonic version and newest-version-wins, so this is current state rather than a change log; the full event is in doc."
+primaryKey:
+  - "advertiser_id"
+  - "marketplace_id"
+  - "campaignId"
+columns: |
+  name	type	description
+  advertiser_id	TEXT	Amazon Advertiser ID (same as merchantId)
+  marketplace_id	TEXT	Amazon Marketplace ID
+  campaignId	TEXT	Amazon advertising campaign ID
+  version	INTEGER	Monotonic per-entity snapshot version (newest wins)
+  adProduct	TEXT	Ad product, e.g. SPONSORED_PRODUCTS
+  name	TEXT	Campaign name
+  state	TEXT	Campaign state (stream delivers ENABLED/PAUSED; ARCHIVE is silent)
+  creationDateTime	TIMESTAMPTZ	Entity creation timestamp (audit.creationDateTime)
+  lastUpdatedDateTime	TIMESTAMPTZ	Entity last-updated timestamp (audit.lastUpdatedDateTime)
+  doc	JSONB	Complete event payload as JSONB (full entity snapshot)

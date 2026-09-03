@@ -1,0 +1,27 @@
+name: "amzadapi_exports_v1__target"
+kind: "table"
+access: "read"
+category: "Amazon Ads API"
+description: "One advertising target per (merchant, marketplace, target id) from the Amazon Ads API exports endpoint, with its campaign and ad group, target type and expression, bid, negative flag and delivery status."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "targetId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant ID
+  marketplaceId	TEXT		Amazon marketplace ID
+  targetId	TEXT		Amazon advertising target ID
+  creationDateTime	TIMESTAMPTZ		Target creation timestamp from Amazon
+  lastUpdatedDateTime	TIMESTAMPTZ		Target last updated timestamp from Amazon
+  campaignId	TEXT		Amazon advertising campaign ID
+  adProduct	TEXT		Ad product type: SPONSORED_PRODUCTS, SPONSORED_DISPLAY, SPONSORED_BRANDS
+  state	TEXT		Target state: ENABLED, PAUSED
+  negative	BOOLEAN		Whether this is a negative target
+  targetDetails	JSONB		Target details configuration (JSONB)
+  targetType	TEXT		Target type: AUTO, KEYWORD, PRODUCT, PRODUCT_AUDIENCE, PRODUCT_CATEGORY
+  targetLevel	TEXT		Target level: AD_GROUP, CAMPAIGN
+  deliveryStatus	TEXT		Delivery status: DELIVERING, NOT_DELIVERING
+  deliveryReasons	JSONB	true	Delivery reasons array (e.g., CAMPAIGN_PAUSED) (JSONB)
+  adGroupId	TEXT	true	Amazon advertising ad group ID
+  bid	JSONB	true	Bid configuration: bid amount and currency code (JSONB)

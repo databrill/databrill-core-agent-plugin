@@ -1,0 +1,22 @@
+name: "amzreport_MERCHANT_LISTINGS_ALL"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Every listing in the seller's catalogue, from GET_MERCHANT_LISTINGS_ALL_DATA, one row per (merchant, marketplace, seller SKU) with the report row in doc. A listing that leaves the report is soft-deleted by stamping deletedAt rather than removed."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "sellerSku"
+columns: |
+  name	type	nullable
+  merchantId	TEXT
+  marketplaceId	TEXT
+  sellerSku	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  deletedAt	TIMESTAMPTZ	true
+  doc	JSONB
+indexes:
+  - name: "amzreport_MERCHANT_LISTINGS_ALL__updatedAt"
+    columns:
+      - "updatedAt"

@@ -1,0 +1,21 @@
+name: "amzspapi_fbaInbound_v2024__InboundPlan"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "An FBA inbound plan, one row per (merchantId, inboundPlanId). Plans Amazon rejects as Amazon Warehousing and Distribution plans are still stored, with isAwd set, so the forward watermark passes over them naturally; no shipment or item calls are made for them."
+primaryKey:
+  - "merchantId"
+  - "inboundPlanId"
+columns: |
+  name	type	nullable	default	description
+  merchantId	TEXT
+  inboundPlanId	TEXT
+  name	TEXT	true
+  status	TEXT	true
+  sourceAddress	JSONB	true
+  placementOption	JSONB	true
+  packingOption	JSONB	true
+  isAwd	BOOLEAN		false	True when getInboundPlan returned the AWD-trap signature; see file JSDoc for details
+  planLastUpdatedAt	TIMESTAMPTZ	true
+  lastSeenAt	TIMESTAMPTZ	true
+  lastFetchedAt	TIMESTAMPTZ	true

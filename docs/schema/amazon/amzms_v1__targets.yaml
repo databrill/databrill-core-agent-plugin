@@ -1,0 +1,24 @@
+name: "amzms_v1__targets"
+kind: "table"
+access: "read"
+category: "Amazon Marketing Stream"
+description: "Latest Amazon Marketing Stream state of one advertising target, per (advertiser, marketplace, target). Newest-version-wins current state, not a change log. The target expression is in doc under exactly one of keywordTarget, productCategoryTarget or autoTarget, discriminated by targetType; adGroupId is null for campaign-level targets."
+primaryKey:
+  - "advertiser_id"
+  - "marketplace_id"
+  - "targetId"
+columns: |
+  name	type	nullable	description
+  advertiser_id	TEXT		Amazon Advertiser ID (same as merchantId)
+  marketplace_id	TEXT		Amazon Marketplace ID
+  targetId	TEXT		Amazon advertising target ID
+  campaignId	TEXT		Parent campaign ID
+  adGroupId	TEXT	true	Parent ad group ID (absent on campaign-level targets)
+  version	INTEGER		Monotonic per-entity snapshot version (newest wins)
+  adProduct	TEXT		Ad product, e.g. SPONSORED_PRODUCTS
+  targetType	TEXT		Target expression type, e.g. KeywordTarget / ProductCategoryTarget / AutoTarget
+  negative	BOOLEAN		Whether this is a negative target
+  state	TEXT		Target state (stream delivers ENABLED/PAUSED; ARCHIVE is silent)
+  creationDateTime	TIMESTAMPTZ		Entity creation timestamp (audit.creationDateTime)
+  lastUpdatedDateTime	TIMESTAMPTZ		Entity last-updated timestamp (audit.lastUpdatedDateTime)
+  doc	JSONB		Complete event payload as JSONB (full entity snapshot)

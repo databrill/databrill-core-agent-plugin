@@ -1,0 +1,5 @@
+name	kind	access	columns	category	description
+wmt_account_v3__profile	table	read	8	Walmart	The Walmart seller's business identity — legal name, business registration number and country of incorporation — one row per connector.
+wmt_inventory_v3__Wfs	table	read	13	Walmart	Latest known Walmart WFS inventory for one SKU at one ship node, keyed (connectorId, sku, shipNodeType, shipNode).
+wmt_orders_v3__Order	table	read	12	Walmart	One Walmart Marketplace order header per (connectorId, purchaseOrderId), with the full payload in doc.
+wmt_orders_v3__OrderLine	table	read	17	Walmart	One line of a Walmart Marketplace order, keyed (connectorId, purchaseOrderId, lineNumber).

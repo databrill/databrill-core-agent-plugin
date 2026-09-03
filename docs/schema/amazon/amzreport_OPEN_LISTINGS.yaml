@@ -1,0 +1,22 @@
+name: "amzreport_OPEN_LISTINGS"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Listings currently available for sale, from GET_FLAT_FILE_OPEN_LISTINGS_DATA, one row per (merchant, marketplace, seller SKU) with the report row in doc. A listing that leaves the report is soft-deleted by stamping deletedAt rather than removed."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "sellerSku"
+columns: |
+  name	type	nullable
+  merchantId	TEXT
+  marketplaceId	TEXT
+  sellerSku	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  deletedAt	TIMESTAMPTZ	true
+  doc	JSONB
+indexes:
+  - name: "amzreport_OPEN_LISTINGS__updatedAt"
+    columns:
+      - "updatedAt"

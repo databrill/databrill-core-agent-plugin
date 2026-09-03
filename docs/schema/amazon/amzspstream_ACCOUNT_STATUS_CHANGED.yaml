@@ -1,0 +1,18 @@
+name: "amzspstream_ACCOUNT_STATUS_CHANGED"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon ACCOUNT_STATUS_CHANGED notifications, one row per message, carrying the previous and current account status and the full notification in payload. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 = generateDeterministicUuidV7(eventTime, notificationId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification eventTime
+  merchantId	TEXT	Merchant id resolved from the metadata subscriptionId (the body carries none)
+  previousAccountStatus	TEXT	Account status before the change (e.g. NORMAL, AT_RISK, DEACTIVATED)
+  currentAccountStatus	TEXT	Account status after the change (e.g. NORMAL, AT_RISK, DEACTIVATED)
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API notificationVersion from the envelope
+  payloadVersion	TEXT	SP-API payloadVersion from the envelope
+  payload	JSONB	Unwrapped accountStatusChangeNotification with previousAccountStatus/currentAccountStatus stripped (JSONB)

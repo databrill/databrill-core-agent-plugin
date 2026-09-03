@@ -1,0 +1,17 @@
+name: "amzspapi_catalog_items_v20220401__itemattributes_lang"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "The language-specific SP-API Catalog Items 2022-04-01 attribute document per (marketplace_code, lang, asin), stored verbatim in data."
+primaryKey:
+  - "marketplace_code"
+  - "lang"
+  - "asin"
+columns: |
+  name	type
+  marketplace_code	TEXT
+  lang	TEXT
+  asin	TEXT
+  created_at	TIMESTAMPTZ
+  modified_at	TIMESTAMPTZ
+  data	JSONB

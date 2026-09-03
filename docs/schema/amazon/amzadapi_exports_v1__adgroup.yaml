@@ -1,0 +1,25 @@
+name: "amzadapi_exports_v1__adgroup"
+kind: "table"
+access: "read"
+category: "Amazon Ads API"
+description: "One advertising ad group per (merchant, marketplace, ad group id) from the Amazon Ads API exports endpoint, with its campaign, ad product, state, delivery status, bid and optimization settings."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "adGroupId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant ID
+  marketplaceId	TEXT		Amazon marketplace ID
+  adGroupId	TEXT		Amazon advertising ad group ID
+  creationDateTime	TIMESTAMPTZ		Ad group creation timestamp from Amazon
+  lastUpdatedDateTime	TIMESTAMPTZ		Ad group last updated timestamp from Amazon
+  campaignId	TEXT		Amazon advertising campaign ID that this ad group belongs to
+  adProduct	TEXT		Ad product type: SPONSORED_DISPLAY, SPONSORED_BRANDS, SPONSORED_PRODUCTS
+  name	TEXT		Ad group name
+  state	TEXT		Ad group state: PAUSED, ENABLED
+  deliveryStatus	TEXT		Delivery status: NOT_DELIVERING, DELIVERING
+  bid	JSONB	true	Bid configuration: defaultBid, currencyCode (JSONB)
+  deliveryReasons	JSONB	true	Delivery reasons array (e.g., CAMPAIGN_PAUSED) (JSONB)
+  creativeType	TEXT	true	Creative type: IMAGE, VIDEO
+  optimization	JSONB	true	Optimization settings: bidStrategy, goalSetting, autoPlacementBidAdjustments (JSONB)

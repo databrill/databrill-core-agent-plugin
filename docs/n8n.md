@@ -15,7 +15,8 @@ database user where available.
 - Add a deterministic `ORDER BY` and a reasonable limit while developing.
 - Do not build identifiers or SQL fragments from untrusted workflow input.
 - Check the source maximum date and currency before sending a report.
-- Use views from the catalog when they already express the required grain.
+- Use the declared views (kind `view` in a group's `index.tsv`) when they
+  already express the required grain.
 
 The n8n Postgres node sanitizes Query Parameters. See the
 [official Postgres node documentation](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.postgres/).
@@ -92,9 +93,10 @@ GROUP BY "date", "marketplace_id"
 ORDER BY "date", "marketplace_id";
 ```
 
-These names match the declared view. Confirm that the live view exists and is
-current against [the complete catalog](table-catalog.md) before saving the
-workflow.
+These names match the declared view. Confirm that the view exists in the
+database and matches its declaration (`amazon_sales_and_traffic` in the
+[Amazon group index](schema/amazon/index.tsv), with the full column list in
+`schema/amazon/amazon_sales_and_traffic.yaml`) before saving the workflow.
 
 ## Multi-workspace n8n workflows
 

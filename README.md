@@ -11,8 +11,8 @@ data in Claude Code or Cowork. It combines:
 - diagnosis methods, the product-family hierarchy, and a SQL reference for the
   column names, quoting rules, and data shapes that differ per relation;
 - read-only Deno helpers for users who have a direct database credential;
-- a generated catalog of all 106 tables and 13 views Databrill can provision in
-  a client database.
+- a generated description of every table and view Databrill can provision in a
+  client database, one index per channel group.
 
 Start with [Getting started](docs/getting-started.md). The connector works
 without any URL configuration; if Databrill provides a scoped MCP URL, use it
@@ -77,7 +77,9 @@ calls still query one workspace at a time. See
 - [Building dashboards](docs/dashboards.md)
 - [Using the database from n8n](docs/n8n.md)
 - [Installing Deno and running the helpers](docs/deno.md)
-- [Complete table and view catalog](docs/table-catalog.md)
+- [Declared tenant schema](docs/schema/README.md) — one index per channel group
+  (Amazon, Walmart, Shopify, The Fulfillment Lab, common), one YAML file per
+  table or view
 
 When reporting results, use plain language, include the period and marketplace,
 state each important metric with its value, and attach an ASIN or SKU to every

@@ -1,0 +1,25 @@
+name: "wmt_inventory_v3__Wfs"
+kind: "table"
+access: "read"
+category: "Walmart"
+description: "Latest known Walmart WFS inventory for one SKU at one ship node, keyed (connectorId, sku, shipNodeType, shipNode). Rows are upserted in place and never deleted, so a SKU that disappears from the feed keeps its last-known quantities: compare each row's time against the connector's latest snapshot time and treat an older row as stale, not as zero."
+primaryKey:
+  - "connectorId"
+  - "sku"
+  - "shipNodeType"
+  - "shipNode"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		OURS, not from the payload: the Databrill connector id of the Walmart connector that took the snapshot; the key that scopes this row to its connector
+  sku	TEXT		ITEM-level (`item.sku`)
+  offerId	TEXT	true
+  shipNodeType	TEXT		NODE-level (`node.shipNodeType`). From the RESPONSE BODY, NEVER from the request: /v3/fulfillment/inventory takes no shipNodeType parameter (that is /v3/orders). The node's CLASS, not its identifier
+  shipNode	TEXT		NODE-level (`node.shipNode`). The node's IDENTIFIER — distinct from shipNodeType, which is its class. IN THE PRIMARY KEY: two nodes of the same shipNodeType but different shipNode are DISTINCT rows, not a collision. The API marks it optional; when the payload omits it the Worker writes the empty-string SENTINEL '' (a PK column cannot be NULL), so '' means `node.shipNode` was absent
+  availToSellQty	INTEGER	true
+  onHandQty	INTEGER	true
+  firstInStockDate	TIMESTAMPTZ	true
+  modifiedDate	TIMESTAMPTZ	true
+  time	TIMESTAMPTZ		OURS, not from the payload: the snapshot time of the latest run that touched this row. NOT IN THE PRIMARY KEY — it is overwritten on every run rather than appended. It is the ONLY staleness signal this table has: a row whose time predates the most recent inventory run was not refreshed by that run, so treat it as stale, not as zero
+  doc	JSONB		THE NODE (`node`) verbatim, NOT the item — the row's grain IS the node, so the node is its verbatim payload. Consequence: sibling nodes of the same item are not recoverable from any single row's doc, and sku/offerId appear only as their own columns. Persisted as JSONB; typed `Unknown` because no vendored API type exists to pin a struct against
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ

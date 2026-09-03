@@ -1,0 +1,19 @@
+name: "amzspapi_searchCatalogItems_v2020__asin"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "Per-ASIN metadata dimension for search-catalog scrapes, keyed (marketplaceId, asin): item name, brand, image, parent ASIN and summaries. Rows are overwritten in place on change, so no history is kept."
+primaryKey:
+  - "marketplaceId"
+  - "asin"
+columns: |
+  name	type	nullable	description
+  marketplaceId	TEXT		Amazon Marketplace ID
+  asin	TEXT		The ASIN this metadata describes
+  itemName	TEXT	true	Item title, from summaries[0].itemName
+  brandName	TEXT	true	Brand, from summaries[0].brandName
+  imageUrl	TEXT	true	MAIN-variant image link, from images[0].images
+  parentAsin	TEXT	true	Parent ASIN from a CHILD variation relationship; NULL for standalone items
+  summaries	JSONB	true	Remaining summaries[0] fields stored as JSONB (open set): browseNode, colorName, manufacturer, modelNumber, sizeName, styleName
+  firstSeenAt	TIMESTAMPTZ		When this ASIN was first recorded
+  updatedAt	TIMESTAMPTZ		When this ASIN's metadata was last overwritten

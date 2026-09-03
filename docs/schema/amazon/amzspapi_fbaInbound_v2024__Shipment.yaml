@@ -1,0 +1,32 @@
+name: "amzspapi_fbaInbound_v2024__Shipment"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "An FBA inbound shipment, one row per (merchantId, shipmentId). A unique index on (merchantId, shipmentConfirmationId) is what lets receipt rows in amzreport_LEDGER_DETAIL be joined back to a shipment. shipmentConfirmationId is the FBA-format identifier and is null only between the plan being recorded and the shipment detail call succeeding."
+primaryKey:
+  - "merchantId"
+  - "shipmentId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT
+  shipmentId	TEXT
+  inboundPlanId	TEXT		Parent inboundPlanId this shipment belongs to
+  shipmentConfirmationId	TEXT	true
+  name	TEXT	true
+  status	TEXT	true
+  amazonReferenceId	TEXT	true
+  destinationWarehouseId	TEXT	true
+  destinationAddress	JSONB	true
+  sourceAddress	JSONB	true
+  selectedTransportationOptionId	TEXT	true
+  selectedDeliveryWindow	JSONB	true
+  placementOptionId	TEXT	true
+  dates	JSONB	true
+  trackingDetails	JSONB	true
+  lastSeenAt	TIMESTAMPTZ	true
+indexes:
+  - name: "amzspapi_fbaInbound_v2024__Shipment__merchantId__shipmentConfirmationId"
+    columns:
+      - "merchantId"
+      - "shipmentConfirmationId"
+    unique: true

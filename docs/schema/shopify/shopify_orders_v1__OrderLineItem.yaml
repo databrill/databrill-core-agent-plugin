@@ -1,0 +1,35 @@
+name: "shopify_orders_v1__OrderLineItem"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify order line item per (shopId, id), where id is the numeric tail of the LineItem GID and orderId is parsed from the bulk JSONL __parentId. Money is an exact decimal string in NUMERIC with its own currency beside it, shopMoney only. Refreshed as a whole set PER PARENT ORDER: updatedAt marks which lines the latest sweep returned, and only lines of the orders that sweep carried are ever deleted."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	BIGINT		The numeric tail of `LineItem.id`, e.g. 19664282419388 from `gid://shopify/LineItem/19664282419388`. THE KEY, and the one key in this schema that Shopify does not also publish as a `legacyResourceId`: `LineItem` exposes none, so the tail is parsed out of the GID instead. It is stable and unique, but it is NOT a number the merchant can look up. Note the GID type is `LineItem`, not `OrderLineItem`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field — `LineItem` exposes no source timestamps of its own
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping AND the PER-PARENT refresh marker: every line a sweep writes carries that run's single instant, and lines belonging to the orders that sweep returned whose stamp is older are deleted. Scoped to those parent ids and never global. Not a Shopify field
+  orderId	BIGINT		The parent Order's id, parsed out of the bulk JSONL's `__parentId`. NOT a selectable GraphQL field. Always present, every line immediately following its own parent line. Equal to `shopify_orders_v1__Order.id`, which Shopify supplies as `legacyResourceId` on the parent line rather than as a GID tail — the two are the same number
+  name	TEXT		`LineItem.name`, the title as shown to the buyer including the variant; `String!`
+  title	TEXT		`LineItem.title`, the product title at the time of sale; `String!`
+  variantTitle	TEXT	true	`LineItem.variantTitle`; `String` (nullable), and null on most lines
+  sku	TEXT	true	`LineItem.sku`; `String` — NULLABLE in the schema though usually filled. Kept nullable because one store's SKU discipline is not evidence about every merchant's
+  vendor	TEXT	true	`LineItem.vendor`; `String` (nullable), rarely null
+  quantity	INTEGER		`LineItem.quantity` as ordered; `Int!`
+  currentQuantity	INTEGER		`LineItem.currentQuantity`, quantity after refunds and removals; `Int!`
+  requiresShipping	BOOLEAN		`LineItem.requiresShipping`; `Boolean!`
+  taxable	BOOLEAN		`LineItem.taxable`; `Boolean!`
+  productId	BIGINT	true	The product's numeric id, parsed out of `LineItem.product.id`. `Product` is nullable — Shopify severs the reference when a product is deleted, so a null here is the fingerprint of a deleted product rather than a dangling id. Joins to `shopify_products_v1__Product.id`
+  variantId	BIGINT	true	The variant's numeric id, parsed out of `LineItem.variant.id`. Nullable. Joins to `shopify_products_v1__ProductVariant.id`
+  originalUnitPriceAmount	NUMERIC		`LineItem.originalUnitPriceSet.shopMoney.amount`; `MoneyBag!`, so always present
+  originalUnitPriceCurrency	TEXT		`LineItem.originalUnitPriceSet.shopMoney.currencyCode`. The denomination of the column above and of nothing else
+  discountedUnitPriceAmount	NUMERIC		`LineItem.discountedUnitPriceSet.shopMoney.amount`; `MoneyBag!`, so always present
+  discountedUnitPriceCurrency	TEXT		`LineItem.discountedUnitPriceSet.shopMoney.currencyCode`
+  originalTotalAmount	NUMERIC		`LineItem.originalTotalSet.shopMoney.amount`; `MoneyBag!`, so always present
+  originalTotalCurrency	TEXT		`LineItem.originalTotalSet.shopMoney.currencyCode`
+  discountedTotalAmount	NUMERIC		`LineItem.discountedTotalSet.shopMoney.amount`; `MoneyBag!`, so always present
+  discountedTotalCurrency	TEXT		`LineItem.discountedTotalSet.shopMoney.currencyCode`
+  doc	JSONB		The verbatim validated LineItem node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no vendored Shopify type exists. Never logged

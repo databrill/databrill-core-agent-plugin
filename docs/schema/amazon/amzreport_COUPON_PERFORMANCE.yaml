@@ -1,0 +1,20 @@
+name: "amzreport_COUPON_PERFORMANCE"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Coupon performance from GET_COUPON_PERFORMANCE_REPORT, one row per (merchant, marketplace, coupon). Clips, redemptions, budget and sales are in doc, and asins is a derived lookup array. Amazon considers the data complete 24 hours after the coupon ends."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "couponId"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  couponId	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  startDateTime	TIMESTAMPTZ
+  endDateTime	TIMESTAMPTZ
+  doc	JSONB
+  asins	TEXT[]

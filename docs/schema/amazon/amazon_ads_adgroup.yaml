@@ -1,0 +1,50 @@
+name: "amazon_ads_adgroup"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Merged live view of Amazon advertising ad groups: the periodic Export table (amzadapi_exports_v1__adgroup) reconciled with the near-realtime Amazon Marketing Stream snapshot (amzms_v1__adgroups), on the same merge semantics as amazon_ads_campaign."
+columns: |
+  name	type	description
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  ad_group_id	TEXT
+  campaign_id	TEXT
+  ad_product	TEXT
+  state	TEXT	Fresher of Export/stream state (ENABLED/PAUSED)
+  name	TEXT	Fresher of Export/stream ad group name
+  delivery_status	TEXT	Export-only serving status
+  delivery_reasons	JSONB	Export-only delivery reasons (JSONB)
+  bid	NUMERIC
+  creative_type	TEXT
+  optimization	JSONB
+  creation_date_time	TIMESTAMPTZ
+  last_updated_date_time	TIMESTAMPTZ	Newest lastUpdatedDateTime across Export and stream
+  export_last_updated_date_time	TIMESTAMPTZ
+  stream_last_updated_date_time	TIMESTAMPTZ
+  stream_version	NUMERIC	Latest stream snapshot version (null: no stream row)
+definition: |
+  SELECT
+    COALESCE(e."merchantId", s."advertiser_id") AS merchant_id,
+    COALESCE(e."marketplaceId", s."marketplace_id") AS marketplace_id,
+    COALESCE(e."adGroupId", s."adGroupId") AS ad_group_id,
+    COALESCE(e."campaignId", s."campaignId") AS campaign_id,
+    COALESCE(e."adProduct", s."adProduct") AS ad_product,
+    CASE WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
+      THEN s."state" ELSE e."state" END AS state,
+    CASE WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
+      THEN s."name" ELSE e."name" END AS name,
+    e."deliveryStatus" AS delivery_status,
+    e."deliveryReasons" AS delivery_reasons,
+    e."bid" AS bid,
+    e."creativeType" AS creative_type,
+    e."optimization" AS optimization,
+    COALESCE(e."creationDateTime", s."creationDateTime") AS creation_date_time,
+    GREATEST(e."lastUpdatedDateTime", s."lastUpdatedDateTime") AS last_updated_date_time,
+    e."lastUpdatedDateTime" AS export_last_updated_date_time,
+    s."lastUpdatedDateTime" AS stream_last_updated_date_time,
+    s."version" AS stream_version
+  FROM "amzadapi_exports_v1__adgroup" e
+  FULL OUTER JOIN "amzms_v1__adgroups" s
+    ON e."merchantId" = s."advertiser_id"
+    AND e."marketplaceId" = s."marketplace_id"
+    AND e."adGroupId" = s."adGroupId"

@@ -1,0 +1,19 @@
+name: "amzspstream_REPORT_PROCESSING_FINISHED"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon REPORT_PROCESSING_FINISHED notifications, one row per message, carrying the report id, report type and processing status. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 = generateDeterministicUuidV7(eventTime, notificationId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification eventTime
+  merchantId	TEXT	Seller id from reportProcessingFinishedNotification.sellerId
+  reportId	TEXT	Report id from reportProcessingFinishedNotification.reportId
+  reportType	TEXT	Report type from reportProcessingFinishedNotification.reportType
+  processingStatus	TEXT	Processing status from reportProcessingFinishedNotification.processingStatus
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API notificationVersion from the envelope
+  payloadVersion	TEXT	SP-API payloadVersion from the envelope
+  payload	JSONB	Unwrapped reportProcessingFinishedNotification with promoted keys stripped (JSONB)

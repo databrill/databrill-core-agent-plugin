@@ -1,0 +1,19 @@
+name: "amzadapi_eligibility_v1__program"
+kind: "table"
+access: "read"
+category: "Amazon Ads API"
+description: "Amazon Ads program eligibility per (merchant, marketplace, program), with the eligibility flag and any reasons Amazon gave for ineligibility."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "program"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant/seller ID
+  marketplaceId	TEXT		Amazon marketplace ID (from API response)
+  program	TEXT		Ad program identifier (e.g., SP, SB, SD, DTC, MAAS, SPOT, RAS)
+  createdAt	TIMESTAMPTZ		When this eligibility record was first created
+  updatedAt	TIMESTAMPTZ		When this eligibility record was last updated
+  deletedAt	TIMESTAMPTZ	true	When this program was soft-deleted (null if active)
+  eligible	BOOLEAN		Whether the merchant is eligible for this program
+  reasons	JSONB	true	JSON array of {code, description, level} explaining eligibility status

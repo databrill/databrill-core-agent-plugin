@@ -1,0 +1,16 @@
+name: "shopify_shop_v1__Shop"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One row per Shopify store naming it: myshopify domain, trading name, timezone and shop currency, keyed by the Shopify shop id. Join any other shopify_* table to this one on shopId to put a name to the store its rows came from. Upserted by each shop refresh and never deleted."
+primaryKey:
+  - "shopId"
+columns: |
+  name	type	description
+  shopId	BIGINT	THE KEY, and the value every other `shopify_*` table in this schema carries — join on it to find out which store a row is from. It is the decimal tail of `gid://shopify/Shop/<digits>`; the full GID is not stored, because nothing here rebuilds one. See `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  createdAt	TIMESTAMPTZ	When this row was first written by a `shop` refresh
+  updatedAt	TIMESTAMPTZ	When the most recent successful `shop` refresh wrote this row. NOT a whole-set refresh marker: nothing in this table is ever deleted for being stamped earlier than a run
+  myshopifyDomain	TEXT	SOURCE: `Shop.myshopifyDomain`, the canonical `*.myshopify.com` host. Usually the most recognisable of the three identifiers, and the one the Admin API is called on. It is Shopify's own answer rather than the value configured on the connector; the two are compared on every refresh and a disagreement is logged. UNLIKE `shopId` IT IS NOT PERMANENT — a merchant may change it once — which is why it is not the key
+  name	TEXT	SOURCE: `Shop.name`, the store's trading name as the merchant set it — what a person means by the name of the shop. It is merchant-editable and NOT an identifier: two stores can share one, and it can change without anything else changing
+  ianaTimezone	TEXT	SOURCE: `Shop.ianaTimezone`. The zone every shop-local calendar day in this schema is reckoned in, notably the `day` column of the two `shopify_reports_v1__*` tables
+  currencyCode	TEXT	SOURCE: `Shop.currencyCode`. The currency of every scalar Money field Shopify returns WITHOUT one, notably `shopify_products_v1__ProductVariant.price`. It does NOT apply to an order's amounts: those carry their own code each, and some orders are in a different currency

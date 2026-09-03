@@ -2,9 +2,9 @@
 name: dbl-metrics-profitability
 description: Assess per-ASIN advertising profitability — ad spend, ad cost per sale, halo revenue, and (when cost inputs are provided) net margin and net profit per ad sale with and without halo. Use when the user asks whether ads/PPC are profitable, net margin, profit per sale, "is this product making money", or break-even ACOS.
 metadata:
-  type: metrics
-  audience: client
-  tool: loadEconomics
+    type: metrics
+    audience: client
+    tool: loadEconomics
 ---
 
 # Advertising profitability
@@ -52,3 +52,7 @@ and pass a family to `products` when the client thinks in families
 The rollup comes from the ad tables (see `dbl-metrics-ads` and
 `${CLAUDE_PLUGIN_ROOT}/docs/sql-reference.md` for which one holds spend and
 revenue). There is no COGS source in the DB — that is an input, not a query.
+
+For the declared columns and types of any Amazon table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's
+`.yaml` beside it.

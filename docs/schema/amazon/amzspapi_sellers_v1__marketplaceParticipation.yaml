@@ -1,0 +1,25 @@
+name: "amzspapi_sellers_v1__marketplaceParticipation"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "One row per (merchant, marketplace) participation from SP-API Sellers v1 getMarketplaceParticipations: whether the seller participates, whether any listings are suspended, and the store name."
+primaryKey:
+  - "id"
+columns: |
+  name	type
+  merchantId	TEXT
+  id	TEXT
+  marketplaceId	TEXT
+  doc	JSONB
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  isReal	BOOLEAN
+  isActive	BOOLEAN
+foreignKeys:
+  - columns:
+      - "marketplaceId"
+    references:
+      table: "amzspapi_sellers_v1__marketplace"
+      columns:
+        - "id"
+    onDelete: "CASCADE"

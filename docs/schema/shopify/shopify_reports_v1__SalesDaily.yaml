@@ -1,0 +1,33 @@
+name: "shopify_reports_v1__SalesDaily"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One shop-local day of the Shopify ShopifyQL `sales` dataset per (shopId, day). A TIME SERIES, upserted over a trailing re-fetch window and never deleted — unlike every other Shopify tenant table. Every measure is an exact decimal string in NUMERIC, including counts and percentages. total_sales is Shopify's own definition and does not equal the sum of order totals in shopify_orders_v1__Order."
+primaryKey:
+  - "shopId"
+  - "day"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  day	DATE		The ShopifyQL `day` dimension: a SHOP-LOCAL calendar day as `YYYY-MM-DD`. `Schema.String` plus postgresType DATE and NOT `Schema.DateTimeUtc`, following `tfl_products_v1__WarehouseInventory.localdate`: a calendar day is not an instant, and a TIMESTAMPTZ column would reintroduce the timezone ambiguity this column exists to remove. Which day a sale falls on is decided by the shop's own timezone, which is why the task is DAILY_ZONED
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this day was FIRST written. Excluded from the upsert's update columns, so a day re-read inside the re-fetch window keeps its original value. Not a Shopify field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping, and it means WHEN THIS DAY'S NUMBERS LAST CHANGED — not when we last looked at them. The writer keeps `dbRunUpsert`'s DEFAULT distinct guard, so a day re-read inside the re-fetch window whose measures all match is not rewritten at all. That is the opposite of every other Shopify tenant table, where the marker must be stamped unconditionally because a whole-set delete runs against it; NOTHING IN THIS FAMILY DELETES ON IT, which is what makes the useful meaning available. Reading it tells you which days are still being revised and how long after the fact — the measurement behind the re-fetch window, available continuously rather than from a one-off diff. Not a Shopify field
+  total_sales	NUMERIC		`MONEY`. The headline figure the merchant sees in their own admin, and the one that DOES NOT equal the sum of `shopify_orders_v1__Order.totalPriceShopAmount` — see the table header before reconciling anything against it. Exact decimal string; up to 3 decimal places measured
+  net_sales	NUMERIC		`MONEY`. Gross sales less discounts and returns, before taxes and shipping. Exact decimal string; up to 3 decimal places measured
+  gross_sales	NUMERIC		`MONEY`. Product sales before any discount, return, tax or shipping. Exact decimal string
+  orders	NUMERIC		`INTEGER`, carried as an exact decimal string in NUMERIC like every other measure here. ShopifyQL's own order count, which uses a DIFFERENT inclusion rule from a row count over `shopify_orders_v1__Order`, so the two can differ by a few orders on a day
+  discounts	NUMERIC		`MONEY`. NEGATIVE in normal operation. The sign is the source's and is not normalised here
+  returns	NUMERIC		`MONEY`. NEGATIVE in normal operation. This is the measure most responsible for a settled day's numbers moving later, and therefore for the re-fetch window in the table header
+  taxes	NUMERIC		`MONEY`. Can be negative, so the column admits either sign
+  duties	NUMERIC		`MONEY`. May be zero on every day of a store; the column exists because the dataset declares it, not because it has been seen non-zero
+  additional_fees	NUMERIC		`MONEY`. May be zero on every day of a store
+  average_order_value	NUMERIC	true	`MONEY`, and a DERIVED measure the source computes — not `total_sales / orders` as computed from this row. Stored as returned so it matches the merchant's admin. NULLABLE because it is a quotient over `orders`, so a day with none has no average order value
+  returning_customer_rate	NUMERIC	true	`PERCENT`, expressed as a UNIT FRACTION rather than a percentage: 0.5357142857142857 means 53.57%. Measured at up to 18 decimal places, which is the independent reason every measure in this table is an exact decimal string rather than a double. NULLABLE because it is a quotient over `customers`, so a day with none has no returning-customer rate
+  customers	NUMERIC		`INTEGER`. Customers who placed an order on this day
+  new_customers	NUMERIC		`INTEGER`. First-time customers within `customers`
+  returning_customers	NUMERIC		`INTEGER`. Repeat customers within `customers`
+  gift_card_discounts	NUMERIC		`MONEY`. May be zero on every day of a store
+  tips	NUMERIC		`MONEY`. May be zero on every day of a store
+  cost_of_goods_sold	NUMERIC		`MONEY`, and it depends on the merchant maintaining a cost per variant — a store that does not will read zero here rather than null. Can be negative, so the column admits either sign
+  gross_profit	NUMERIC		`MONEY`. Derived by the source from `net_sales` and `cost_of_goods_sold`; stored as returned rather than recomputed, and therefore only as trustworthy as the cost data behind it
+  gross_margin	NUMERIC	true	`PERCENT` as a UNIT FRACTION. Derived by the source, and it can exceed 1.0 when the cost data behind `cost_of_goods_sold` is incomplete. Stored as returned rather than clamped. NULLABLE, and the ONE column in this family where a null has actually been seen: it is `gross_profit` over `net_sales`, and the source can return no value for a day

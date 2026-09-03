@@ -1,0 +1,19 @@
+name: "amzreport_FBA_INVENTORY_PLANNING"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "FBA inventory-health metrics per (merchant, marketplace, SKU) from GET_FBA_INVENTORY_PLANNING_DATA. The report's many highly region-variable columns are kept verbatim in doc under their original names. Scoped to one marketplace per row. A SKU that leaves the report is soft-deleted by stamping deleted_at rather than removed."
+primaryKey:
+  - "merchant_id"
+  - "marketplace_id"
+  - "sku"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  sku	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  deleted_at	TIMESTAMPTZ	true
+  snapshot_date	DATE
+  doc	JSONB

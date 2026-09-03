@@ -1,0 +1,29 @@
+name: "amzreport_PROMOTION_PERFORMANCE"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Promotion performance from GET_PROMOTION_PERFORMANCE_REPORT, one row per (merchant, marketplace, promotion): glance views, units sold and revenue, per-product metrics in includedProducts, and a derived asins lookup array. lastUpdatedDateTime can move long after the promotion ends."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "promotionId"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  promotionId	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  promotionName	TEXT
+  type	TEXT
+  status	TEXT
+  glanceViews	INTEGER
+  unitsSold	INTEGER
+  revenue	NUMERIC
+  revenueCurrencyCode	TEXT
+  startDateTime	TIMESTAMPTZ
+  endDateTime	TIMESTAMPTZ
+  createdDateTime	TIMESTAMPTZ
+  lastUpdatedDateTime	TIMESTAMPTZ
+  includedProducts	JSONB
+  asins	TEXT[]

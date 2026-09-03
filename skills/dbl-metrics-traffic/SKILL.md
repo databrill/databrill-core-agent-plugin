@@ -2,9 +2,9 @@
 name: dbl-metrics-traffic
 description: Analyze Sales & Traffic per ASIN — sessions, page views, units ordered, ordered-product sales, and session conversion rate. Use when the user asks about sessions, traffic, page views, conversion rate, units/sales per ASIN, or listing performance over time.
 metadata:
-  type: metrics
-  audience: client
-  tool: loadTraffic
+    type: metrics
+    audience: client
+    tool: loadTraffic
 ---
 
 # Sales & Traffic (sessions / units / sales / CR)
@@ -57,3 +57,7 @@ The raw table `amzreport_SALES_AND_TRAFFIC__skuByDay` keeps JSON documents —
 `marketplaceId`, `date` (camelCase here, unlike the view). Use it only for a
 field the view drops. Double-quote identifiers; see
 `${CLAUDE_PLUGIN_ROOT}/docs/sql-reference.md`.
+
+For the declared columns and types of any Amazon table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's
+`.yaml` beside it.

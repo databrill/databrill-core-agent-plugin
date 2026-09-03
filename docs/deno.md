@@ -63,8 +63,8 @@ deno run --allow-env --allow-read --allow-net scripts/catalog.ts \
 ```
 
 This reports the tables, views, columns, types, and nullability actually present
-in the selected database. Compare it with
-[the complete declared catalog](table-catalog.md).
+in the selected database. Compare it with the
+[declared schema](schema/README.md).
 
 ## Run a read-only query
 

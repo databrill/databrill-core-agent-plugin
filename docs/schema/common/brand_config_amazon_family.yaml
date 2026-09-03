@@ -1,0 +1,25 @@
+name: "brand_config_amazon_family"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable product families, grouping related ASINs under an ontology category. msku is an optional family-level identifier and deliberately has no foreign key, because it may name a conceptual SKU that exists as no variant row."
+primaryKey:
+  - "family"
+columns: |
+  name	type	nullable	default
+  family	TEXT
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  category	TEXT	true
+  msku	TEXT	true
+  label	TEXT	true
+  description	TEXT	true
+foreignKeys:
+  - columns:
+      - "category"
+    references:
+      table: "brand_config_ontology_category"
+      columns:
+        - "category"
+    onDelete: "RESTRICT"
+    onUpdate: "CASCADE"

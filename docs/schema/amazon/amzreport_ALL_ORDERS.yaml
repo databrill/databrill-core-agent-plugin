@@ -1,0 +1,61 @@
+name: "amzreport_ALL_ORDERS"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Order line items from the Amazon all-orders report (GET_FLAT_FILE_ALL_ORDERS_DATA_BY_LAST_UPDATE_GENERAL), one row per (merchant, marketplace, Amazon order id, SKU). Common fields are explicit columns, EU VAT fields are broken out, and the remaining marketplace-specific fields stay in extras. The product name is deliberately not stored."
+primaryKey:
+  - "merchant_id"
+  - "marketplace_id"
+  - "amazon_order_id"
+  - "sku"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  amazon_order_id	TEXT
+  sku	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  localdate	DATE	true
+  merchant_order_id	TEXT	true
+  purchase_date	TEXT	true
+  last_updated_date	TEXT	true
+  order_status	TEXT	true
+  fulfillment_channel	TEXT	true
+  sales_channel	TEXT	true
+  order_channel	TEXT	true
+  ship_service_level	TEXT	true
+  asin	TEXT	true
+  item_status	TEXT	true
+  quantity	NUMERIC	true
+  quantity_shipped	NUMERIC	true
+  quantity_unshipped	NUMERIC	true
+  currency	TEXT	true
+  item_price	NUMERIC	true
+  item_tax	NUMERIC	true
+  shipping_price	NUMERIC	true
+  shipping_tax	NUMERIC	true
+  gift_wrap_price	NUMERIC	true
+  gift_wrap_tax	NUMERIC	true
+  item_promotion_discount	NUMERIC	true
+  ship_promotion_discount	NUMERIC	true
+  ship_city	TEXT	true
+  ship_state	TEXT	true
+  ship_postal_code	TEXT	true
+  ship_country	TEXT	true
+  promotion_ids	TEXT	true
+  is_business_order	BOOLEAN	true
+  purchase_order_number	TEXT	true
+  price_designation	TEXT	true
+  is_amazon_invoiced	BOOLEAN	true
+  vat_exclusive_item_price	NUMERIC	true
+  vat_exclusive_shipping_price	NUMERIC	true
+  vat_exclusive_giftwrap_price	NUMERIC	true
+  extras	JSONB	true
+indexes:
+  - name: "amzreport_ALL_ORDERS__merchant_id__marketplace_id__localdate"
+    columns:
+      - "merchant_id"
+      - "marketplace_id"
+      - "localdate"
+    using: "BTREE"

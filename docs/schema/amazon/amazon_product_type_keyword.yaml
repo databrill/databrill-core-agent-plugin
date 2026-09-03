@@ -1,0 +1,17 @@
+name: "amazon_product_type_keyword"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "Amazon's mapping from an item-type keyword to the product types it belongs to, one row per (marketplace_code, item_type_keyword, product_type). Built by looking up each distinct item-type keyword in amazon_browse_node_query. Marketplace reference data, not client data."
+primaryKey:
+  - "marketplace_code"
+  - "item_type_keyword"
+  - "product_type"
+columns: |
+  name	type	nullable
+  marketplace_code	TEXT
+  item_type_keyword	TEXT
+  product_type	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  deleted_at	TIMESTAMPTZ	true

@@ -1,0 +1,22 @@
+name: "amzfact_ledger_build"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "What one ledger write covered and what it could not place, one row per (merchantId, dateFirst, dateLast). Not a gating table: no status, no READY check. It records the three things a run encountered that produced no transaction and no posting."
+primaryKey:
+  - "merchantId"
+  - "dateFirst"
+  - "dateLast"
+columns: |
+  name	type	check	description
+  merchantId	TEXT		Amazon sellingPartnerId this write covered, across every marketplace
+  dateFirst	DATE		First marketplace-local bookedDate the write covered, YYYY-MM-DD
+  dateLast	DATE		Last marketplace-local bookedDate the write covered, YYYY-MM-DD
+  projectionVersion	INTEGER	"projectionVersion" > 0	Compiled projection version that wrote it; matches the transaction rows
+  writtenAt	TIMESTAMPTZ		When this write completed
+  transactionsWritten	INTEGER	"transactionsWritten" >= 0
+  postingsWritten	INTEGER	"postingsWritten" >= 0
+  transactionsSuperseded	INTEGER	"transactionsSuperseded" >= 0	Rows deleted because the source named them superseded by a released emission
+  unmapped	JSONB		Breakdown paths no placement covers. Their money IS booked, into Equity:…:Imbalance; this records which path caused it, which the imbalance posting's empty path cannot say.
+  excludedTypes	JSONB		Transaction types in the source but outside the allow-list, with their money: the standing explanation for Assets:…:Clearing drift
+  attributionHolds	JSONB		Orders the SKU join refused to resolve. The money is booked in full; only the SKU dimension is withheld.

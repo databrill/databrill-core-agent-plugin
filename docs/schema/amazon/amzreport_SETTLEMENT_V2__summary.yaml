@@ -1,0 +1,19 @@
+name: "amzreport_SETTLEMENT_V2__summary"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "One row per V2 settlement (GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_V2): the settlement period, deposit date and total amount, taken from the report's summary row. The individual transactions are in amzreport_SETTLEMENT_V2."
+primaryKey:
+  - "merchant_id"
+  - "settlement_id"
+columns: |
+  name	type
+  merchant_id	TEXT
+  settlement_id	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  settlement_start_date	TIMESTAMPTZ
+  settlement_end_date	TIMESTAMPTZ
+  deposit_date	TIMESTAMPTZ
+  total_amount	NUMERIC
+  currency	TEXT

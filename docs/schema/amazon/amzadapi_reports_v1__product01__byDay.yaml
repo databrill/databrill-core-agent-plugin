@@ -1,0 +1,81 @@
+name: "amzadapi_reports_v1__product01__byDay"
+kind: "table"
+access: "read"
+category: "Amazon Ads API"
+description: "Daily Amazon Ads product-attribution report: one row per day, ad entity and converted-product dimension, showing which advertised products led to purchases of which converted products. Promoted metrics count the advertised product itself; halo metrics count other products bought after the ad."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "date"
+  - "adProduct"
+  - "campaignId"
+  - "adGroupId"
+  - "adId"
+  - "advertisedProductId"
+  - "advertisedProductSku"
+  - "convertedProductId"
+  - "convertedProductMarketplace"
+  - "productRelevance"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  date	DATE
+  adProduct	TEXT
+  campaignId	TEXT
+  adGroupId	TEXT
+  adId	TEXT
+  advertisedProductId	TEXT
+  advertisedProductSku	TEXT
+  convertedProductId	TEXT
+  convertedProductMarketplace	TEXT
+  productRelevance	TEXT
+  campaignCountry	TEXT
+  budgetCurrency	TEXT
+  convertedProductParentProductId	TEXT
+  purchases	INTEGER
+  purchasesFromClicks	INTEGER
+  purchasesFromViews	INTEGER
+  purchasesPromoted	INTEGER
+  purchasesFromClicksPromoted	INTEGER
+  purchasesFromViewsPromoted	INTEGER
+  purchasesHalo	INTEGER
+  purchasesFromClicksHalo	INTEGER
+  purchasesFromViewsHalo	INTEGER
+  sales	NUMERIC
+  salesFromClicks	NUMERIC
+  salesFromViews	NUMERIC
+  salesPromoted	NUMERIC
+  salesFromClicksPromoted	NUMERIC
+  salesFromViewsPromoted	NUMERIC
+  salesHalo	NUMERIC
+  unitsSold	INTEGER
+  unitsSoldFromClicks	INTEGER
+  unitsSoldFromViews	INTEGER
+  unitsSoldPromoted	INTEGER
+  unitsSoldFromClicksPromoted	INTEGER
+  unitsSoldFromViewsPromoted	INTEGER
+  unitsSoldHalo	INTEGER
+  newToBrandPurchases	INTEGER
+  newToBrandPurchasesFromClicks	INTEGER
+  newToBrandPurchasesFromViews	INTEGER
+  newToBrandPurchasesPromoted	INTEGER
+  newToBrandPurchasesHalo	INTEGER
+  newToBrandSales	NUMERIC
+  newToBrandSalesPromoted	NUMERIC
+  newToBrandSalesHalo	NUMERIC
+  newToBrandUnitsSold	INTEGER
+  newToBrandUnitsSoldPromoted	INTEGER
+  newToBrandUnitsSoldHalo	INTEGER
+  detailPageViews	INTEGER
+  detailPageViewsFromClicks	INTEGER
+  detailPageViewsFromViews	INTEGER
+  detailPageViewsPromoted	INTEGER
+  detailPageViewsHalo	INTEGER
+  addToCart	INTEGER
+  addToCartFromClicks	INTEGER
+  addToCartFromViews	INTEGER
+  addToCartPromoted	INTEGER
+  brandedSearches	INTEGER
+  brandedSearchesFromClicks	INTEGER
+  brandedSearchesFromViews	INTEGER

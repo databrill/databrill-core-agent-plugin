@@ -1,0 +1,62 @@
+name: "amazon_ads_campaign"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Merged live view of Amazon advertising campaigns: the periodic Export table (amzadapi_exports_v1__campaign) reconciled with the near-realtime Amazon Marketing Stream snapshot (amzms_v1__campaigns). `state` and `name` come from whichever side is fresher, so a console change shows within seconds of being made instead of waiting for the next Export. Delivery and serving fields are Export-only."
+columns: |
+  name	type	description
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  campaign_id	TEXT
+  ad_product	TEXT
+  state	TEXT	Fresher of Export/stream state (ENABLED/PAUSED)
+  name	TEXT	Fresher of Export/stream campaign name
+  delivery_status	TEXT	Export-only serving status
+  delivery_reasons	JSONB	Export-only delivery reasons (JSONB)
+  portfolio_id	TEXT
+  start_date	TEXT
+  end_date	TEXT
+  budget_caps	JSONB	Export budget caps (JSONB)
+  optimization	JSONB
+  targeting_settings	TEXT
+  tags	JSONB
+  cost_type	TEXT
+  is_multi_ad_groups_enabled	BOOLEAN
+  brand_entity_id	TEXT
+  creation_date_time	TIMESTAMPTZ
+  last_updated_date_time	TIMESTAMPTZ	Newest lastUpdatedDateTime across Export and stream
+  export_last_updated_date_time	TIMESTAMPTZ
+  stream_last_updated_date_time	TIMESTAMPTZ
+  stream_version	NUMERIC	Latest stream snapshot version (null: no stream row)
+definition: |
+  SELECT
+    COALESCE(e."merchantId", s."advertiser_id") AS merchant_id,
+    COALESCE(e."marketplaceId", s."marketplace_id") AS marketplace_id,
+    COALESCE(e."campaignId", s."campaignId") AS campaign_id,
+    COALESCE(e."adProduct", s."adProduct") AS ad_product,
+    CASE WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
+      THEN s."state" ELSE e."state" END AS state,
+    CASE WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
+      THEN s."name" ELSE e."name" END AS name,
+    e."deliveryStatus" AS delivery_status,
+    e."deliveryReasons" AS delivery_reasons,
+    e."portfolioId" AS portfolio_id,
+    e."startDate" AS start_date,
+    e."endDate" AS end_date,
+    e."budgetCaps" AS budget_caps,
+    e."optimization" AS optimization,
+    e."targetingSettings" AS targeting_settings,
+    e."tags" AS tags,
+    e."costType" AS cost_type,
+    e."isMultiAdGroupsEnabled" AS is_multi_ad_groups_enabled,
+    e."brandEntityId" AS brand_entity_id,
+    COALESCE(e."creationDateTime", s."creationDateTime") AS creation_date_time,
+    GREATEST(e."lastUpdatedDateTime", s."lastUpdatedDateTime") AS last_updated_date_time,
+    e."lastUpdatedDateTime" AS export_last_updated_date_time,
+    s."lastUpdatedDateTime" AS stream_last_updated_date_time,
+    s."version" AS stream_version
+  FROM "amzadapi_exports_v1__campaign" e
+  FULL OUTER JOIN "amzms_v1__campaigns" s
+    ON e."merchantId" = s."advertiser_id"
+    AND e."marketplaceId" = s."marketplace_id"
+    AND e."campaignId" = s."campaignId"

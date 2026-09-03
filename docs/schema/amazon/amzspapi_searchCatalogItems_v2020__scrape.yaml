@@ -1,0 +1,17 @@
+name: "amzspapi_searchCatalogItems_v2020__scrape"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "One completed SP-API searchCatalogItems scrape per (targetId, scrapeTime), recording the depth, page and item counts and the run's status. The ranked ASINs live in amzspapi_searchCatalogItems_v2020__rank under the same key."
+primaryKey:
+  - "targetId"
+  - "scrapeTime"
+columns: |
+  name	type	nullable	description
+  targetId	BIGINT		Signed BIGINT; the scrape unit this run belongs to (see __target)
+  scrapeTime	TIMESTAMPTZ		When this scrape ran (TIMESTAMPTZ); the second half of the PK
+  depthPages	INTEGER		Number of result pages requested for this scrape
+  pageCount	INTEGER		Number of result pages actually fetched
+  itemCount	INTEGER		Total number of ranked items recorded for this scrape
+  status	TEXT		Outcome of the scrape: always 'ok' — abandoned scrapes are header-less (engine rebuild)
+  error	TEXT	true	Reserved; always NULL now that only completed ('ok') scrapes write a header

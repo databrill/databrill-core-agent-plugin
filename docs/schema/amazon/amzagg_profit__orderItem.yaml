@@ -1,0 +1,49 @@
+name: "amzagg_profit__orderItem"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Materialized P&L order-item atom: one row per (merchantId, marketplaceId, kind, orderId, sku, sourceKey). A product total is a fold of these rows. Money is signed as it contributes to profit; gross profit, net profit, margin, ROI and unit price are derived at read time and deliberately not stored."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "kind"
+  - "orderId"
+  - "sku"
+  - "sourceKey"
+columns: |
+  name	type	nullable	check	description
+  merchantId	TEXT			Amazon Seller ID that owns the atom
+  marketplaceId	TEXT			Marketplace the atom is attributed to. On refund and adjustment rows this is an attribution, possibly the writer's single-marketplace context default, not a fact reported by the source.
+  kind	TEXT		"kind" IN ('sale', 'refund', 'adjustment')	Which atom this is, and therefore which date books it: sale | refund | adjustment
+  orderId	TEXT			Amazon order id; the empty string for an inventory-level reimbursement that names no order (Lost_Warehouse, Lost_Inbound, Damaged_Warehouse, Reimbursement_Reversal).
+  sku	TEXT			Seller SKU; the empty string where the event is not attributable to one
+  sourceKey	TEXT			Discriminator carrying the source aggregate's remaining GROUP BY columns, built with makeCompositeKey: empty on a sale; (dateBooked, currency) on a refund; (return:, dateBooked) or (reimb:, dateBooked, currency, reason) on an adjustment. It makes the primary key unique per source aggregate, not per real-world event.
+  currency	TEXT			ISO currency of every money column on the row. On refund and adjustment rows this is an attribution derived from the settlement summary, the reimbursement's currency_unit or the marketplace default, not necessarily a fact on the source row.
+  dateOrder	DATE	true		Marketplace-local date of the originating order, YYYY-MM-DD. Equal to dateBooked on a sale, carried from the originating order on a refund when it resolves, and null on an adjustment.
+  dateBooked	DATE			Marketplace-local date the row is booked on, YYYY-MM-DD. This is the period filter: order date for a sale, settlement posted date for a refund, return or approval date for an adjustment.
+  asin	TEXT	true		ASIN as reported by the source, or null when it is unknown
+  title	TEXT	true		Seller listing title, falling back to the catalog item name; null when neither is known
+  orderStatus	TEXT			Order status as reported (Shipped, Pending, ...); the empty string on every non-sale row
+  fulfillment	TEXT	true	"fulfillment" IN ('FBA', 'FBM')	Fulfilment channel normalized to FBA or FBM; null when the source does not report one
+  returned	BOOLEAN			True when the order and sku have a refund or a customer return on record on ANY date, not only within the projected period. Always true on a refund or return row, false on a reimbursement.
+  units	INTEGER			Units sold on this line; 0 on refund and adjustment rows
+  refundedUnits	INTEGER			Units refunded by this row; 0 on sale and adjustment rows. Refund settlement rows never carry a quantity, so this is estimated from the refunded principal over the original unit price and clamped into [1, ordered units] per grouped local day.
+  returnedUnits	INTEGER			Units physically returned by this row, all dispositions; non-zero only on a return row
+  sellableReturnUnits	INTEGER			Of returnedUnits, those that came back SELLABLE and are credited back to COGS
+  sales	DOUBLE PRECISION			Revenue: item + shipping + gift wrap, NET of the shipping promotion. Positive. Add back shipPromotionDiscount to get the gross-of-shipping-promotion definition the dashboard uses.
+  promo	DOUBLE PRECISION			Item promotion discount, negative. Excludes the shipping promotion.
+  shipPromotionDiscount	DOUBLE PRECISION			Shipping promotion, negative, already netted inside sales. Stored separately so both the exporter's split (shipping promotion nets revenue) and the dashboard's split (shipping promotion is a promotion) stay derivable from one projection.
+  refundCost	DOUBLE PRECISION			Net money movement of a refund event, signed and normally negative: returned principal and shipping, the commission Amazon gives back, and the refund commission it keeps.
+  reimbursements	DOUBLE PRECISION			FBA reimbursement money, signed: a reimbursement is positive, a reversal negative
+  amazonFees	DOUBLE PRECISION			Amazon order-item fees, negative. Settled from SETTLEMENT_V2 when a settlement has posted, otherwise forecast from the FBA fee preview; feesEstimated says which.
+  cogs	DOUBLE PRECISION			Landed cost of the units sold, negative; 0 when no UNIT_COGS attribute covers the sku
+  cogsCredit	DOUBLE PRECISION			Landed cost credited back, positive: sellable customer returns and units Amazon put back into stock instead of paying for. Without it every returned unit is charged to COGS and never recovered.
+  shipping	DOUBLE PRECISION			Seller-paid shipping (FBM), negative; not modelled yet, always 0
+  unitCogs	DOUBLE PRECISION	true		Resolved landed unit cost as of the projection's as-of date, or null when no UNIT_COGS attribute covers the sku. Not derivable from cogs, which is 0 on a zero-unit row.
+  feesEstimated	BOOLEAN			True when amazonFees is a fee-preview forecast rather than a settled amount. The row is retired and recomputed when the real event arrives, never on an age threshold.
+  promotionIds	TEXT	true		Promotion ids attached to the order line, comma-separated as Amazon reports them
+indexes:
+  - name: "amzagg_profit__orderItem__marketplaceId__dateBooked"
+    columns:
+      - "marketplaceId"
+      - "dateBooked"

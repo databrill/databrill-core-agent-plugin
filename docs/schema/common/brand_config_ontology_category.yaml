@@ -1,0 +1,15 @@
+name: "brand_config_ontology_category"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable ontology categories: one row per category, holding the authored property values in data and the inherited-and-resolved values in dataResolved."
+primaryKey:
+  - "category"
+columns: |
+  name	type	nullable	default
+  category	TEXT
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  description	TEXT	true
+  data	JSONB
+  dataResolved	JSONB		'{}'::jsonb

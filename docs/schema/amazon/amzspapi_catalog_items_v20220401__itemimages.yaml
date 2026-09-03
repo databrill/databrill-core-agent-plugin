@@ -1,0 +1,15 @@
+name: "amzspapi_catalog_items_v20220401__itemimages"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "The SP-API Catalog Items 2022-04-01 image set per (marketplace_code, asin), stored verbatim in images."
+primaryKey:
+  - "marketplace_code"
+  - "asin"
+columns: |
+  name	type
+  marketplace_code	TEXT
+  asin	TEXT
+  created_at	TIMESTAMPTZ
+  modified_at	TIMESTAMPTZ
+  images	JSONB

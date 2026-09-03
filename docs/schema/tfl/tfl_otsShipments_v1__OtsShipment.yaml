@@ -1,0 +1,26 @@
+name: "tfl_otsShipments_v1__OtsShipment"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "One The Fulfillment Lab (GFS) off-the-shelf shipment header per (connectorId, id), with its warehouse, status, category and reference identifiers. detailsFetchedAt is ours rather than GFS's: NULL means the detail fetch is still pending."
+primaryKey:
+  - "connectorId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this OTS shipment
+  id	INTEGER		`otsShipment.id`, GFS's own id. Unique
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
+  warehouseId	INTEGER		`otsShipment.warehouseId`; a small integer code, constant so far
+  warehouse	TEXT	true	`otsShipment.warehouse` (observed: Tampa). Note the name has no `Name` suffix here, unlike `warehouseName` elsewhere in this API — the payload field is spelled this way
+  statusId	INTEGER		`otsShipment.statusId`; a small integer code
+  status	TEXT	true	`otsShipment.status`; observed Canceled / Completed / Pulled. A vendor string, so NOT a Schema.Literal — a new status must not become a decode failure
+  categoryId	INTEGER		`otsShipment.categoryId`; a small integer code
+  category	TEXT	true	`otsShipment.category`; observed Disposal / Legacy / Outbound
+  hubspotTicketNumber	TEXT	true	`otsShipment.hubspotTicketNumber`; a free-text field that MEASURED holds non-numeric values such as "email" and the empty string, so it must not be parsed as a number
+  clientReferenceId	TEXT	true	`otsShipment.clientReferenceId`; merchant-supplied free text, frequently the empty string
+  gfsCreatedAt	TIMESTAMPTZ		SOURCE ZONE: UTC BY INFERENCE, NOT BY MEASUREMENT — parsed directly with no localisation. `otsShipment.createdAt` has no partner stamp to difference against, so its zone cannot be measured. The inference's basis: every `createdAt` measured anywhere in this API is UTC, and the same payload's `completedDate` carries an explicit Z on the detail route, so the serializer family is UTC and a wall-time reading has zero supporting instances. If wrong, the error is a bounded 4-5 hour shift recoverable from `doc`
+  completedDate	TIMESTAMPTZ	true	SOURCE ZONE: UTC, MEASURED — the detail route serialises an explicit `Z`, which the list route truncates. `otsShipment.completedDate`; null on an incomplete shipment
+  detailsFetchedAt	TIMESTAMPTZ	true	OURS, NOT GFS'S: when this shipment's detail route was successfully fetched and its items written. NULL means still pending. MUST be excluded from `updateColumns` on the header upsert, or the daily header refresh nulls it on any doc change and details are re-fetched forever. Stamped AFTER the child-item upsert succeeds, so a crash in between leaves it null and the next run retries
+  doc	JSONB		The full verbatim OTS shipment payload from the API; persisted as JSONB, including the raw `createdAt` string that makes the UTC inference above reversible. Typed `Unknown` because no vendored API type exists to pin a struct against

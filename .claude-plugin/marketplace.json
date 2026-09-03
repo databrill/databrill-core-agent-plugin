@@ -1,15 +1,15 @@
 {
-  "name": "databrill",
-  "description": "Official Databrill plugins for client data exploration and reporting in Claude.",
-  "owner": {
-    "name": "Databrill"
-  },
-  "plugins": [
-    {
-      "name": "databrill-core",
-      "source": "./",
-      "description": "Explore Databrill data, answer commerce questions, and build reports with hosted MCP tools and read-only Deno helpers.",
-      "version": "0.5.0"
-    }
-  ]
+	"name": "databrill",
+	"description": "Official Databrill plugins for client data exploration and reporting in Claude.",
+	"owner": {
+		"name": "Databrill"
+	},
+	"plugins": [
+		{
+			"name": "databrill-core",
+			"source": "./",
+			"description": "Explore Databrill data, answer commerce questions, and build reports with hosted MCP tools and read-only Deno helpers.",
+			"version": "0.6.0"
+		}
+	]
 }

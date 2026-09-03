@@ -1,0 +1,31 @@
+name: "amazon_browse_node"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "Amazon browse-node (category) tree, one row per (marketplace_code, id), carrying the node's name, parent, materialized ancestor path and whether it has children."
+primaryKey:
+  - "marketplace_code"
+  - "id"
+columns: |
+  name	type	nullable
+  marketplace_code	TEXT
+  id	BIGINT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  deleted_at	TIMESTAMPTZ	true
+  name	TEXT
+  store_context_name	TEXT	true
+  parent_id	BIGINT	true
+  path	BIGINT[]
+  has_children	BOOLEAN
+indexes:
+  - name: "amazon_browse_node__marketplace_code__parent_id"
+    columns:
+      - "marketplace_code"
+      - "parent_id"
+  - name: "amazon_browse_node__updated_at"
+    columns:
+      - "updated_at"
+  - name: "amazon_browse_node__deleted_at"
+    columns:
+      - "deleted_at"

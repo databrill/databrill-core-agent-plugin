@@ -1,0 +1,18 @@
+name: "amzspstream_FEE_PROMOTION"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon FEE_PROMOTION notifications, one row per message, carrying the fee promotion type. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 = generateDeterministicUuidV7(eventTime, notificationId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification EventTime
+  merchantId	TEXT	Merchant id from FeePromotionNotification.MerchantId
+  marketplaceId	TEXT	Marketplace id from FeePromotionNotification.MarketplaceId
+  feePromotionType	TEXT	Fee promotion type from FeePromotionNotification.FeePromotionType
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API NotificationVersion from the envelope
+  payloadVersion	TEXT	SP-API PayloadVersion from the envelope
+  payload	JSONB	Unwrapped FeePromotionNotification with MerchantId/MarketplaceId/FeePromotionType stripped (JSONB)

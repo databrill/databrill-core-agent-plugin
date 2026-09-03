@@ -1,0 +1,18 @@
+name: "amzspapi_fbaInventory_v1__InventorySummary"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "Latest FBA inventory summary per (merchant, marketplace, seller SKU) from SP-API FBA Inventory v1, with the full summary — fulfillable, inbound, reserved, researching and unfulfillable quantities — in doc."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "sellerSku"
+columns: |
+  name	type	nullable
+  merchantId	TEXT
+  marketplaceId	TEXT
+  sellerSku	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  doc	JSONB
+  contentHash	TEXT	true

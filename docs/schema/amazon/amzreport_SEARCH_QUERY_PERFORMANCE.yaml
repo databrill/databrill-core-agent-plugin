@@ -1,0 +1,29 @@
+name: "amzreport_SEARCH_QUERY_PERFORMANCE"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Brand Analytics search query performance per (ASIN, search query, reporting period), from GET_BRAND_ANALYTICS_SEARCH_QUERY_PERFORMANCE_REPORT, with the query's score and volume and the impression, click, cart-add and purchase blocks."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "timeUnit"
+  - "dateFirst"
+  - "asin"
+  - "searchQuery"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  timeUnit	TEXT
+  dateFirst	DATE
+  dateLast	DATE
+  asin	TEXT
+  searchQuery	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  searchQueryScore	INTEGER
+  searchQueryVolume	INTEGER
+  impressionData	JSONB
+  clickData	JSONB
+  cartAddData	JSONB
+  purchaseData	JSONB

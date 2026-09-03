@@ -1,0 +1,20 @@
+name: "amzfact_sku_identity"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "What a seller SKU points at: one row per (merchant, seller SKU) carrying FNSKU, ASIN and condition. Not keyed by marketplace — identity does not vary by marketplace, as measured across every observed pair."
+primaryKey:
+  - "merchantId"
+  - "sku"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant (seller) id owning the SKU
+  sku	TEXT		The seller's own SKU, as the inventory response reported it. May not exist as a listing.
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  fnsku	TEXT	true	The pool this label points at; joins to amzfact_fnsku_fbaInventory.fnsku
+  asin	TEXT	true
+  condition	TEXT	true	Item condition as the seller described it
+  source	TEXT		Which writer last wrote this row. A literal union so a second source needs no DDL.
+  observedAtPoll	TIMESTAMPTZ	true	Instant the poll response reported this identity, not our write clock
+  contentHash	TEXT		Digest over (fnsku, asin, condition), used as the upsert's whereDistinct guard so an unchanged identity is not rewritten

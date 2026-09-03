@@ -1,0 +1,16 @@
+name: "brand_ontology_variant"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Read view of the customer-editable ontology variants (brand_config_ontology_variant), one row per merchant SKU, with the category it is assigned to. `data` is the RESOLVED property values, with the category's values already folded in; the values authored on the variant alone are not exposed here."
+columns: |
+  name	type
+  msku	TEXT
+  category	TEXT
+  data	JSONB
+definition: |
+  SELECT
+  	v."msku",
+  	v."category",
+  	v."dataResolved" AS "data"
+  FROM "brand_config_ontology_variant" v

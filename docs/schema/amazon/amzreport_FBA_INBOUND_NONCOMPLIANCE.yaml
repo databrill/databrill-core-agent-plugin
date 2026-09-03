@@ -1,0 +1,26 @@
+name: "amzreport_FBA_INBOUND_NONCOMPLIANCE"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Inbound shipment noncompliance events Amazon reports against a shipment: delivery delays, labelling issues, carton quantity mismatches and tracking problems. One row per (merchant_id, issue_reported_at, fba_shipment_id, index), the index disambiguating several issues reported for one shipment at the same instant. North American reports carry more columns than European and Australian ones; everything outside the key and the promoted queryable columns is kept in doc, and product name is not stored."
+primaryKey:
+  - "merchant_id"
+  - "issue_reported_at"
+  - "fba_shipment_id"
+  - "index"
+columns: |
+  name	type
+  merchant_id	TEXT
+  issue_reported_at	TIMESTAMPTZ
+  fba_shipment_id	TEXT
+  index	INTEGER
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  shipment_creation_date	DATE
+  fulfillment_center_id	TEXT
+  problem_type	TEXT
+  problem_level	TEXT
+  problem_quantity	INTEGER
+  coaching_level	TEXT
+  alert_status	TEXT
+  doc	JSONB

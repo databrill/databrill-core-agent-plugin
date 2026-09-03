@@ -1,0 +1,21 @@
+name: "amzspapi_catalog_items_v20220401__catalogitem"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "Core SP-API Catalog Items 2022-04-01 record per (marketplace_code, asin): dimensions, identifiers, thumbnail, product type, parent ASIN, variation theme and summaries."
+primaryKey:
+  - "marketplace_code"
+  - "asin"
+columns: |
+  name	type	nullable
+  marketplace_code	TEXT
+  asin	TEXT
+  created_at	TIMESTAMPTZ
+  modified_at	TIMESTAMPTZ
+  dimensions	JSONB	true
+  identifiers	JSONB	true
+  thumbnail	TEXT	true
+  product_type	TEXT	true
+  parent_asin	TEXT	true
+  variation_theme	JSONB	true
+  summaries	JSONB	true

@@ -36,17 +36,17 @@ The same columns also carry float noise — a clicks total can come back as
 There is no single convention. Snake_case belongs to the curated views and the
 rollup tables; camelCase belongs to the raw `amzreport_*` / `amzadapi_*` tables.
 
-| Relation | Date column | Store columns |
-| --- | --- | --- |
-| `amazon_sales_and_traffic` (view) | `date` | `merchant_id`, `marketplace_id` |
-| `amzreport_SALES_AND_TRAFFIC__skuByDay` | `date` | `merchantId`, `marketplaceId` |
-| `amazon_fba_inventory_summary` (view) | `last_updated_time` | `merchant_id`, `marketplace_id` |
-| `product_overview_ad_asin__day` | `date` | `merchant_id`, `marketplace_id` |
-| `amzadapi_reports_v1__search_asin_placement__byDay` | `date` | `merchantId`, `marketplaceId` |
-| `amzadapi_reports_v1__product01__byDay` | `date` | `merchantId`, `marketplaceId` |
-| `amzreport_SEARCH_QUERY_PERFORMANCE` | `dateFirst` / `dateLast` (no single date) | `merchantId`, `marketplaceId` |
-| `amazon_sales_rank__{cc}` | `time` (timestamptz) | none — one table per marketplace |
-| `brand_config_amazon_asin` / `brand_config_amazon_family` | none | none — catalogue config, not per store |
+| Relation                                                  | Date column                               | Store columns                          |
+| --------------------------------------------------------- | ----------------------------------------- | -------------------------------------- |
+| `amazon_sales_and_traffic` (view)                         | `date`                                    | `merchant_id`, `marketplace_id`        |
+| `amzreport_SALES_AND_TRAFFIC__skuByDay`                   | `date`                                    | `merchantId`, `marketplaceId`          |
+| `amazon_fba_inventory_summary` (view)                     | `last_updated_time`                       | `merchant_id`, `marketplace_id`        |
+| `product_overview_ad_asin__day`                           | `date`                                    | `merchant_id`, `marketplace_id`        |
+| `amzadapi_reports_v1__search_asin_placement__byDay`       | `date`                                    | `merchantId`, `marketplaceId`          |
+| `amzadapi_reports_v1__product01__byDay`                   | `date`                                    | `merchantId`, `marketplaceId`          |
+| `amzreport_SEARCH_QUERY_PERFORMANCE`                      | `dateFirst` / `dateLast` (no single date) | `merchantId`, `marketplaceId`          |
+| `amazon_sales_rank__{cc}`                                 | `time` (timestamptz)                      | none — one table per marketplace       |
+| `brand_config_amazon_asin` / `brand_config_amazon_family` | none                                      | none — catalogue config, not per store |
 
 Product keys vary too: `asin` in the ad and rank relations, `child_asin` /
 `parent_asin` in `amazon_sales_and_traffic`, `childAsin` / `parentAsin` in
@@ -105,11 +105,11 @@ count collapse into one row and real stock disappears.
 
 ## Which advertising table has which numbers
 
-| Relation | Has | Lacks |
-| --- | --- | --- |
-| `product_overview_ad_asin__day` | `ad_impressions`, `ad_clicks`, `ad_orders`, `ad_spend`, `ad_revenue` per ASIN per day | campaign, ad format, search term |
-| `amzadapi_reports_v1__search_asin_placement__byDay` | `impressions`, `clicks`, `totalCost`, `sales`, `adProduct`, `campaignId`, `target`, `searchTerm`, `placementClassification` | nothing relevant — but it is search-term grain, so aggregate before use |
-| `amzadapi_reports_v1__product01__byDay` | `adProduct`, purchases/sales/units incl. `*Halo*`, `detailPageViews`, `brandedSearches` | **impressions, clicks and cost** — efficiency cannot be computed from it |
+| Relation                                            | Has                                                                                                                         | Lacks                                                                    |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `product_overview_ad_asin__day`                     | `ad_impressions`, `ad_clicks`, `ad_orders`, `ad_spend`, `ad_revenue` per ASIN per day                                       | campaign, ad format, search term                                         |
+| `amzadapi_reports_v1__search_asin_placement__byDay` | `impressions`, `clicks`, `totalCost`, `sales`, `adProduct`, `campaignId`, `target`, `searchTerm`, `placementClassification` | nothing relevant — but it is search-term grain, so aggregate before use  |
+| `amzadapi_reports_v1__product01__byDay`             | `adProduct`, purchases/sales/units incl. `*Halo*`, `detailPageViews`, `brandedSearches`                                     | **impressions, clicks and cost** — efficiency cannot be computed from it |
 
 `amzadapi_reports_v1__product01__byDay` has 61 columns and a name that sounds
 like the advertising performance table. It is not. Reach for
@@ -132,8 +132,9 @@ treat `''` as "unclassified", not as a fifth ad format.
 ## Workspace-specific relations
 
 `product_overview_ad_asin__day` and other rollups (`custom_report_*`, `r26*_*`)
-are provisioned per workspace and are not in
-[the generated catalog](table-catalog.md), which only covers the relations
+are provisioned per workspace and are not in the declared schema (for Amazon,
+[`schema/amazon/index.tsv`](schema/amazon/index.tsv); the other groups are
+listed in [`schema/README.md`](schema/README.md)), which only covers the tables
 Databrill creates everywhere. Always `listTables` for the workspace you are
 actually querying rather than assuming either direction.
 

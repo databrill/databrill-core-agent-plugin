@@ -1,0 +1,26 @@
+name: "shopify_locations_v1__Location"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify Location per (shopId, id), where id is the location's legacyResourceId. Read as a whole set on every run with includeInactive and includeLegacy both true, so the levels table always has its parent; updatedAt marks which rows the latest successful refresh returned and older rows are deleted. Geography is promoted, the street address stays in doc."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	BIGINT		`Location.legacyResourceId`, the REST Admin API id that appears in the merchant's admin URLs; `UnsignedInt64!`. THE KEY, and the value `shopify_inventory_v1__InventoryLevel.locationId` refers to. The full GID is `gid://shopify/Location/<this>` and is not stored, because nothing here rebuilds one. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping AND the whole-set refresh marker: every row of a successful refresh carries that run's single instant, and rows older than it are deleted for this shop. Not a Shopify field
+  name	TEXT		`Location.name`; `String!`. A business label, not person data
+  isActive	BOOLEAN		`Location.isActive`; `Boolean!`. A deactivated location can still hold inventory levels, which is why the read passes `includeInactive: true` rather than relying on this column to explain a missing parent
+  fulfillsOnlineOrders	BOOLEAN		`Location.fulfillsOnlineOrders`; `Boolean!`
+  shipsInventory	BOOLEAN		`Location.shipsInventory`; `Boolean!`
+  hasActiveInventory	BOOLEAN		`Location.hasActiveInventory`; `Boolean!` — true on exactly the locations that carry inventory levels. A location where it is false returns no levels at all, so this column is the cheap answer to 'why does this location have no rows in the levels table'
+  isFulfillmentService	BOOLEAN		`Location.isFulfillmentService`; `Boolean!`. A fulfillment-service location is returned only with `includeLegacy: true`, and it can hold inventory levels
+  addressCity	TEXT	true	`Location.address.city`; nullable in the schema
+  addressProvinceCode	TEXT	true	`Location.address.provinceCode`; nullable in the schema
+  addressCountryCode	TEXT	true	`Location.address.countryCode`; nullable in the schema though usually filled. The other address lines — street, zip and phone — stay in `doc`
+  shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `Location.createdAt`; `DateTime!`. Prefixed `shopify` so it cannot be confused with our own `createdAt` bookkeeping column
+  shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `Location.updatedAt`; `DateTime!`. NOT a watermark — this family is a whole-set read and keeps no watermark
+  doc	JSONB		The validated Location node, persisted as JSONB — every field the pinned query selects, which is where the full address lives: street lines, province name, country name, zip and phone. NOT the raw response body: this family arrives as a decoded GraphQL page rather than as a JSONL line, so `doc` is the node after validation. Nothing the query returns is dropped on the way, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` because no vendored Shopify type exists

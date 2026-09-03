@@ -1,13 +1,31 @@
 {
-  "lock": false,
-  "tasks": {
-    "check": "deno check scripts/catalog.ts scripts/query.ts",
-    "test": "deno test scripts/query_test.ts",
-    "ok": "deno fmt --check . && deno task check && deno task test"
-  },
-  "fmt": {
-    "lineWidth": 120,
-    "proseWrap": "preserve",
-    "exclude": ["docs/table-catalog.md"]
-  }
+	"lock": false,
+	"tasks": {
+		"check": "deno check --quiet",
+		"ci": "deno task static:ci && deno task test",
+		"fmt:check": "deno fmt --check",
+		"fmt": "deno fmt",
+		"lint": "deno lint",
+		"static:ci": "deno --quiet task fmt:check && deno --quiet task check && deno --quiet task lint",
+		"static": "deno --quiet fmt && deno --quiet task check && deno --quiet task lint",
+		"test": "deno test scripts/query_test.ts"
+	},
+	"fmt": {
+		"useTabs": true,
+		"lineWidth": 120,
+		"indentWidth": 4,
+		"semiColons": true,
+		"singleQuote": false,
+		"proseWrap": "preserve",
+		"exclude": [
+			"docs/schema"
+		]
+	},
+	"lint": {
+		"rules": {
+			"tags": [
+				"recommended"
+			]
+		}
+	}
 }

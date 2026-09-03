@@ -1,0 +1,31 @@
+name: "amzreport_FBA_REIMBURSEMENTS"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Itemized FBA inventory reimbursements from GET_FBA_REIMBURSEMENTS_DATA, one row per (merchant, reimbursement, index), with the reason, amount and the quantities reimbursed in cash and in inventory. Reversal and clawback rows carry the original reimbursement id and type."
+primaryKey:
+  - "merchant_id"
+  - "reimbursement_id"
+  - "index"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  reimbursement_id	TEXT
+  index	INTEGER
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  marketplace_id	TEXT
+  approval_date	TIMESTAMPTZ	true
+  case_id	TEXT	true
+  amazon_order_id	TEXT	true
+  reason	TEXT	true
+  sku	TEXT	true
+  fnsku	TEXT	true
+  asin	TEXT	true
+  condition	TEXT	true
+  currency_unit	TEXT	true
+  amount_total	NUMERIC	true
+  quantity_reimbursed_cash	NUMERIC	true
+  quantity_reimbursed_inventory	NUMERIC	true
+  original_reimbursement_id	TEXT	true
+  original_reimbursement_type	TEXT	true

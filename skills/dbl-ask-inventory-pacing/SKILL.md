@@ -2,9 +2,9 @@
 name: dbl-ask-inventory-pacing
 description: Recommend how advertising should respond to inventory — pause, throttle, hold, or ramp spend based on each product's runway. Use when the user asks "should we pause ads before the stockout", "we're low on stock, what about ads", "should we cut spend to stretch inventory", "we restocked — ramp back up?", "how do we sell down overstock", "long-term storage fee risk", or wants an inventory-driven ad pacing decision.
 metadata:
-  type: question
-  audience: client
-  tool: inventoryPacing
+    type: question
+    audience: client
+    tool: inventoryPacing
 ---
 
 # How should ads respond to inventory?
@@ -58,10 +58,10 @@ out-of-stock child.
 The tool returns a category; clients always ask the follow-up. Get a number by
 comparing the period before a spend change with the period after:
 
-| | Before | After |
-| --- | --- | --- |
-| ad spend / day | $1.70 | $59.00 |
-| units / day | 3.0 | 6.9 |
+|                | Before | After  |
+| -------------- | ------ | ------ |
+| ad spend / day | $1.70  | $59.00 |
+| units / day    | 3.0    | 6.9    |
 
 $57.30 of extra daily spend bought 3.9 extra units/day → about $14.70 per extra
 unit, against a $33 selling price. Then solve backwards for the target:
@@ -95,6 +95,9 @@ observed — don't extrapolate to zero or past the maximum seen.
 - When a tool's output is too large to return inline it is written to a file
   instead. Don't re-run with narrower parameters as a first move — `grep` that
   file for the family or ASIN you care about.
+- For the declared columns and types of the tables named here, or of any other
+  Amazon table, read `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and
+  then that table's `.yaml` beside it.
 
 ## Follow-ups
 

@@ -2,9 +2,9 @@
 name: dbl-metrics-amazon-inventory
 description: Report how many units of Amazon FBA stock a store holds right now — on-hand, fulfillable, inbound, reserved, unfulfillable — by ASIN, FNSKU, or seller SKU. Use when the user asks how much Amazon inventory they have, what is in stock, what is inbound, how much is unsellable or damaged, or wants an FBA stock list for one marketplace. Do not use for The Fulfillment Lab stock, and do not use for an ads pacing decision.
 metadata:
-  type: metric
-  audience: client
-  tool: executeSql
+    type: metric
+    audience: client
+    tool: executeSql
 ---
 
 # How much Amazon FBA stock is there?
@@ -16,10 +16,10 @@ other table for a units total.
 ## Use `amzfact_fnsku_fbaInventory`, not the raw summary table
 
 `amzfact_fnsku_fbaInventory` holds one row per
-`(merchantId, marketplaceId, fnsku)` — one row per *physical pool*.
+`(merchantId, marketplaceId, fnsku)` — one row per _physical pool_.
 
 `amzspapi_fbaInventory_v1__InventorySummary` and the
-`amazon_fba_inventory_summary` view are keyed by *seller SKU*. A commingled pool
+`amazon_fba_inventory_summary` view are keyed by _seller SKU_. A commingled pool
 is repeated once per seller SKU pointing at it, each repetition carrying the
 same quantities, so summing them counts the same physical units several times.
 Measured on a live US store on 2026-08-25: 171,115 units per seller SKU against
@@ -43,7 +43,7 @@ report per-marketplace figures instead. Do not sum them into one number.
 by several days, and most workspaces do not have those tables at all. Do not
 reach for them without the operator's direction.)
 
-Summing across *merchants* within one marketplace is fine: different merchants
+Summing across _merchants_ within one marketplace is fine: different merchants
 own different physical units.
 
 Common marketplace ids: US `ATVPDKIKX0DER`, CA `A2EUQ1WTGCTBG2`,
@@ -72,6 +72,10 @@ write clock. Report `MAX("observedAtPoll")` alongside any total.
 
 A pool that has gone to zero keeps its row, so filter
 `COALESCE("totalQuantity",0) > 0` for a "what do we hold" list.
+
+For the declared columns and types of any Amazon table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's
+`.yaml` beside it.
 
 ## Query shapes
 

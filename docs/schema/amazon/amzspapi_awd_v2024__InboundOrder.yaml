@@ -1,0 +1,18 @@
+name: "amzspapi_awd_v2024__InboundOrder"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "An AWD inbound order — the supplier-to-AWD leg — one row per (merchantId, orderId). Fetched once when the order is first seen and never refetched, because packagesToInbound is static packaging configuration; it is the only source of units-per-case and of the SKU-to-ASIN mapping for this leg."
+primaryKey:
+  - "merchantId"
+  - "orderId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT
+  orderId	TEXT		AWD inbound order ID (STAR- prefix)
+  orderStatus	TEXT		InboundStatus from the API; observed CONFIRMED/CLOSED/CANCELLED
+  externalReferenceId	TEXT	true
+  originAddress	JSONB	true
+  packagesToInbound	JSONB		DistributionPackageQuantity[]; source of unitsPerCase and SKU→ASIN mapping; JSONB
+  orderCreatedAt	TIMESTAMPTZ	true
+  lastFetchedAt	TIMESTAMPTZ		When getInbound succeeded for this order

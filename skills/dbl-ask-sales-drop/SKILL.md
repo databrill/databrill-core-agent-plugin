@@ -2,9 +2,9 @@
 name: dbl-ask-sales-drop
 description: Diagnose why a store's sales dropped — decompose the change into traffic, conversion, and price, and flag ad-channel and ad-efficiency causes. Use when the user asks "why did sales drop / fall / decline", "sales are down", "revenue dropped", "why did orders fall", "what happened to sales (week-over-week)", or wants a sales-decrease diagnosis for a marketplace.
 metadata:
-  type: question
-  audience: client
-  tool: salesDropDiagnosis
+    type: question
+    audience: client
+    tool: salesDropDiagnosis
 ---
 
 # Why did sales drop?
@@ -55,6 +55,10 @@ efficiency from a single cause that has nothing to do with demand. Check
 `buy_box_percentage` in `amazon_sales_and_traffic`, before assigning any other
 cause. If stock is at or near zero, say so and hand off to
 `dbl-ask-inventory-pacing`.
+
+For the declared columns and types of those tables, or of any other Amazon
+table, read `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that
+table's `.yaml` beside it.
 
 ## "The store looks fine" is usually not the answer
 

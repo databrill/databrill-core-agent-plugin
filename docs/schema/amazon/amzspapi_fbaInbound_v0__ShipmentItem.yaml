@@ -1,0 +1,19 @@
+name: "amzspapi_fbaInbound_v0__ShipmentItem"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "One item line on an FBA inbound shipment as reported by the older FBA Inbound API, one row per (merchantId, shipmentId, msku). This is the only Amazon source of per-item received quantity — the newer API exposes no such field — so it is the companion of amzspapi_fbaInbound_v2024__ShipmentItem when verifying what a shipment received. shipmentId here is the FBA-format confirmation id, the join key to amzspapi_fbaInbound_v2024__Shipment. Treat quantityReceived as a receipt counter and not as a located-in-full verdict: it can fall after a shipment closes."
+primaryKey:
+  - "merchantId"
+  - "shipmentId"
+  - "msku"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT
+  shipmentId	TEXT		FBA-format shipment confirmation id (v0 ShipmentId == v2024 shipmentConfirmationId)
+  msku	TEXT		Seller SKU (v0 SellerSKU); one row per SKU per shipment
+  fnsku	TEXT	true
+  quantityShipped	INTEGER		Units the seller declared shipped (v0 QuantityShipped)
+  quantityReceived	INTEGER	true
+  quantityInCase	INTEGER	true
+  lastFetchedAt	TIMESTAMPTZ		When the walker last wrote this row; the API does not expose its own last-updated timestamp

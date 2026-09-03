@@ -2,9 +2,9 @@
 name: dbl-metrics-sqp
 description: Analyze Search Query Performance — our impressions/clicks/purchases vs the whole-market totals (impression/click/purchase share), and the top search queries. Use when the user asks about SQP, search query performance, impression share, click share, market share on keywords, or which search terms drive the category.
 metadata:
-  type: metrics
-  audience: client
-  tool: loadSqp
+    type: metrics
+    audience: client
+    tool: loadSqp
 ---
 
 # Search Query Performance (our vs market)
@@ -71,3 +71,7 @@ Source: `amzreport_SEARCH_QUERY_PERFORMANCE` (`impressionData`, `clickData`,
 `asin`, `searchQuery`, `dateFirst`, `dateLast`, `searchQueryVolume`). Queries
 must filter `merchantId`, `marketplaceId`, `timeUnit` and a bounded `dateFirst`
 range together or they time out — the index leads with `merchantId`.
+
+For the declared columns and types of any Amazon table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's
+`.yaml` beside it.

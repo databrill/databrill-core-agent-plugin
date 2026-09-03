@@ -1,13 +1,13 @@
 {
-  "version": 1,
-  "workspaces": {
-    "100000001": {
-      "label": "Example workspace",
-      "database": {
-        "postgresUrl": "${EXAMPLE_POSTGRES_URL}",
-        "schema": "w100000001"
-      },
-      "merchants": {}
-    }
-  }
+	"version": 1,
+	"workspaces": {
+		"100000001": {
+			"label": "Example workspace",
+			"database": {
+				"postgresUrl": "${EXAMPLE_POSTGRES_URL}",
+				"schema": "w100000001"
+			},
+			"merchants": {}
+		}
+	}
 }

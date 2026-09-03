@@ -1,0 +1,24 @@
+name: "shopify_products_v1__Product"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify Product per (shopId, id), where id is the product's legacyResourceId. Refreshed as a whole set from an Admin GraphQL bulk operation; `updatedAt` is both our bookkeeping stamp and the marker that identifies rows the latest successful refresh did not return."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		THE STORE THIS ROW CAME FROM: the Shopify shop id, i.e. the decimal tail of `gid://shopify/Shop/<digits>`, which is also the key of the Databrill connector that fetched it. It is Shopify's permanent identifier for the store: the merchant can read it off their own admin URLs, and it survives a `myshopify.com` domain change, an ownership transfer, and the connector being removed and re-registered. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	BIGINT		`Product.legacyResourceId`, the REST Admin API id that appears in the merchant's admin URLs; `UnsignedInt64!` on the pinned API version. THE KEY: the full GID is `gid://shopify/Product/<this>` and is not stored, because nothing here rebuilds one. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping AND the whole-set refresh marker: every row of a successful refresh carries that run's single instant, and rows older than it are deleted for this shop. Not a Shopify field
+  title	TEXT		`Product.title`; `String!`
+  handle	TEXT		`Product.handle`, the storefront URL slug; `String!`
+  status	TEXT		`Product.status`; `ProductStatus!`. Schema.String and NOT Schema.Literal on purpose: Shopify may add an enum member in any quarterly version, and a Literal turns that into an ingest failure on a row we could otherwise have stored (the same call `tfl_orders_v1__Order` made for `financialStatus`)
+  vendor	TEXT		`Product.vendor`; `String!`
+  productType	TEXT		`Product.productType`; `String!`
+  shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `Product.createdAt`; `DateTime!` (RFC 3339 UTC). Prefixed `shopify` so it cannot be confused with our own `createdAt` bookkeeping column
+  shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `Product.updatedAt`; `DateTime!`. Prefixed `shopify` for the same reason as `shopifyCreatedAt`. NOT a watermark — this family is a whole-set refresh and reads every product every run
+  shopifyPublishedAt	TIMESTAMPTZ	true	SOURCE instant: `Product.publishedAt`; `DateTime` (nullable in the schema) — null on an unpublished product
+  totalInventory	INTEGER		`Product.totalInventory`; `Int!`
+  doc	JSONB		The verbatim validated Product node from the bulk JSONL, persisted as JSONB. Holds `tags` and anything else the pinned query returns but does not promote, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` rather than a struct because no vendored Shopify type exists to pin a struct against

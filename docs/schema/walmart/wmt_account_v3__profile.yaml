@@ -1,0 +1,17 @@
+name: "wmt_account_v3__profile"
+kind: "table"
+access: "read"
+category: "Walmart"
+description: "The Walmart seller's business identity — legal name, business registration number and country of incorporation — one row per connector."
+primaryKey:
+  - "connectorId"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		OURS, not from the payload: the Databrill connector id of the Walmart connector whose entity-match profile this is; the key that scopes this row to its connector (a globally unique UUIDv7, one per workspace, so no workspace column is needed in the primary key)
+  name	TEXT	true
+  businessRegistrationNumber	TEXT	true
+  countryOfIncorporation	TEXT	true
+  doc	JSONB		The verbatim entitymatchprofile response body (the `body` wrapper plus `status`). Persisted as JSONB; typed `Unknown` because Walmart publishes no API specification, so there is no generated type to assert the shape against
+  time	TIMESTAMPTZ		OURS, not from the payload: the time this profile was fetched from Walmart
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ

@@ -1,0 +1,19 @@
+name: "amzspstream_PRICING_HEALTH"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon PRICING_HEALTH notifications, one row per message, carrying the issue type and affected ASIN. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 = generateDeterministicUuidV7(eventTime, notificationId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification EventTime
+  merchantId	TEXT	Seller id from payload.sellerId
+  issueType	TEXT	Pricing health issue type from payload.issueType
+  marketplaceId	TEXT	Marketplace id from payload.offerChangeTrigger.marketplaceId
+  asin	TEXT	ASIN from payload.offerChangeTrigger.asin
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API NotificationVersion from the envelope
+  payloadVersion	TEXT	SP-API PayloadVersion from the envelope
+  payload	JSONB	Unwrapped payload with sellerId/issueType stripped (JSONB)

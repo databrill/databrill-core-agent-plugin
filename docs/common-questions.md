@@ -78,8 +78,7 @@ impression, click, and purchase share. A large market with weak impression share
 is an acquisition opportunity; strong clicks with weak purchases suggests a
 conversion or offer problem — check our median price against the market's median
 price for that term before saying so. Work at family level; per-ASIN purchase
-counts are too small to interpret. If you drop to SQL, read [Search Query
-Performance data shape](sqp-data-shape.md) first: the market totals repeat
+counts are too small to interpret. If you drop to SQL, read [Search Query Performance data shape](sqp-data-shape.md) first: the market totals repeat
 across our ASIN rows, and `totalClickRate` is not a click-through rate.
 
 Question: Is organic rank improving?
@@ -222,8 +221,10 @@ Database path: inspect `wmt_orders_v3__Order`, `wmt_orders_v3__OrderLine`, and
 1. Read [What data the MCP returns](data-coverage.md).
 2. Run `listTables` for the selected workspace (or `scripts/catalog.ts` with a
    direct credential).
-3. Find candidate relations in [the complete catalog](table-catalog.md), keeping
-   in mind that a workspace may also hold rollups the catalog does not list.
+3. Find candidate tables in the [declared schema](schema/README.md): open the
+   group's `index.tsv` for the channel in question, then the YAML of the tables
+   you pick — keeping in mind that a workspace may also hold rollups the
+   declared schema does not list.
 4. Inspect exact live column names and types with `describeTable`; never guess.
    [SQL quick reference](sql-reference.md) has the ones that differ per relation.
 5. Write one bounded, read-only query with double-quoted identifiers and

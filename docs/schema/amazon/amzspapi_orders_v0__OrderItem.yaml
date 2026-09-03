@@ -1,0 +1,25 @@
+name: "amzspapi_orders_v0__OrderItem"
+kind: "table"
+access: "read"
+category: "Amazon orders"
+description: "One SP-API Orders v0 order line per (merchantId, marketplaceId, orderItemKey), with the full item document in doc. orderKey joins to amzspapi_orders_v0__Order."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "orderItemKey"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  orderItemKey	TEXT
+  orderKey	TEXT
+  orderItemId	TEXT
+  time	TIMESTAMPTZ
+  doc	JSONB
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+indexes:
+  - name: "amzspapi_orders_v0__OrderItem__orderKey__orderItemId"
+    columns:
+      - "orderKey"
+      - "orderItemId"

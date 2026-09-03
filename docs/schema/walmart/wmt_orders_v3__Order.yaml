@@ -1,0 +1,22 @@
+name: "wmt_orders_v3__Order"
+kind: "table"
+access: "read"
+category: "Walmart"
+description: "One Walmart Marketplace order header per (connectorId, purchaseOrderId), with the full payload in doc. There is deliberately no status column: Walmart reports status only per line, on wmt_orders_v3__OrderLine."
+primaryKey:
+  - "connectorId"
+  - "purchaseOrderId"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of the Walmart connector that fetched this order
+  purchaseOrderId	TEXT		Walmart's purchase order identifier; `order.purchaseOrderId`
+  customerOrderId	TEXT	true
+  customerEmailId	TEXT	true
+  time	TIMESTAMPTZ		The order's orderDate; `order.orderDate`, which arrives as EPOCH MILLISECONDS (inventory's dates are ISO 8601 strings — the two families are opposite). No PST/PDT conversion is applied or needed
+  estimatedDeliveryDate	TIMESTAMPTZ	true
+  estimatedShipDate	TIMESTAMPTZ	true
+  shipNodeType	TEXT	true
+  shippingInfo	JSONB	true
+  doc	JSONB		The full verbatim order payload from the API; persisted as JSONB. Typed `Unknown` rather than a struct because no vendored API type exists to pin a struct against, and because the payload's undeclared extras are exactly what this column exists to retain
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ

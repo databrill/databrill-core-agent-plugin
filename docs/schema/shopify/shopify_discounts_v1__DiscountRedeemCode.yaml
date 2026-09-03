@@ -1,0 +1,18 @@
+name: "shopify_discounts_v1__DiscountRedeemCode"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify DiscountRedeemCode per (shopId, id) — a redeemable code belonging to one discount. A child of shopify_discounts_v1__Discount via discountGid, refreshed as a whole set on every run; fetchedAt marks which rows the latest successful run returned and older rows are deleted before their parents."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	description
+  shopId	BIGINT	The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	TEXT	Full Shopify `DiscountRedeemCode` GID, e.g. `gid://shopify/DiscountRedeemCode/<n>`. Distinct on every row
+  discountGid	TEXT	The owning discount's GID, from the bulk JSONL's `__parentId`; always a `DiscountCodeNode` GID, because the four members that declare a `codes` connection are exactly the four code members. Refers to `shopify_discounts_v1__Discount.id`; no declared foreign key
+  createdAt	TIMESTAMPTZ	OUR row bookkeeping: when this row was first written. Not a Shopify field
+  fetchedAt	TIMESTAMPTZ	OUR row bookkeeping AND the whole-set refresh marker, as on the parent table: every row of a successful run carries that run's single instant whether or not any value changed, and rows older than it are deleted for this shop. Not a Shopify field
+  code	TEXT	`DiscountRedeemCode.code`; `String!`. The string a shopper types at checkout, and the value that joins to an order's discount codes. NOT the primary key — nothing says a retired code string cannot be reused on a later discount
+  asyncUsageCount	INTEGER	`DiscountRedeemCode.asyncUsageCount`; `Int!`. Redemptions of THIS code, counted asynchronously. It is a per-code breakdown of the parent's own `asyncUsageCount`, and the two are equal only when a discount has exactly one code
+  doc	JSONB	The verbatim validated DiscountRedeemCode node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no vendored Shopify type exists

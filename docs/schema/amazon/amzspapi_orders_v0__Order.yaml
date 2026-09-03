@@ -1,0 +1,23 @@
+name: "amzspapi_orders_v0__Order"
+kind: "table"
+access: "read"
+category: "Amazon orders"
+description: "One SP-API Orders v0 order per (merchantId, marketplaceId, orderKey), with the full order document in doc. Amazon's own order number is in amazonOrderId, which is indexed for lookup."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "orderKey"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  orderKey	TEXT
+  amazonOrderId	TEXT
+  time	TIMESTAMPTZ
+  doc	JSONB
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+indexes:
+  - name: "amzspapi_orders_v0__Order__amazonOrderId"
+    columns:
+      - "amazonOrderId"

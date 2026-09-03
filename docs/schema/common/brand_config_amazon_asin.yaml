@@ -1,0 +1,36 @@
+name: "brand_config_amazon_asin"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable per-ASIN configuration: the ontology variant and product family an ASIN belongs to, its display labels with optional per-country overrides, and a description."
+primaryKey:
+  - "asin"
+columns: |
+  name	type	nullable	default
+  asin	TEXT
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  msku	TEXT	true
+  family	TEXT	true
+  countryToFamily	JSONB	true
+  labelInFamily	TEXT	true
+  countryToLabelInFamily	JSONB	true
+  labelStandalone	TEXT	true
+  description	TEXT	true
+foreignKeys:
+  - columns:
+      - "msku"
+    references:
+      table: "brand_config_ontology_variant"
+      columns:
+        - "msku"
+    onDelete: "RESTRICT"
+    onUpdate: "CASCADE"
+  - columns:
+      - "family"
+    references:
+      table: "brand_config_amazon_family"
+      columns:
+        - "family"
+    onDelete: "RESTRICT"
+    onUpdate: "CASCADE"

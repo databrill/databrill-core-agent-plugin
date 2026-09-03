@@ -1,0 +1,14 @@
+name: "amzfact_ledger_item"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "A ledger transaction's per-SKU dimension: SKU, ASIN and units, one row per (transactionId, sku). Carries no money and is not derivable from the postings — units appear on no posting, and a free replacement's SKU appears in no posting at all."
+primaryKey:
+  - "transactionId"
+  - "sku"
+columns: |
+  name	type	nullable	description
+  transactionId	TEXT		The amzfact_ledger_transaction this item belongs to
+  sku	TEXT		Seller SKU, or the empty string where the document's money is not attributable to one. Read back as null; no real SKU is the empty string.
+  asin	TEXT	true	ASIN as the source reported it, or null when unknown
+  units	INTEGER		quantityShipped summed over the document's items sharing this SKU. Zero on an itemless document. Carried nowhere else: no posting has a unit count.

@@ -1,0 +1,19 @@
+name: "amazon_browse_node_query"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "Amazon's browse tree guide query for a browse node, one row per (marketplace_code, node_id): the query string as published, the same query parsed into a map of field name to values, and the item-type keywords hoisted out of it — which are the input to the product-type lookup in amazon_product_type_keyword. version records the guide worksheet the row came from. Marketplace reference data, not client data."
+primaryKey:
+  - "marketplace_code"
+  - "node_id"
+columns: |
+  name	type	nullable
+  marketplace_code	TEXT
+  node_id	BIGINT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  deleted_at	TIMESTAMPTZ	true
+  version	TEXT	true
+  query	TEXT
+  data	JSONB	true
+  item_type_keywords	TEXT[]	true

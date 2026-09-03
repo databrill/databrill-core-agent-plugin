@@ -55,12 +55,12 @@ Use `a."family"` alone when you only need the key; join
 better-named objects, and they are frequently empty while the `brand_config_*`
 tables underneath are fully populated. In a verified workspace:
 
-| Relation | Rows |
-| --- | --- |
-| `brand_config_amazon_asin` | 2,295 |
-| `brand_config_amazon_family` | 155 |
-| `brand_ontology_amazon_asin` | 0 |
-| `brand_ontology_amazon_family` | 0 |
+| Relation                       | Rows  |
+| ------------------------------ | ----- |
+| `brand_config_amazon_asin`     | 2,295 |
+| `brand_config_amazon_family`   | 155   |
+| `brand_ontology_amazon_asin`   | 0     |
+| `brand_ontology_amazon_family` | 0     |
 
 The cause is in the view definitions, not the data.
 `brand_ontology_amazon_family` inner-joins `brand_config_ontology_category`, and

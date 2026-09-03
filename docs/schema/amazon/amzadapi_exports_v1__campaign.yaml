@@ -1,0 +1,31 @@
+name: "amzadapi_exports_v1__campaign"
+kind: "table"
+access: "read"
+category: "Amazon Ads API"
+description: "One advertising campaign per (merchant, marketplace, campaign id) from the Amazon Ads API exports endpoint, with its ad product, state, flight dates, budget caps, targeting settings and delivery status."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "campaignId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant ID
+  marketplaceId	TEXT		Amazon marketplace ID
+  campaignId	TEXT		Amazon advertising campaign ID
+  creationDateTime	TIMESTAMPTZ		Campaign creation timestamp from Amazon
+  lastUpdatedDateTime	TIMESTAMPTZ		Campaign last updated timestamp from Amazon
+  adProduct	TEXT		Ad product type: SPONSORED_DISPLAY, SPONSORED_BRANDS, SPONSORED_PRODUCTS
+  name	TEXT		Campaign name
+  startDate	DATE		Campaign start date (YYYY-MM-DD format)
+  state	TEXT		Campaign state: PAUSED, ENABLED
+  deliveryStatus	TEXT		Delivery status: NOT_DELIVERING, DELIVERING
+  budgetCaps	JSONB		Budget caps configuration (JSONB)
+  optimization	JSONB	true	Optimization settings: bidStrategy, goalSetting, autoPlacementBidAdjustments (JSONB)
+  targetingSettings	TEXT	true	Targeting settings: T00030, T00020, AUTO
+  deliveryReasons	JSONB	true	Delivery reasons array (e.g., CAMPAIGN_PAUSED) (JSONB)
+  tags	JSONB	true	Campaign tags array (JSONB)
+  portfolioId	TEXT	true	Portfolio ID
+  endDate	DATE	true	Campaign end date (YYYY-MM-DD format)
+  costType	TEXT	true	Cost type: CPC
+  isMultiAdGroupsEnabled	BOOLEAN	true	Whether multi ad groups is enabled
+  brandEntityId	TEXT	true	Brand entity ID

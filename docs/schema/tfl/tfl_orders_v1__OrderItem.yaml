@@ -1,0 +1,22 @@
+name: "tfl_orders_v1__OrderItem"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "One line of a The Fulfillment Lab (GFS) order, keyed (connectorId, id), joining to tfl_orders_v1__Order by orderId. Lines are populated only by the order detail route — the list route returns none. Upserts never delete, so a line cancelled at GFS lingers and a naive SUM over an order's items can exceed the order."
+primaryKey:
+  - "connectorId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this order item
+  id	INTEGER		`items[].id`, the line's own GFS id. Unique across orders
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
+  orderId	INTEGER		`items[].orderId`, joining to `tfl_orders_v1__Order.id`. No foreign key is declared, matching the wmt_* target-table precedent
+  sku	TEXT	true	`items[].sku`, joining to `tfl_products_v1__Sku.sku` by convention
+  name	TEXT	true	`items[].name`; the product name as the cart supplied it
+  quantity	INTEGER		`items[].quantity`; MEASURED integral
+  retailValue	DOUBLE PRECISION		`items[].retailValue`, the line's retail amount. MEASURED NON-INTEGRAL, so Schema.Int would truncate it. Stored DOUBLE PRECISION rather than NUMERIC: the repo's position is that money-adjacent analytics values take DOUBLE PRECISION, which postgres.js returns as a real JS number, while NUMERIC comes back as a string
+  gfsCreatedAt	TIMESTAMPTZ		SOURCE ZONE: UTC, parsed directly with NO localisation. `items[].createdAt`. MEASURED within milliseconds of the parent order's `createdAt`, and that parent field is itself measured UTC. Prefixed `gfs` so it does not collide with our own `createdAt` bookkeeping column
+  gfsModifiedAt	TIMESTAMPTZ		SOURCE ZONE: UTC, parsed directly with NO localisation — DELIBERATELY UNLIKE the order-level `gfsModifiedAt`, which is Eastern. ONE PAYLOAD CARRIES BOTH READINGS: MEASURED, `items[].modifiedAt` sits within milliseconds of the order's UTC `createdAt` while the same rows' order-level `modifiedAt` reads four hours behind. Localising this value from America/New_York would shift it 4-5 hours
+  doc	JSONB		The full verbatim `items[]` element from the order detail payload; persisted as JSONB. Keeps the raw timestamp strings, so the UTC reading above is recoverable from stored data without a re-fetch. Typed `Unknown` because no vendored API type exists to pin a struct against

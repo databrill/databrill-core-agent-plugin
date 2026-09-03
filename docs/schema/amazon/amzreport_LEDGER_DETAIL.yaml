@@ -1,0 +1,33 @@
+name: "amzreport_LEDGER_DETAIL"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "FBA inventory movements from the Inventory Ledger detailed view (GET_LEDGER_DETAIL_VIEW_DATA), one row per event keyed (merchant, date, FNSKU, event type, index), with the quantity moved, the fulfilment centre, disposition and reason."
+primaryKey:
+  - "merchant_id"
+  - "date"
+  - "fnsku"
+  - "event_type"
+  - "index"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  date	DATE
+  fnsku	TEXT
+  event_type	TEXT
+  index	INTEGER
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  marketplace_id	TEXT
+  asin	TEXT	true
+  sku	TEXT	true
+  reference_id	TEXT	true
+  quantity	NUMERIC	true
+  fulfillment_center	TEXT	true
+  disposition	TEXT	true
+  reason	TEXT	true
+  country	TEXT	true
+  reconciled_quantity	NUMERIC	true
+  unreconciled_quantity	NUMERIC	true
+  date_and_time	TIMESTAMPTZ	true
+  extras	JSONB	true

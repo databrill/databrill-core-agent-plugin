@@ -1,0 +1,20 @@
+name: "amzspapi_awd_v2024__ReplenishmentOrder"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "An AWD replenishment order — the AWD-to-FBA leg — one row per (merchantId, orderId). Built from the order listing alone, because the detail call returns the same object. Requested per-SKU quantities are in amzspapi_awd_v2024__ReplenishmentOrderProduct and the outbound shipment summaries in amzspapi_awd_v2024__ReplenishmentOutboundShipment. shippedProducts has been empty on every order seen, including successful ones, so nothing relies on it."
+primaryKey:
+  - "merchantId"
+  - "orderId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT
+  orderId	TEXT		Replenishment order ID (repl-<uuid>)
+  status	TEXT		ReplenishmentOrderStatus; observed SUCCESS/INELIGIBLE/FAILURE/INVENTORY_OUTBOUND
+  orderCreatedAt	TIMESTAMPTZ		API createdAt
+  orderUpdatedAt	TIMESTAMPTZ		API updatedAt; the walk watermark advances over it
+  confirmedOn	TIMESTAMPTZ	true
+  shippedProducts	JSONB	true
+  eligibleProducts	JSONB	true
+  distributionIneligibleReasons	JSONB	true
+  lastSeenAt	TIMESTAMPTZ		Touched whenever the order appears in a listReplenishmentOrders page

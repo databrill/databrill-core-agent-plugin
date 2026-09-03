@@ -1,0 +1,30 @@
+name: "amzspapi_finances_v20240619__Transaction"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "One SP-API Finances 2024-06-19 transaction event per (merchantId, transactionKey), with the full event in doc. The itemProjection columns describe this row's projection into amzspapi_finances_v20240619__TransactionItemSummary and are authoritative only about that projection, never about the Amazon document."
+primaryKey:
+  - "merchantId"
+  - "transactionKey"
+columns: |
+  name	type	nullable	check	description
+  merchantId	TEXT			Amazon Seller ID
+  transactionKey	TEXT			UUID v7-like key from makeKey_transactionKey(postedDate, transactionId); time-prefixed so postedDate-range scans hit a contiguous PK range without an extra index
+  transactionId	TEXT			The API's unique transaction identifier
+  time	TIMESTAMPTZ			The transaction's postedDate
+  transactionType	TEXT	true
+  transactionStatus	TEXT	true
+  marketplaceId	TEXT	true
+  orderId	TEXT	true
+  doc	JSONB			The full Transaction object from the API; persisted as JSONB
+  itemProjectionVersion	INTEGER	true	"itemProjectionVersion" IS NULL OR "itemProjectionVersion" > 0
+  itemProjectionItemCount	INTEGER	true	"itemProjectionItemCount" IS NULL OR "itemProjectionItemCount" >= 0
+  itemProjectionSourceUpdatedAt	TIMESTAMPTZ	true
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+indexes:
+  - name: "amzspapi_finances_v20240619__Transaction__merchantId_orderId"
+    columns:
+      - "merchantId"
+      - "orderId"
+    where: "\"orderId\" IS NOT NULL"

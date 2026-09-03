@@ -1,0 +1,35 @@
+name: "brand_ontology_amazon_asin"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Read view of the customer-editable per-ASIN configuration (brand_config_amazon_asin) with its ontology variant and product family resolved, one row per configured ASIN. `data` is the VARIANT's resolved property values and is null for an ASIN with no variant. `variantCategory` and `familyCategory` are reported separately because an ASIN can be assigned to a family whose category differs from its variant's. ONLY ASINs that resolve to a variant or to a family appear: an ASIN configured with neither is filtered out, so this view is not a complete list of configured ASINs."
+columns: |
+  name	type	nullable
+  asin	TEXT
+  msku	TEXT	true
+  family	TEXT	true
+  countryToFamily	JSONB	true
+  labelInFamily	TEXT	true
+  countryToLabelInFamily	JSONB	true
+  labelStandalone	TEXT	true
+  description	TEXT	true
+  variantCategory	TEXT	true
+  familyCategory	TEXT	true
+  data	JSONB	true
+definition: |
+  SELECT
+  	a."asin",
+  	a."msku",
+  	a."family",
+  	a."countryToFamily",
+  	a."labelInFamily",
+  	a."countryToLabelInFamily",
+  	a."labelStandalone",
+  	a."description",
+  	v."category"     AS "variantCategory",
+  	f."category"     AS "familyCategory",
+  	v."dataResolved" AS "data"
+  FROM "brand_config_amazon_asin" a
+  LEFT JOIN "brand_config_ontology_variant" v ON v."msku" = a."msku"
+  LEFT JOIN "brand_config_amazon_family" f    ON f."family" = a."family"
+  WHERE v."msku" IS NOT NULL OR f."category" IS NOT NULL

@@ -1,0 +1,63 @@
+name: "amazon_fba_inventory_summary"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "DEPRECATED — do not build on this view. Flattens amzspapi_fbaInventory_v1__InventorySummary into columns: one row per (merchant_id, marketplace_id, sku) with the fulfillable, inbound working, inbound shipped, inbound receiving, reserved, researching and unfulfillable quantity breakdowns pulled out of the stored document. This documentation does not match the view: `stores`, `created_at` and `updated_at` are listed here but do not exist in the database, `last_updated_time` is TIMESTAMPTZ rather than TEXT, and the column order differs. Query amzspapi_fbaInventory_v1__InventorySummary directly instead."
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  sku	TEXT
+  asin	TEXT	true
+  fnsku	TEXT	true
+  condition	TEXT	true
+  fulfillable	INTEGER	true
+  inbound_working	INTEGER	true
+  inbound_shipped	INTEGER	true
+  inbound_receiving	INTEGER	true
+  total_reserved	INTEGER	true
+  pending_customer_order	INTEGER	true
+  pending_transshipment	INTEGER	true
+  fc_processing	INTEGER	true
+  total_researching	INTEGER	true
+  total_unfulfillable	INTEGER	true
+  customer_damaged	INTEGER	true
+  warehouse_damaged	INTEGER	true
+  distributor_damaged	INTEGER	true
+  carrier_damaged	INTEGER	true
+  defective	INTEGER	true
+  expired	INTEGER	true
+  last_updated_time	TEXT	true
+  product_name	TEXT	true
+  total	INTEGER	true
+  stores	TEXT[]	true
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+definition: |
+  SELECT
+      "merchantId" as merchant_id,
+      "marketplaceId" as marketplace_id,
+      "sellerSku" as sku,
+      doc->>'asin' as asin,
+      doc->>'fnSku' as fnsku,
+      doc->>'condition' as condition,
+      (doc->'inventoryDetails'->'fulfillableQuantity')::int as fulfillable,
+      (doc->'inventoryDetails'->'inboundWorkingQuantity')::int as inbound_working,
+      (doc->'inventoryDetails'->'inboundShippedQuantity')::int as inbound_shipped,
+      (doc->'inventoryDetails'->'inboundReceivingQuantity')::int as inbound_receiving,
+      (doc->'inventoryDetails'->'reservedQuantity'->'totalReservedQuantity')::int as total_reserved,
+      (doc->'inventoryDetails'->'reservedQuantity'->'pendingCustomerOrderQuantity')::int as pending_customer_order,
+      (doc->'inventoryDetails'->'reservedQuantity'->'pendingTransshipmentQuantity')::int as pending_transshipment,
+      (doc->'inventoryDetails'->'reservedQuantity'->'fcProcessingQuantity')::int as fc_processing,
+      (doc->'inventoryDetails'->'researchingQuantity'->'totalResearchingQuantity')::int as total_researching,
+      (doc->'inventoryDetails'->'unfulfillableQuantity'->'totalUnfulfillableQuantity')::int as total_unfulfillable,
+      (doc->'inventoryDetails'->'unfulfillableQuantity'->'customerDamagedQuantity')::int as customer_damaged,
+      (doc->'inventoryDetails'->'unfulfillableQuantity'->'warehouseDamagedQuantity')::int as warehouse_damaged,
+      (doc->'inventoryDetails'->'unfulfillableQuantity'->'distributorDamagedQuantity')::int as distributor_damaged,
+      (doc->'inventoryDetails'->'unfulfillableQuantity'->'carrierDamagedQuantity')::int as carrier_damaged,
+      (doc->'inventoryDetails'->'unfulfillableQuantity'->'defectiveQuantity')::int as defective,
+      (doc->'inventoryDetails'->'unfulfillableQuantity'->'expiredQuantity')::int as expired,
+      (doc->'totalQuantity')::int  as total,
+      NULLIF(btrim(doc->>'lastUpdatedTime'), '')::timestamptz as last_updated_time,
+      doc->>'productName' as product_name
+  FROM "amzspapi_fbaInventory_v1__InventorySummary"

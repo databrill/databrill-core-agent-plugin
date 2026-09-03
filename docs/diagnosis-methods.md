@@ -16,8 +16,7 @@ So before diagnosing an ads or sales question on a specific product, check:
 
 - `inventoryPacing` for the family's runway, or
 - `amazon_fba_inventory_summary` for `fulfillable` by ASIN (filter merchant and
-  marketplace, then sum over SKUs — see [SQL quick
-  reference](sql-reference.md)), and
+  marketplace, then sum over SKUs — see [SQL quick reference](sql-reference.md)), and
 - `buy_box_percentage` in `amazon_sales_and_traffic`, which falls with the offer
   even when units remain.
 
@@ -51,16 +50,16 @@ Advertising cost as a share of sales moves for exactly three reasons:
 culprit names itself. Run `loadAds` for both periods with `derived: true` and
 compute AOV as `revenue / purchases`.
 
-Do not skip to a guess: in one analysis clicks got *cheaper* and click-through
-*improved*, while the entire deterioration sat in factors 2 and 3. A plausible
+Do not skip to a guess: in one analysis clicks got _cheaper_ and click-through
+_improved_, while the entire deterioration sat in factors 2 and 3. A plausible
 "CPC inflation" story would have been wrong.
 
 ## 3. Conversion problem or budget-mix problem?
 
 Once factor 2 or 3 is the culprit, ask whether conversion really got worse or
 whether the money simply moved to worse campaigns. Test it with a
-counterfactual: hold each campaign's *current* performance fixed and restore the
-*old* budget split.
+counterfactual: hold each campaign's _current_ performance fixed and restore the
+_old_ budget split.
 
 ```text
 counterfactual_sales = Σ_campaign ( total_spend_now × share_of_spend_before
@@ -109,10 +108,10 @@ whenever a family's sales fall faster than its traffic.
 A pacing recommendation of "throttle" invites the obvious follow-up. Answer it
 by comparing the period before a spend change with the period after:
 
-| | Before | After |
-| --- | --- | --- |
-| ad spend / day | $1.70 | $59.00 |
-| units / day | 3.0 | 6.9 |
+|                | Before | After  |
+| -------------- | ------ | ------ |
+| ad spend / day | $1.70  | $59.00 |
+| units / day    | 3.0    | 6.9    |
 
 $57.30 of extra daily spend bought 3.9 extra units per day, so an extra unit of
 velocity costs about $14.70 — against a $33 selling price. Then solve backwards
@@ -140,7 +139,7 @@ spend in this period" and confirm it against the campaign list. Several stores
 have never run Sponsored Brands, Sponsored Brands Video or Sponsored Display at
 all.
 
-When only one format exists, the useful breakdown is by campaign *type* —
+When only one format exists, the useful breakdown is by campaign _type_ —
 automatic targeting, broad keyword, product targeting, manual keyword. Many
 accounts encode this in campaign names (for example `{family} |DB {type}`).
 Twenty-five raw campaign rows are not an answer; the same rows grouped into four

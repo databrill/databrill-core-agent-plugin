@@ -1,0 +1,18 @@
+name: "amzop_latest__byStoreAsin"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "Latest observation time per (type, merchant, marketplace, ASIN) across the listing and orders report sources. deleted flips to true when an ASIN drops out of a snapshot source such as the all-listings or open-listings report; the orders writer never sets it."
+primaryKey:
+  - "type"
+  - "merchantId"
+  - "marketplaceId"
+  - "asin"
+columns: |
+  name	type	default
+  type	TEXT
+  merchantId	TEXT
+  marketplaceId	TEXT
+  asin	TEXT
+  time	TIMESTAMPTZ
+  deleted	BOOLEAN	false

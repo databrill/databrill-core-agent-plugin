@@ -1,0 +1,23 @@
+name: "brand_ontology_amazon_family"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Read view of the customer-editable Amazon product families (brand_config_amazon_family) joined to the ontology category each belongs to, one row per family. `data` is the CATEGORY's resolved property values, not the family's — a family carries no properties of its own. A family whose category is missing does not appear, because the join is inner."
+columns: |
+  name	type	nullable
+  family	TEXT
+  category	TEXT
+  msku	TEXT	true
+  label	TEXT	true
+  description	TEXT	true
+  data	JSONB
+definition: |
+  SELECT
+  	f."family",
+  	f."category",
+  	f."msku",
+  	f."label",
+  	f."description",
+  	c."dataResolved" AS "data"
+  FROM "brand_config_amazon_family" f
+  JOIN "brand_config_ontology_category" c ON c."category" = f."category"

@@ -113,25 +113,25 @@ Example `databrill.config.json`:
 
 ```json
 {
-  "version": 1,
-  "workspaces": {
-    "100000001": {
-      "label": "Example A",
-      "database": {
-        "postgresUrl": "${WORKSPACE_A_POSTGRES_URL}",
-        "schema": "w100000001"
-      },
-      "merchants": {}
-    },
-    "100000002": {
-      "label": "Example B",
-      "database": {
-        "postgresUrl": "${WORKSPACE_B_POSTGRES_URL}",
-        "schema": "w100000002"
-      },
-      "merchants": {}
-    }
-  }
+	"version": 1,
+	"workspaces": {
+		"100000001": {
+			"label": "Example A",
+			"database": {
+				"postgresUrl": "${WORKSPACE_A_POSTGRES_URL}",
+				"schema": "w100000001"
+			},
+			"merchants": {}
+		},
+		"100000002": {
+			"label": "Example B",
+			"database": {
+				"postgresUrl": "${WORKSPACE_B_POSTGRES_URL}",
+				"schema": "w100000002"
+			},
+			"merchants": {}
+		}
+	}
 }
 ```
 

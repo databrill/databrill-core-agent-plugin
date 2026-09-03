@@ -2,9 +2,9 @@
 name: dbl-metrics-shopify-orders
 description: Analyze Shopify orders and line items — units sold by product or SKU, revenue, refunds, discounts, shipping and tax, order counts, geography, customers and repeat purchase. Use when the user asks what sold on Shopify, best sellers, Shopify refunds or returns, where Shopify orders ship, Shopify customer or repeat-order questions, or wants Shopify sales history older than the daily reports.
 metadata:
-  type: metric
-  audience: client
-  tool: executeSql
+    type: metric
+    audience: client
+    tool: executeSql
 ---
 
 # What sold on Shopify?
@@ -13,7 +13,10 @@ Use `executeSql` against `shopify_orders_v1__Order` (one row per
 `(shopId, id)`) and `shopify_orders_v1__OrderLineItem` (one row per line, parent
 `orderId`).
 
-**Read `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first.**
+**Read `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first.** For the
+declared columns and types of any `shopify_*` table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/shopify/index.tsv` and then that table's
+`.yaml` beside it.
 
 ## Before any revenue number
 
@@ -111,12 +114,59 @@ them only when the task genuinely needs them, and never dump the column.
 
 ## Discounts
 
-`shopify_discounts_v1__Discount` holds one row per discount with `title`,
-`status`, `discountType`, `summary`, `startsAt`/`endsAt`, `usageLimit` and
-`asyncUsageCount`; `shopify_discounts_v1__DiscountRedeemCode` holds its codes,
-joined on the discount's `id`. `asyncUsageCount` is a redemption count, **not** a
-freshness signal. Note the table may cover fewer shops than the workspace has —
-one workspace had it on 2 of 3.
+`shopify_discounts_v1__Discount` is one row per `(shopId, id)`, and **`id` here
+is a GID string**, not the numeric id every other table uses:
+`gid://shopify/DiscountCodeNode/<n>` or `gid://shopify/DiscountAutomaticNode/<n>`.
+`shopify_discounts_v1__DiscountRedeemCode.discountGid` joins to it, also a GID.
+
+`fetchedAt` is the refresh marker — **this family has no `updatedAt` column at
+all**. It is read as a whole set with no watermark, and rows the latest
+successful run did not return are deleted.
+
+### It is a union of eight member types, so most nulls mean "not declared"
+
+`discountType` is the discriminator: `DiscountCode{Basic,Bxgy,FreeShipping,App}`
+and `DiscountAutomatic{Basic,Bxgy,FreeShipping,App}`. Only eleven fields are
+declared by every member; the rest are null on the members that do not declare
+them, which is **not the same as an empty value**. `nodeType` is the coarse
+code-versus-automatic split, derived from the GID independently of
+`discountType`, so the two can be checked against each other.
+
+Measured on a live workspace, 202 discounts: 181 `DiscountCodeBasic`, 8
+`DiscountAutomaticApp`, 8 `DiscountCodeBxgy`, 4 `DiscountCodeFreeShipping`, 1
+`DiscountCodeApp`.
+
+The nulls that will mislead a report:
+
+- **`usageLimit` is null for two indistinguishable reasons** — an automatic
+  discount does not declare the field at all, and a code discount declares it
+  null meaning _unlimited_. Non-null on only 14 of the 202 measured. Never render
+  a null as "unlimited" without checking `nodeType` first.
+- **`summary` is absent on the two App members**, so it was null on all 9 App
+  rows. For those, `appDiscountTypeTitle` is the closest thing to a description.
+- **`shortSummary` is declared only by the Basic and FreeShipping members** —
+  null on every Bxgy and App row.
+- **`totalSalesAmount` null means never redeemed**, not missing: non-null on 109
+  of 202. Paired with `totalSalesCurrency`, null exactly when it is.
+- **`endsAt` null means no end date.**
+- **`appliesOncePerCustomer` null means the discount is automatic.**
+- **`codeCount` is null on automatic discounts** and, where present, equals the
+  number of `DiscountRedeemCode` rows for that discount — the importer verifies
+  that rather than assuming it, so a mismatch is worth reporting rather than
+  working around.
+
+### The rest
+
+`status` is `ACTIVE`, `EXPIRED` or `SCHEDULED`, stored as text rather than an
+enum so a new Shopify member arrives as a row instead of an ingest failure.
+`discountClasses` is a JSONB array over `PRODUCT` / `ORDER` / `SHIPPING`, not a
+scalar. `asyncUsageCount` is a redemption count on both tables and is **not** a
+freshness signal — whether a redemption moves `shopifyUpdatedAt` has never been
+observed. Member-specific fields no column promotes stay in `doc`, which does
+**not** contain the redeem codes; those are their own rows.
+
+The table may cover fewer shops than the workspace has — one workspace had
+discounts on 2 of its 3 shops.
 
 Order-level discount money is `totalDiscountsShopAmount` on the order, and it is
 positive there (unlike the report table's `discounts`, which is negative).

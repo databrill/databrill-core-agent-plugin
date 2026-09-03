@@ -1,0 +1,18 @@
+name: "amzspapi_sellers_v1__marketplace"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "One row per Amazon marketplace as SP-API Sellers v1 reports it, with country, name, default currency and language, and storefront domain. isReal is false for entries that are not sellable storefronts, such as the Non-Amazon set and the invoicing shadow marketplace."
+primaryKey:
+  - "id"
+columns: |
+  name	type
+  id	TEXT
+  countryCode	TEXT
+  name	TEXT
+  defaultCurrencyCode	TEXT
+  defaultLanguageCode	TEXT
+  domainName	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  isReal	BOOLEAN

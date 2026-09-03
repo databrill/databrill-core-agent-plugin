@@ -1,0 +1,34 @@
+name: "amzreport_FBA_REMOVAL_ORDER_DETAIL"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Removal-order lines from GET_FBA_FULFILLMENT_REMOVAL_ORDER_DETAIL_DATA, one row per (merchant, request time, order, SKU, index), with the requested, cancelled, disposed, shipped and in-process quantities and the removal fee."
+primaryKey:
+  - "merchant_id"
+  - "request_time"
+  - "order_id"
+  - "sku"
+  - "index"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  request_time	TIMESTAMPTZ
+  order_id	TEXT
+  sku	TEXT
+  index	INTEGER
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  fnsku	TEXT	true
+  order_source	TEXT	true
+  order_type	TEXT	true
+  order_status	TEXT	true
+  last_updated_date	TIMESTAMPTZ	true
+  disposition	TEXT	true
+  requested_quantity	NUMERIC	true
+  cancelled_quantity	NUMERIC	true
+  disposed_quantity	NUMERIC	true
+  shipped_quantity	NUMERIC	true
+  in_process_quantity	NUMERIC	true
+  removal_fee	NUMERIC	true
+  currency	TEXT	true
+  extras	JSONB	true

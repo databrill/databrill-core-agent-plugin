@@ -2,9 +2,9 @@
 name: dbl-metrics-ads
 description: Analyze Amazon PPC advertising performance metrics including impressions, clicks, orders, spend, sales, CTR, CR, CPC, ACOS, and ROAS. Use when the user asks about ad performance, PPC metrics, advertising efficiency, campaign analysis, ACOS/ROAS, or spend by ad type (SP/SB/SBV/SD).
 metadata:
-  type: metrics
-  audience: client
-  tool: loadAds
+    type: metrics
+    audience: client
+    tool: loadAds
 ---
 
 # Ad performance (PPC)
@@ -77,14 +77,16 @@ too high" or "why did efficiency drop". The short form:
    that closes most of the gap it is a budget-mix problem, not a performance
    problem — a completely different fix.
 
-With one ad format, break down by campaign *type* (auto / broad / product
+With one ad format, break down by campaign _type_ (auto / broad / product
 targeting / manual keyword), which many accounts encode in campaign names.
 
 ## SQL fallback (only for things the tool can't express)
 
 Read `${CLAUDE_PLUGIN_ROOT}/docs/sql-reference.md` first — it has the date/store
 column table, quoting and `::numeric` rules, and which ad relation holds which
-numbers.
+numbers. For the declared columns and types of any Amazon table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's
+`.yaml` beside it.
 
 - `product_overview_ad_asin__day` — per ASIN per day: `ad_impressions`,
   `ad_clicks`, `ad_orders`, `ad_spend`, `ad_revenue`. This is the rollup

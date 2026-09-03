@@ -2,9 +2,9 @@
 name: dbl-metrics-shopify-catalog
 description: Look up the Shopify catalogue — products, variants, SKUs, prices, compare-at prices, vendor, product type, status, published state, and the SKU-to-variant mapping used to join Shopify to other sources. Use when the user asks what products or variants exist on Shopify, Shopify pricing, which products are unpublished or draft, or needs to map a Shopify SKU to a product.
 metadata:
-  type: metric
-  audience: client
-  tool: executeSql
+    type: metric
+    audience: client
+    tool: executeSql
 ---
 
 # What is in the Shopify catalogue?
@@ -13,7 +13,10 @@ Use `executeSql` against `shopify_products_v1__Product` and
 `shopify_products_v1__ProductVariant`, one row per `(shopId, id)`, the variant
 carrying its parent `productId`.
 
-**Read `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first.**
+**Read `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first.** For the
+declared columns and types of any `shopify_*` table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/shopify/index.tsv` and then that table's
+`.yaml` beside it.
 
 ## The catalogue is a snapshot, not a history
 

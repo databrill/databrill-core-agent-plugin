@@ -12,10 +12,18 @@ Prefer a dedicated MCP tool whenever it covers the requested metric. Read
 If no MCP tool covers it:
 
 1. identify the workspace, marketplace, period, grain, and currency;
-2. run `listTables` to see what this workspace actually has, and
-   `describeTable` for exact live columns — `${CLAUDE_PLUGIN_ROOT}/docs/table-catalog.md`
-   lists what Databrill provisions everywhere, but a workspace can lack a
-   relation, have it empty, or have extra rollups that are not in the catalog;
+2. identify the channel — Amazon, Walmart, Shopify or The Fulfillment Lab — and
+   read `${CLAUDE_PLUGIN_ROOT}/docs/schema/<group>/index.tsv` for it (`amazon`,
+   `walmart`, `shopify`, `tfl`; exchange rates, brand configuration and the
+   schema version row are in `common`; a cross-channel question reads `common`
+   plus each channel it touches), then
+   `${CLAUDE_PLUGIN_ROOT}/docs/schema/<group>/<name>.yaml` for each table you
+   pick (its `columns` key is a tab-separated table whose first line names the
+   fields, and an empty cell means the field does not apply); then run
+   `listTables` to see what this workspace actually has and
+   `describeTable` for the exact columns in the database, because a workspace
+   can lack a declared table, have it empty, or hold extra rollups the declared
+   schema does not list;
 3. read `${CLAUDE_PLUGIN_ROOT}/docs/sql-reference.md` for the date/store column
    table, quoting, `::numeric`, partitioned rank tables, and the relations whose
    names mislead;

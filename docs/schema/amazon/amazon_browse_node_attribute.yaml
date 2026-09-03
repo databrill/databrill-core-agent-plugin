@@ -1,0 +1,25 @@
+name: "amazon_browse_node_attribute"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "Attributes of an Amazon browse node: one row per (marketplace_code, node_id, name) holding that attribute's value."
+primaryKey:
+  - "marketplace_code"
+  - "node_id"
+  - "name"
+columns: |
+  name	type	nullable
+  marketplace_code	TEXT
+  node_id	BIGINT
+  name	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  deleted_at	TIMESTAMPTZ	true
+  value	TEXT
+indexes:
+  - name: "amazon_browse_node_attribute__updated_at"
+    columns:
+      - "updated_at"
+  - name: "amazon_browse_node_attribute__deleted_at"
+    columns:
+      - "deleted_at"

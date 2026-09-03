@@ -1,0 +1,19 @@
+name: "amzspapi_awd_v2024__InboundShipmentSkuQuantity"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "One SKU line on an AWD inbound shipment, one row per (merchantId, shipmentId, sku). Quantities are stored exactly as Amazon reports them, together with their unit, which is commonly CASES; product units are not materialised — derive them as quantity times unitsPerCase when the unit is CASES. unitsPerCase comes from the matching inbound order and is null until that order has been fetched. Both shortfalls and over-receipts occur in real data."
+primaryKey:
+  - "merchantId"
+  - "shipmentId"
+  - "sku"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT
+  shipmentId	TEXT
+  sku	TEXT
+  expectedQuantity	INTEGER		As-reported expected quantity in expectedUnit
+  expectedUnit	TEXT		InventoryUnitOfMeasurement of expectedQuantity
+  receivedQuantity	INTEGER	true
+  receivedUnit	TEXT	true
+  unitsPerCase	INTEGER	true

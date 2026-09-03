@@ -1,0 +1,18 @@
+name: "brand_ontology_category"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Read view of the customer-editable ontology categories (brand_config_ontology_category), one row per category. `data` is the RESOLVED property values — the category's own values with anything inherited already folded in — and is what a reader normally wants; `dataSelf` is the values authored on this category alone. Note the names invert the underlying table, where the authored column is `data`."
+columns: |
+  name	type	nullable
+  category	TEXT
+  description	TEXT	true
+  data	JSONB
+  dataSelf	JSONB
+definition: |
+  SELECT
+  	c."category",
+  	c."description",
+  	c."dataResolved" AS "data",
+  	c."data"         AS "dataSelf"
+  FROM "brand_config_ontology_category" c

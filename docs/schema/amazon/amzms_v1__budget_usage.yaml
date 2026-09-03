@@ -1,0 +1,21 @@
+name: "amzms_v1__budget_usage"
+kind: "table"
+access: "read"
+category: "Amazon Marketing Stream"
+description: "Amazon Marketing Stream budget-usage events, one row per (advertiser, marketplace, update time, budget scope, scope type, ad product), with the full event in doc. A portfolio-scoped event has no ad product and stores the empty string."
+primaryKey:
+  - "advertiser_id"
+  - "marketplace_id"
+  - "usage_updated_timestamp"
+  - "budget_scope_id"
+  - "budget_scope_type"
+  - "advertising_product_type"
+columns: |
+  name	type	description
+  advertiser_id	TEXT	Amazon Advertiser ID (same as merchantId)
+  marketplace_id	TEXT	Amazon Marketplace ID
+  usage_updated_timestamp	TIMESTAMPTZ	Timestamp when budget usage was updated (from message)
+  budget_scope_id	TEXT	Budget scope identifier (campaign or portfolio id)
+  budget_scope_type	TEXT	Budget scope type: CAMPAIGN or PORTFOLIO
+  advertising_product_type	TEXT	Ad product (sp/sb/sd); empty string for portfolio scopes
+  doc	JSONB	Complete message payload as JSONB

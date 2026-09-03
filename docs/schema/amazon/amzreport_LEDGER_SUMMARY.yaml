@@ -1,0 +1,41 @@
+name: "amzreport_LEDGER_SUMMARY"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "FBA inventory movement summaries from the Inventory Ledger summary view (GET_LEDGER_SUMMARY_VIEW_DATA), one row per (merchant, time unit, period start, location level, location, FNSKU, disposition). The ending warehouse balance is not stored: it is the starting balance plus the movement columns."
+primaryKey:
+  - "merchant_id"
+  - "time_unit"
+  - "date_first"
+  - "location_level"
+  - "location"
+  - "fnsku"
+  - "disposition"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  time_unit	TEXT
+  date_first	DATE
+  location_level	TEXT
+  location	TEXT
+  fnsku	TEXT
+  disposition	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  marketplace_id	TEXT
+  asin	TEXT	true
+  sku	TEXT	true
+  starting_warehouse_balance	NUMERIC	true
+  in_transit_between_warehouses	NUMERIC	true
+  receipts	NUMERIC	true
+  customer_shipments	NUMERIC	true
+  customer_returns	NUMERIC	true
+  vendor_returns	NUMERIC	true
+  warehouse_transfer_in_out	NUMERIC	true
+  found	NUMERIC	true
+  lost	NUMERIC	true
+  damaged	NUMERIC	true
+  disposed	NUMERIC	true
+  other_events	NUMERIC	true
+  unknown_events	NUMERIC	true
+  extras	JSONB	true

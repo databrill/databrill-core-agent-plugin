@@ -1,0 +1,20 @@
+name: "amzagg_profit__orderItemProjectionState"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Completeness state of the amzagg_profit__orderItem projection, one row per merchant. READY-gating on this row, including the covered date window, is what makes a delete-and-replace rebuild safe to serve."
+primaryKey:
+  - "merchantId"
+columns: |
+  name	type	nullable	check	description
+  merchantId	TEXT			Amazon Seller ID; the whole primary key, one row per merchant
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  projectionVersion	INTEGER		"projectionVersion" > 0	Projection version this state describes; the first version is 1
+  status	TEXT		"status" IN ('BACKFILLING', 'READY', 'STALE', 'FAILED')	BACKFILLING | READY | STALE | FAILED
+  dateCoveredFirst	DATE	true		First marketplace-local bookedDate the last completed rebuild covered, YYYY-MM-DD; null before one completes. Reads outside this window are not served by this table.
+  dateCoveredLast	DATE	true		Last marketplace-local bookedDate the last completed rebuild covered, YYYY-MM-DD; null before one completes.
+  rowCount	INTEGER		"rowCount" >= 0	Atoms written by the last completed rebuild of this merchant
+  startedAt	TIMESTAMPTZ			Start of the current or most recent rebuild run
+  completedAt	TIMESTAMPTZ	true		Completion time of the last successful rebuild; null until one succeeds
+  lastError	TEXT	true		Sanitized failure detail; never contains documents or business identifiers

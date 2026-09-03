@@ -1,0 +1,31 @@
+name: "shopify_inventory_v1__InventoryLevel"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify InventoryLevel per (shopId, locationId, inventoryItemId) — a natural triple, because a level is the intersection of a location and an item and its own GID carries a query string. Read as a whole set on every run with no watermark and no repair task; fetchedAt marks which rows the latest successful run returned and older rows are deleted."
+primaryKey:
+  - "shopId"
+  - "locationId"
+  - "inventoryItemId"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  locationId	BIGINT		`InventoryLevel.location.legacyResourceId`. The bulk JSONL's `__parentId` names the same location as a GID, and the importer checks that rather than assuming it. Refers to `shopify_locations_v1__Location.id`; no declared foreign key
+  inventoryItemId	BIGINT		`InventoryLevel.item.legacyResourceId`; `UnsignedInt64!` on `InventoryItem`. The same value appears on `shopify_products_v1__ProductVariant.inventoryItemId`, which is how a level reaches a variant without depending on `item.variant` being present
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field
+  fetchedAt	TIMESTAMPTZ		OUR row bookkeeping AND the whole-set refresh marker: every row of a successful run carries that run's single instant WHETHER OR NOT ANY VALUE CHANGED, and rows older than it are deleted for this shop. It is the only trustworthy freshness signal on this table — Shopify's own `shopifyUpdatedAt` does not always move when a quantity does. Not a Shopify field
+  levelGid	TEXT		`InventoryLevel.id`, kept as provenance and NEVER as a key or a join. Shopify returns it as `gid://shopify/InventoryLevel/<n>?inventory_item_id=<m>`, a GID carrying a query string, whose `<n>` is shared by every level at the same location. It cannot be passed to `nodes(ids:)`
+  variantId	BIGINT	true	The variant's numeric id, parsed out of `InventoryLevel.item.variant.id`. `ProductVariant` is nullable in the schema — an inventory item need not belong to a variant — though usually filled. Nullable on the schema's authority. Joins to `shopify_products_v1__ProductVariant.id`
+  sku	TEXT	true	`InventoryLevel.item.sku`; `String` (nullable in the schema) though usually filled. Denormalized onto the level so a stock report does not have to join through the variant table
+  tracked	BOOLEAN		`InventoryLevel.item.tracked`; `Boolean!`, and false on most levels. THIS is the column that says whether a quantity means anything: Shopify keeps returning levels for untracked items and their numbers do not move with sales
+  available	INTEGER		`quantities(names: ["available"])`. Always present. NEGATIVE VALUES ARE REAL and are stored as they arrive
+  onHand	INTEGER		`quantities(names: ["on_hand"])`. Always present; can be negative
+  committed	INTEGER		`quantities(names: ["committed"])`. Always present
+  incoming	INTEGER		`quantities(names: ["incoming"])`. Always present, and may be zero on every level of a store, so any logic keyed on it can ship untested
+  reserved	INTEGER	true	`quantities(names: ["reserved"])`. NULLABLE, unlike the four above, because the four inventory states below `committed` depend on what the merchant's plan has enabled and one store is not evidence that every merchant's response carries them; an absent name is stored as null rather than as a fabricated zero
+  damaged	INTEGER	true	`quantities(names: ["damaged"])`. Nullable for the reason given on `reserved`
+  safetyStock	INTEGER	true	`quantities(names: ["safety_stock"])`. Nullable for the reason given on `reserved`
+  qualityControl	INTEGER	true	`quantities(names: ["quality_control"])`. Nullable for the reason given on `reserved`
+  shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `InventoryLevel.createdAt`; `DateTime!`
+  shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `InventoryLevel.updatedAt`; `DateTime!`. DO NOT USE IT AS A FRESHNESS SIGNAL AND DO NOT FILTER ON IT: a level can carry a per-quantity `updatedAt` newer than this value, which is why this family keeps no watermark. `fetchedAt` is the column that answers when we last confirmed the row
+  doc	JSONB		The verbatim validated InventoryLevel node from the bulk JSONL, persisted as JSONB, including its `__parentId` and the per-quantity `updatedAt` instants that no column promotes. Typed `Unknown` because no vendored Shopify type exists

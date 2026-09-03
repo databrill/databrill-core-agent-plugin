@@ -1,0 +1,17 @@
+name: "fx_ecb_rate_latest"
+kind: "table"
+access: "read"
+category: "Exchange rates"
+description: "The most recent European Central Bank foreign-exchange reference rate per (currency, frequency), a cache derived from fx_ecb_rate_history. Same EUR-pivot semantics: value is units of the currency per 1 EUR, and EUR itself never has a row."
+primaryKey:
+  - "unit"
+  - "timeFormat"
+columns: |
+  name	type
+  unit	CHAR(3)
+  timeFormat	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  period	TEXT
+  value	DOUBLE PRECISION
+  decimals	INTEGER

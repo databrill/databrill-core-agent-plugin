@@ -1,0 +1,50 @@
+name: "amazon_listing_open"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Flattened view of currently open listings with consumer and B2B pricing, from the GET_FLAT_FILE_OPEN_LISTINGS_DATA report (amzreport_OPEN_LISTINGS). Carries the consumer price, the B2B base price, up to five B2B quantity-based pricing tiers, and country code joined from amazon_marketplace."
+columns: |
+  name	type	nullable	description
+  merchant_id	TEXT		Merchant identifier (part of primary key)
+  marketplace_id	TEXT		Amazon marketplace identifier (part of primary key)
+  seller_sku	TEXT		Seller SKU (part of primary key)
+  country_code	TEXT	true	Country code derived from marketplace
+  asin	TEXT	true
+  price	NUMERIC	true	Consumer listing price
+  business_price	NUMERIC	true	B2B base price (may be NULL)
+  quantity	INTEGER	true
+  quantity_price_type	TEXT	true	B2B tiered pricing type (percent_off, fixed, etc.)
+  quantity_lower_bound_1	INTEGER	true
+  quantity_price_1	NUMERIC	true
+  quantity_lower_bound_2	INTEGER	true
+  quantity_price_2	NUMERIC	true
+  quantity_lower_bound_3	INTEGER	true
+  quantity_price_3	NUMERIC	true
+  quantity_lower_bound_4	INTEGER	true
+  quantity_price_4	NUMERIC	true
+  quantity_lower_bound_5	INTEGER	true
+  quantity_price_5	NUMERIC	true
+definition: |
+  SELECT
+  	l."merchantId" AS merchant_id,
+  	l."marketplaceId" AS marketplace_id,
+  	l."sellerSku" AS seller_sku,
+  	m.country_code,
+  	l.doc->>'asin' AS asin,
+  	(l.doc->>'price')::NUMERIC AS price,
+  	(l.doc->>'Business Price')::NUMERIC AS business_price,
+  	(l.doc->>'quantity')::INTEGER AS quantity,
+  	l.doc->>'Quantity Price Type' AS quantity_price_type,
+  	(l.doc->>'Quantity Lower Bound 1')::INTEGER AS quantity_lower_bound_1,
+  	(l.doc->>'Quantity Price 1')::NUMERIC AS quantity_price_1,
+  	(l.doc->>'Quantity Lower Bound 2')::INTEGER AS quantity_lower_bound_2,
+  	(l.doc->>'Quantity Price 2')::NUMERIC AS quantity_price_2,
+  	(l.doc->>'Quantity Lower Bound 3')::INTEGER AS quantity_lower_bound_3,
+  	(l.doc->>'Quantity Price 3')::NUMERIC AS quantity_price_3,
+  	(l.doc->>'Quantity Lower Bound 4')::INTEGER AS quantity_lower_bound_4,
+  	(l.doc->>'Quantity Price 4')::NUMERIC AS quantity_price_4,
+  	(l.doc->>'Quantity Lower Bound 5')::INTEGER AS quantity_lower_bound_5,
+  	(l.doc->>'Quantity Price 5')::NUMERIC AS quantity_price_5
+  FROM "amzreport_OPEN_LISTINGS" l
+  LEFT JOIN amazon_marketplace m ON l."marketplaceId" = m.marketplace_id
+  WHERE l."deletedAt" IS NULL

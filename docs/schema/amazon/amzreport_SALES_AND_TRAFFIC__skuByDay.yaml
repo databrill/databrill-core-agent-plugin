@@ -1,0 +1,27 @@
+name: "amzreport_SALES_AND_TRAFFIC__skuByDay"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Daily sales and traffic per (merchant, marketplace, date, SKU) from GET_SALES_AND_TRAFFIC_REPORT, with the report's salesByAsin and trafficByAsin blocks in sales and traffic."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "date"
+  - "sku"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  date	DATE
+  sku	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  parentAsin	TEXT
+  childAsin	TEXT
+  sales	JSONB
+  traffic	JSONB
+indexes:
+  - name: "amzreport_sales_traffic_skuByDay__childAsin_date"
+    columns:
+      - "childAsin"
+      - "date"

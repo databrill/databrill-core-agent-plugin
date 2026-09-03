@@ -1,0 +1,74 @@
+name: "amazon_listing_all"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Flattened view of all merchant listings — active, inactive and incomplete — with full product metadata, from the GET_MERCHANT_LISTINGS_ALL_DATA report (amzreport_MERCHANT_LISTINGS_ALL). Condition codes are decoded, fulfillment channel is derived as FBA or FBM, open_date is parsed to timestamptz, and country code is joined from amazon_marketplace."
+columns: |
+  name	type	nullable	description
+  merchant_id	TEXT		Merchant identifier (part of primary key)
+  marketplace_id	TEXT		Amazon marketplace identifier (part of primary key)
+  seller_sku	TEXT		Seller SKU (part of primary key)
+  country_code	TEXT	true	Country code derived from marketplace (US, CA, MX, etc.)
+  asin	TEXT	true	Amazon Standard Identification Number
+  listing_id	TEXT	true
+  item_name	TEXT	true
+  item_description	TEXT	true
+  item_note	TEXT	true
+  item_condition	TEXT	true	Amazon condition code (11=New, 4=Used Acceptable, etc.)
+  item_condition_name	TEXT	true	Human-readable condition name
+  status	TEXT	true	Listing status: Active, Inactive, or Incomplete
+  fulfillment_channel	TEXT	true
+  fulfillment_channel_type	TEXT	true	FBA or FBM derived from fulfillment_channel
+  price	NUMERIC	true
+  quantity	INTEGER	true
+  pending_quantity	INTEGER	true
+  product_id	TEXT	true
+  product_id_type	TEXT	true
+  open_date	TIMESTAMPTZ	true
+  merchant_shipping_group	TEXT	true
+  item_is_marketplace	TEXT	true
+definition: |
+  SELECT
+  	l."merchantId" AS merchant_id,
+  	l."marketplaceId" AS marketplace_id,
+  	l."sellerSku" AS seller_sku,
+  	m.country_code,
+  	l.doc->>'asin1' AS asin,
+  	l.doc->>'listing-id' AS listing_id,
+  	l.doc->>'item-name' AS item_name,
+  	l.doc->>'item-description' AS item_description,
+  	l.doc->>'item-note' AS item_note,
+  	l.doc->>'item-condition' AS item_condition,
+  	CASE l.doc->>'item-condition'
+  		WHEN '1' THEN 'Used - Like New'
+  		WHEN '2' THEN 'Used - Very Good'
+  		WHEN '3' THEN 'Used - Good'
+  		WHEN '4' THEN 'Used - Acceptable'
+  		WHEN '5' THEN 'Collectible - Like New'
+  		WHEN '6' THEN 'Collectible - Very Good'
+  		WHEN '7' THEN 'Collectible - Good'
+  		WHEN '8' THEN 'Collectible - Acceptable'
+  		WHEN '10' THEN 'Refurbished'
+  		WHEN '11' THEN 'New'
+  		ELSE l.doc->>'item-condition'
+  	END AS item_condition_name,
+  	l.doc->>'status' AS status,
+  	l.doc->>'fulfillment-channel' AS fulfillment_channel,
+  	CASE
+  		WHEN l.doc->>'fulfillment-channel' LIKE 'AMAZON%' THEN 'FBA'
+  		ELSE 'FBM'
+  	END AS fulfillment_channel_type,
+  	(l.doc->>'price')::NUMERIC AS price,
+  	(l.doc->>'quantity')::INTEGER AS quantity,
+  	(l.doc->>'pending-quantity')::INTEGER AS pending_quantity,
+  	l.doc->>'product-id' AS product_id,
+  	l.doc->>'product-id-type' AS product_id_type,
+  	TO_TIMESTAMP(
+  		REGEXP_REPLACE(l.doc->>'open-date', ' (PST|PDT|MST|MDT|CST|CDT|EST|EDT)$', ''),
+  		'YYYY-MM-DD HH24:MI:SS'
+  	) AS open_date,
+  	l.doc->>'merchant-shipping-group' AS merchant_shipping_group,
+  	l.doc->>'item-is-marketplace' AS item_is_marketplace
+  FROM "amzreport_MERCHANT_LISTINGS_ALL" l
+  LEFT JOIN amazon_marketplace m ON l."marketplaceId" = m.marketplace_id
+  WHERE l."deletedAt" IS NULL

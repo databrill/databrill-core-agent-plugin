@@ -1,0 +1,22 @@
+name: "tfl_asns_v1__AsnItem"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "One element of a The Fulfillment Lab (GFS) ASN detail's products, inserts or containers array, keyed (connectorId, asnId, kind, id), where kind discriminates the three. id is the line id and itemId is the product reference; they must not be conflated. Items are populated only by the ASN detail route."
+primaryKey:
+  - "connectorId"
+  - "asnId"
+  - "kind"
+  - "id"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this ASN item
+  asnId	INTEGER		The parent ASN's `asn.id`, joining to `tfl_asns_v1__Asn.id`
+  kind	TEXT		Which ASN array this element came from. Renders TEXT. In the key because a line id is not proven unique ACROSS the three arrays — `inserts` and `containers` were empty on all 12 sampled ASNs, so there is no evidence either way and the key cannot be widened later
+  id	INTEGER		The element's own LINE id (`products[].id`). NOT the product reference — see `itemId`
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
+  itemId	INTEGER	true	`products[].itemId` — the PRODUCT reference, joining to `tfl_products_v1__Inventory.productId`. MEASURED: a line's `itemId` is a real productId while its `id` is a different number, so the two have different meanings. Nullable because the `insert` and `container` element shapes are unobserved
+  expectedQuantity	INTEGER	true	`products[].expectedQuantity`; units this line was expected to deliver. Nullable because the `insert` and `container` element shapes are unobserved
+  receivedQuantity	INTEGER	true	`products[].receivedQuantity`; units actually received against this line. Nullable because the `insert` and `container` element shapes are unobserved
+  doc	JSONB		The verbatim array element from the ASN detail payload; persisted as JSONB. This is the only place the unobserved `insert` and `container` shapes will be recorded in full when they first appear. Typed `Unknown` because no vendored API type exists to pin a struct against

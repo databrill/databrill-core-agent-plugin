@@ -1,0 +1,23 @@
+name: "amazon_marketplace"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "Reference table of Amazon marketplaces: one row per marketplace id, with its short code, display name, country, default currency and language, storefront domain and time zone."
+primaryKey:
+  - "marketplace_id"
+columns: |
+  name	type	nullable
+  marketplace_id	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  marketplace_code	TEXT
+  name	TEXT
+  country_code	TEXT
+  currency	TEXT
+  lang	TEXT
+  domain	TEXT
+  time_zone	TEXT	true
+indexes:
+  - name: "amazon_marketplace__marketplace_code"
+    columns:
+      - "marketplace_code"

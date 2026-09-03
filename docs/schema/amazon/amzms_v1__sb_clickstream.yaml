@@ -1,0 +1,21 @@
+name: "amzms_v1__sb_clickstream"
+kind: "table"
+access: "read"
+category: "Amazon Marketing Stream"
+description: "Amazon Marketing Stream Sponsored Brands clickstream events, append-only: one immutable row per event, keyed by idempotency id within the (advertiser, marketplace, time window) stream. Corrections arrive as new rows, so consumers must SUM over the window rather than take the latest row."
+primaryKey:
+  - "advertiser_id"
+  - "marketplace_id"
+  - "time_window_start"
+  - "idempotency_id"
+columns: |
+  name	type	nullable	description
+  advertiser_id	TEXT		Amazon Advertiser ID (same as merchantId)
+  marketplace_id	TEXT		Amazon Marketplace ID
+  time_window_start	TIMESTAMPTZ		Start of the hourly aggregation window the metrics belong to
+  idempotency_id	TEXT		Per-stream event identity; corrections arrive as new ids
+  campaign_id	TEXT	true	Campaign ID the metrics are attributed to
+  ad_group_id	TEXT	true	Ad group ID the metrics are attributed to
+  ad_id	TEXT	true	Ad ID the metrics are attributed to
+  keyword_id	TEXT	true	Keyword/targeting-expression ID the metrics are attributed to
+  doc	JSONB		Complete event payload as JSONB (metrics live here)

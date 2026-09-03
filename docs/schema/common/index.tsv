@@ -1,0 +1,15 @@
+name	kind	access	columns	category	description
+brand_config_amazon_asin	table	readwrite	10	Brand ontology and product configuration	Customer-editable per-ASIN configuration: the ontology variant and product family an ASIN belongs to, its display labels with optional per-country overrides, and a description.
+brand_config_amazon_attributes	table	readwrite	14	Brand ontology and product configuration	Customer-editable, Amazon-keyed scoped attributes — unit costs, VAT rates, unsellable-return loss, the brand-registry flag and inventory-planning inputs.
+brand_config_amazon_family	table	readwrite	7	Brand ontology and product configuration	Customer-editable product families, grouping related ASINs under an ontology category.
+brand_config_business_attributes	table	readwrite	12	Brand ontology and product configuration	Customer-editable workspace-level business attributes, such as business age, employee count and valuation multiple.
+brand_config_ontology_category	table	readwrite	6	Brand ontology and product configuration	Customer-editable ontology categories: one row per category, holding the authored property values in data and the inherited-and-resolved values in dataResolved.
+brand_config_ontology_metadata	table	readwrite	7	Brand ontology and product configuration	Declares the ontology properties available to category and variant configuration: one row per property, with its value type, allowed values and whether it applies to categories, variants or both.
+brand_config_ontology_variant	table	readwrite	6	Brand ontology and product configuration	Customer-editable ontology variants: one row per merchant SKU, assigned to a category, holding the authored property values in data and the inherited-and-resolved values in dataResolved.
+brand_ontology_amazon_asin	view	read	11	Curated views	Read view of the customer-editable per-ASIN configuration (brand_config_amazon_asin) with its ontology variant and product family resolved, one row per configured ASIN.
+brand_ontology_amazon_family	view	read	6	Curated views	Read view of the customer-editable Amazon product families (brand_config_amazon_family) joined to the ontology category each belongs to, one row per family.
+brand_ontology_category	view	read	4	Curated views	Read view of the customer-editable ontology categories (brand_config_ontology_category), one row per category.
+brand_ontology_variant	view	read	3	Curated views	Read view of the customer-editable ontology variants (brand_config_ontology_variant), one row per merchant SKU, with the category it is assigned to.
+fx_ecb_rate_history	table	read	7	Exchange rates	European Central Bank foreign-exchange reference rates, append-only: one row per (currency, frequency, period).
+fx_ecb_rate_latest	table	read	7	Exchange rates	The most recent European Central Bank foreign-exchange reference rate per (currency, frequency), a cache derived from fx_ecb_rate_history.
+databrill_schema_version	table	read	3	Schema metadata	Records which version of the published Databrill tenant schema contract this database satisfies, one row per component.

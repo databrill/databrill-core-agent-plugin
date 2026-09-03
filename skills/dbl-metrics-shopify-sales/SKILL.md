@@ -2,9 +2,9 @@
 name: dbl-metrics-shopify-sales
 description: Report Shopify store performance from the daily reports — sales, net sales, gross profit, orders, sessions, conversion rate, bounce rate, returning customers. Use when the user asks how the Shopify store is doing, Shopify revenue or traffic for a period, Shopify conversion, why Shopify sales changed, or wants a week-over-week or month-over-month Shopify trend.
 metadata:
-  type: metric
-  audience: client
-  tool: executeSql
+    type: metric
+    audience: client
+    tool: executeSql
 ---
 
 # How is the Shopify store performing?
@@ -15,7 +15,10 @@ row per `(shopId, day)`.
 
 **Read `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first.** These two
 tables carry more traps than any other Shopify family, and every one of them
-returns a plausible wrong number rather than an error.
+returns a plausible wrong number rather than an error. For the declared columns
+and types of any `shopify_*` table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/shopify/index.tsv` and then that table's
+`.yaml` beside it.
 
 ## The four that matter most here
 
@@ -107,7 +110,7 @@ sources count differently.
 
 ## Which days are still moving
 
-`SalesDaily.updatedAt` means *when this day's numbers last changed*, not when we
+`SalesDaily.updatedAt` means _when this day's numbers last changed_, not when we
 last looked. Recent days revise as returns land. If the user is comparing a
 just-ended period, check whether its days are still being revised before
 treating the comparison as settled. On `SessionsDaily` a completed day has never

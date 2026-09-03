@@ -1,0 +1,33 @@
+name: "amzadapi_exports_v1__ad"
+kind: "table"
+access: "read"
+category: "Amazon Ads API"
+description: "One advertising ad per (merchant, marketplace, ad id) from the Amazon Ads API exports endpoint, with its ad group, campaign, ad product, state, delivery status and creative."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "adId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant ID
+  marketplaceId	TEXT		Amazon marketplace ID
+  adId	TEXT		Amazon advertising ad ID
+  creationDateTime	TIMESTAMPTZ		Ad creation timestamp from Amazon
+  lastUpdatedDateTime	TIMESTAMPTZ		Ad last updated timestamp from Amazon
+  adGroupId	TEXT		Amazon advertising ad group ID
+  campaignId	TEXT		Amazon advertising campaign ID
+  adProduct	TEXT		Ad product type: SPONSORED_DISPLAY, SPONSORED_BRANDS, SPONSORED_PRODUCTS
+  state	TEXT		Ad state: ENABLED, PAUSED
+  adType	TEXT		Ad type: PRODUCT_AD, VIDEO, BRAND_VIDEO, PRODUCT_COLLECTION
+  creative	JSONB		Creative configuration: products, videos, customImages, brandLogo, landingPage, headline, brandName (JSONB)
+  deliveryStatus	TEXT		Delivery status: NOT_DELIVERING, DELIVERING
+  deliveryReasons	JSONB	true	Delivery reasons array (e.g., CAMPAIGN_PAUSED) (JSONB)
+  adVersionId	TEXT	true	Ad version ID
+  name	TEXT	true	Ad name (often ASIN value)
+indexes:
+  - name: "amzadapi_exports_v1__ad__campaign_not_delivering"
+    columns:
+      - "merchantId"
+      - "marketplaceId"
+      - "campaignId"
+    where: "state = 'ENABLED' AND \"deliveryStatus\" = 'NOT_DELIVERING'"

@@ -1,0 +1,20 @@
+name: "amzreport_SALES_AND_TRAFFIC__store"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Storefront-wide sales and traffic per (merchant, marketplace, granularity, date) from GET_SALES_AND_TRAFFIC_REPORT — not broken down by SKU — with the report's salesByDate and trafficByDate blocks in sales and traffic."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "dateGranularity"
+  - "date"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  dateGranularity	TEXT
+  date	DATE
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  sales	JSONB
+  traffic	JSONB

@@ -1,0 +1,15 @@
+name: "amzspapi_catalog_items_v20220401__itemattributes"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "The full SP-API Catalog Items 2022-04-01 attribute document per (marketplace_code, asin), stored verbatim in data."
+primaryKey:
+  - "marketplace_code"
+  - "asin"
+columns: |
+  name	type
+  marketplace_code	TEXT
+  asin	TEXT
+  created_at	TIMESTAMPTZ
+  modified_at	TIMESTAMPTZ
+  data	JSONB

@@ -1,0 +1,28 @@
+name: "amzspapi_awd_v2024__InboundShipment"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "An AWD inbound shipment on the supplier-to-AWD leg, one row per (merchantId, shipmentId). Rows are seeded from shipment listings, which touch lastSeenAt, then enriched by a detail call, which sets lastFetchedAt. A listed shipmentUpdatedAt moving past the stored value is what triggers the next detail fetch, including after the shipment has closed."
+primaryKey:
+  - "merchantId"
+  - "shipmentId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT
+  shipmentId	TEXT		AWD shipment ID (STAR- prefix)
+  orderId	TEXT		The AWD inbound order this shipment belongs to (STAR- prefix)
+  externalReferenceId	TEXT	true
+  shipmentStatus	TEXT		InboundShipmentStatus from the API
+  carrierCode	TEXT	true
+  trackingId	TEXT	true
+  warehouseReferenceId	TEXT	true
+  destinationRegion	TEXT	true
+  shipBy	TIMESTAMPTZ	true
+  shipmentCreatedAt	TIMESTAMPTZ		API createdAt
+  shipmentUpdatedAt	TIMESTAMPTZ		API updatedAt; drives the detail-fetch decision
+  lastSeenAt	TIMESTAMPTZ		Touched whenever the shipment appears in a listInboundShipments page
+  lastFetchedAt	TIMESTAMPTZ	true
+  originAddress	JSONB	true
+  destinationAddress	JSONB	true
+  shipmentContainerQuantities	JSONB	true
+  shipmentReceivedQuantity	JSONB	true

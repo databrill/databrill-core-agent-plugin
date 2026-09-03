@@ -1,0 +1,14 @@
+name: "amazon_merchant"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "One row per Amazon seller account (merchant) known to this workspace, with its display name and whether it is currently active."
+primaryKey:
+  - "merchantId"
+columns: |
+  name	type
+  merchantId	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  merchantName	TEXT
+  isActive	BOOLEAN

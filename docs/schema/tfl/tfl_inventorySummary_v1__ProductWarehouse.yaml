@@ -1,0 +1,29 @@
+name: "tfl_inventorySummary_v1__ProductWarehouse"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "The Fulfillment Lab (GFS) inventory movement aggregates for one product at one warehouse over one calendar month, keyed (connectorId, startDate, endDate, productName, warehouseName). Every measure is window-relative, which is why the window is part of the key, and several can go negative. GFS's ALL rollup row is validated and then discarded rather than stored, so an unfiltered SUM is not doubled."
+primaryKey:
+  - "connectorId"
+  - "startDate"
+  - "endDate"
+  - "productName"
+  - "warehouseName"
+columns: |
+  name	type	nullable	check	description
+  connectorId	TEXT			The Databrill connector id of The Fulfillment Lab connector that fetched this summary row
+  startDate	DATE			The window's inclusive first `yyyy-MM-dd` calendar day, ALWAYS an EASTERN (America/New_York) calendar month bound (e.g. 2026-07-01) — the bound is derived in Eastern, never in UTC, because deriving it in UTC would mint a second, silently incompatible key family for the same month. A trailing 31-day window would mint a new primary key every day and pile up overlapping windows that cannot be summed. Stored DATE, not TIMESTAMPTZ
+  endDate	DATE			The window's inclusive last `yyyy-MM-dd` calendar day, ALWAYS an EASTERN (America/New_York) calendar month bound (e.g. 2026-07-31), derived in Eastern and never in UTC, on the same reasoning as `startDate`. Asked for in full even mid-month: MEASURED, a window clamped to today differs from the full-month window on many rows, every one with LOWER `shipped`, so clamping silently drops activity. Stored DATE, not TIMESTAMPTZ
+  productName	TEXT			`row.productName` STORED VERBATIM — no trim, no case folding, no whitespace collapsing, no unicode normalisation. It is the ONLY identity this payload carries, and any normalisation would stop the stored key matching tomorrow's payload, breaking the upsert-in-place identity irreparably under the no-ALTER constraint
+  warehouseName	TEXT		"warehouseName" <> 'ALL'	`row.warehouseSummaries[].warehouseName` (observed: Tampa). A CHECK constraint forbids the value 'ALL': GFS returns an ALL rollup row per product which we validate against the sum of the real rows, log on mismatch, and DISCARD — storing it would double every unfiltered SUM, a silent wrong answer rather than an error
+  createdAt	TIMESTAMPTZ			OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ			OUR row bookkeeping: when this row was last written. Not a GFS field
+  productId	INTEGER	true		DERIVED, not from this payload: resolved from the `/products/inventory` response the same work unit fetched. NULL means the name did not resolve — the earliest signal of a product rename — or that it resolved AMBIGUOUSLY, which yields NULL rather than an arbitrary pick. Never part of the key: it is derived, nullable, and can change for a row already stored
+  beginningInventory	INTEGER			`warehouseSummaries[].beginningInventory`; level at the window's start
+  shipped	INTEGER			`warehouseSummaries[].shipped`; units shipped within the window
+  returnsToInventory	INTEGER			`warehouseSummaries[].returnsToInventory`; units returned to stock
+  miscellaneousAdjustments	INTEGER			`warehouseSummaries[].miscellaneousAdjustments`. GOES NEGATIVE. INTEGER is signed; no constraint, coercion or clamp may reject or alter a negative value
+  otsShipments	INTEGER			`warehouseSummaries[].otsShipments`; movement attributed to off-the-shelf shipments. GOES NEGATIVE, and by thousands of units. INTEGER is signed; do not clamp
+  received	INTEGER			`warehouseSummaries[].received`; units received into the warehouse
+  endingInventory	INTEGER			`warehouseSummaries[].endingInventory`; level at the window's end
+  doc	JSONB			The verbatim `warehouseSummaries[]` element together with its parent `productName`; persisted as JSONB. Typed `Unknown` because no vendored API type exists to pin a struct against

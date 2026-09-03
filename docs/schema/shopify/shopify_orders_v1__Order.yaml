@@ -1,0 +1,56 @@
+name: "shopify_orders_v1__Order"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify Order per (shopId, id), where id is the order's legacyResourceId. Loaded once in full and then swept incrementally by updatedAt; UPSERT-ONLY, so no sweep ever deletes an order. Every money amount is an exact decimal string in NUMERIC with its own currency code beside it, for both the shop and presentment halves of the MoneyBag. Person data stays in doc."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	BIGINT		`Order.legacyResourceId`, the REST Admin API id that appears in the merchant's admin URLs; `UnsignedInt64!` on the pinned API version. THE KEY: the full GID is `gid://shopify/Order/<this>` and is not stored, because nothing here rebuilds one. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written by a sweep. NOT a refresh marker — unlike the products tables nothing in this table is ever deleted for being stamped earlier, because an incremental sweep returns only what changed. Not a Shopify field
+  name	TEXT		`Order.name`, the merchant-facing order number such as `#1001`; `String!`. A business string, not person data
+  shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `Order.createdAt`; `DateTime!`. Prefixed `shopify` so it cannot be confused with our own `createdAt` bookkeeping column
+  shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `Order.updatedAt`; `DateTime!`. This is the field the incremental sweep filters on, but it is NOT the durable watermark: Shopify returns it TRUNCATED TO THE SECOND (decoding the pagination cursor shows that sub-second precision exists and is dropped), so treating a returned value as an exact instant loses up to a second of rows. The sweep keeps its own watermark with an explicit overlap
+  shopifyProcessedAt	TIMESTAMPTZ		SOURCE instant: `Order.processedAt`, when the order was processed by the payment provider; `DateTime!`
+  shopifyClosedAt	TIMESTAMPTZ	true	SOURCE instant: `Order.closedAt`; `DateTime` (nullable), filled on nearly every order
+  shopifyCancelledAt	TIMESTAMPTZ	true	SOURCE instant: `Order.cancelledAt`; `DateTime` (nullable), filled only on cancelled orders
+  displayFinancialStatus	TEXT	true	`Order.displayFinancialStatus`; `OrderDisplayFinancialStatus` — NULLABLE in the schema even though it is filled in practice, so the column is nullable too. Schema.String and NOT Schema.Literal: Shopify may add an enum member in any quarterly version, and a Literal turns that into an ingest failure on a row we could otherwise have stored
+  displayFulfillmentStatus	TEXT		`Order.displayFulfillmentStatus`; `OrderDisplayFulfillmentStatus!`. Schema.String and not a Literal, for the same reason
+  currencyCode	TEXT		`Order.currencyCode`, the shop's currency at the time the order was placed; `CurrencyCode!`, and more than one value can occur on one shop. This is order metadata, NOT the denomination of any column here — every amount below carries its own code
+  test	BOOLEAN		`Order.test`; `Boolean!`. Test orders are rare but real, so it must be filterable rather than assumed away
+  customerId	BIGINT	true	The customer's numeric id, parsed out of `Order.customer.id`. `Customer` is nullable in the schema and occasionally null in practice, so this column is nullable. It joins to `shopify_customers_v1__Customer.id`, which is the same number; no declared foreign key
+  shippingCity	TEXT	true	`Order.shippingAddress.city`. The address itself is nullable
+  shippingProvinceCode	TEXT	true	`Order.shippingAddress.provinceCode`; nullable, filled on nearly every order
+  shippingCountryCodeV2	TEXT	true	`Order.shippingAddress.countryCodeV2`; nullable, filled on nearly every order
+  billingCity	TEXT	true	`Order.billingAddress.city`. The address itself is nullable
+  billingProvinceCode	TEXT	true	`Order.billingAddress.provinceCode`; nullable, filled on nearly every order
+  billingCountryCodeV2	TEXT	true	`Order.billingAddress.countryCodeV2`; nullable, filled on nearly every order
+  totalPriceShopAmount	NUMERIC		`Order.totalPriceSet.shopMoney.amount`; the bag is `MoneyBag!`, so always present
+  totalPriceShopCurrency	TEXT		`Order.totalPriceSet.shopMoney.currencyCode`. The denomination of the column above and of nothing else. More than one value can occur on one shop
+  totalPricePresentmentAmount	NUMERIC		`Order.totalPriceSet.presentmentMoney.amount`, what the buyer was charged in
+  totalPricePresentmentCurrency	TEXT		`Order.totalPriceSet.presentmentMoney.currencyCode`. Differs from the shop half only on rare orders — too rare to rely on, too real to discard
+  subtotalPriceShopAmount	NUMERIC	true	`Order.subtotalPriceSet.shopMoney.amount`. NULLABLE because `subtotalPriceSet` is `MoneyBag` rather than `MoneyBag!`, though filled in practice
+  subtotalPriceShopCurrency	TEXT	true	`Order.subtotalPriceSet.shopMoney.currencyCode`
+  subtotalPricePresentmentAmount	NUMERIC	true	`Order.subtotalPriceSet.presentmentMoney.amount`
+  subtotalPricePresentmentCurrency	TEXT	true	`Order.subtotalPriceSet.presentmentMoney.currencyCode`
+  totalTaxShopAmount	NUMERIC	true	`Order.totalTaxSet.shopMoney.amount`. NULLABLE: `totalTaxSet` is `MoneyBag`
+  totalTaxShopCurrency	TEXT	true	`Order.totalTaxSet.shopMoney.currencyCode`
+  totalTaxPresentmentAmount	NUMERIC	true	`Order.totalTaxSet.presentmentMoney.amount`
+  totalTaxPresentmentCurrency	TEXT	true	`Order.totalTaxSet.presentmentMoney.currencyCode`
+  totalDiscountsShopAmount	NUMERIC	true	`Order.totalDiscountsSet.shopMoney.amount`. NULLABLE: `totalDiscountsSet` is `MoneyBag`
+  totalDiscountsShopCurrency	TEXT	true	`Order.totalDiscountsSet.shopMoney.currencyCode`
+  totalDiscountsPresentmentAmount	NUMERIC	true	`Order.totalDiscountsSet.presentmentMoney.amount`
+  totalDiscountsPresentmentCurrency	TEXT	true	`Order.totalDiscountsSet.presentmentMoney.currencyCode`
+  totalShippingPriceShopAmount	NUMERIC		`Order.totalShippingPriceSet.shopMoney.amount`; the bag is `MoneyBag!`, so always present
+  totalShippingPriceShopCurrency	TEXT		`Order.totalShippingPriceSet.shopMoney.currencyCode`
+  totalShippingPricePresentmentAmount	NUMERIC		`Order.totalShippingPriceSet.presentmentMoney.amount`
+  totalShippingPricePresentmentCurrency	TEXT		`Order.totalShippingPriceSet.presentmentMoney.currencyCode`
+  totalRefundedShopAmount	NUMERIC		`Order.totalRefundedSet.shopMoney.amount`; the bag is `MoneyBag!`, so always present. Zero on an unrefunded order rather than absent
+  totalRefundedShopCurrency	TEXT		`Order.totalRefundedSet.shopMoney.currencyCode`
+  totalRefundedPresentmentAmount	NUMERIC		`Order.totalRefundedSet.presentmentMoney.amount`
+  totalRefundedPresentmentCurrency	TEXT		`Order.totalRefundedSet.presentmentMoney.currencyCode`
+  doc	JSONB		The verbatim validated Order node from the bulk JSONL, persisted as JSONB. Holds `tags`, `email`, `phone`, `note`, the full addresses and everything else the pinned query returns but does not promote, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` because no vendored Shopify type exists to pin a struct against. Never logged

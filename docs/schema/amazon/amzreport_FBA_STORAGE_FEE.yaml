@@ -1,0 +1,39 @@
+name: "amzreport_FBA_STORAGE_FEE"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Estimated monthly FBA storage fees from GET_FBA_STORAGE_FEE_CHARGES_DATA, one row per (merchant, country, month of charge, FNSKU, fulfilment centre, index), with the item's measured volume and average quantity on hand. Region-specific fields stay in extras."
+primaryKey:
+  - "merchant_id"
+  - "country_code"
+  - "month_of_charge"
+  - "fnsku"
+  - "fulfillment_center"
+  - "index"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  country_code	TEXT
+  month_of_charge	TEXT
+  fnsku	TEXT
+  fulfillment_center	TEXT
+  index	INTEGER
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  marketplace_id	TEXT
+  asin	TEXT	true
+  longest_side	NUMERIC	true
+  median_side	NUMERIC	true
+  shortest_side	NUMERIC	true
+  measurement_units	TEXT	true
+  weight	NUMERIC	true
+  weight_units	TEXT	true
+  item_volume	NUMERIC	true
+  volume_units	TEXT	true
+  average_quantity_on_hand	NUMERIC	true
+  average_quantity_pending_removal	NUMERIC	true
+  currency	TEXT	true
+  surcharge_age_of_inventory	NUMERIC	true
+  quantity_with_long_term_storage_fee_charge	NUMERIC	true
+  per_unit_volume	NUMERIC	true
+  extras	JSONB	true

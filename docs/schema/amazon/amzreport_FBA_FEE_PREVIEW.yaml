@@ -1,0 +1,38 @@
+name: "amzreport_FBA_FEE_PREVIEW"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Estimated Amazon selling and fulfilment fees per (merchant, marketplace, SKU), from GET_FBA_ESTIMATED_FBA_FEES_TXT_DATA, with the item's dimensions and weight. Region-specific fields stay in extras. A SKU that leaves the report is soft-deleted by stamping deleted_at rather than removed."
+primaryKey:
+  - "merchant_id"
+  - "marketplace_id"
+  - "sku"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  sku	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  deleted_at	TIMESTAMPTZ	true
+  fnsku	TEXT	true
+  asin	TEXT	true
+  product_group	TEXT	true
+  fulfilled_by	TEXT	true
+  your_price	NUMERIC	true
+  sales_price	NUMERIC	true
+  longest_side	NUMERIC	true
+  median_side	NUMERIC	true
+  shortest_side	NUMERIC	true
+  length_and_girth	NUMERIC	true
+  unit_of_dimension	TEXT	true
+  item_package_weight	NUMERIC	true
+  unit_of_weight	TEXT	true
+  currency	TEXT	true
+  estimated_referral_fee_per_unit	NUMERIC	true
+  estimated_variable_closing_fee	NUMERIC	true
+  estimated_order_handling_fee_per_order	NUMERIC	true
+  estimated_pick_pack_fee_per_unit	NUMERIC	true
+  estimated_weight_handling_fee_per_unit	NUMERIC	true
+  expected_fulfillment_fee_per_unit	NUMERIC	true
+  extras	JSONB	true

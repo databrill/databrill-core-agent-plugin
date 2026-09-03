@@ -1,0 +1,22 @@
+name: "amzspstream_ORDER_CHANGE"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon ORDER_CHANGE notifications, one row per message, with the full notification in payload. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 = generateDeterministicUuidV7(eventTime, notificationId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification EventTime
+  merchantId	TEXT	Seller id from OrderChangeNotification.SellerId
+  marketplaceId	TEXT	Marketplace id from the notification Summary
+  amazonOrderId	TEXT	Amazon order id the change pertains to
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API NotificationVersion from the envelope
+  payloadVersion	TEXT	SP-API PayloadVersion from the envelope
+  payload	JSONB	Unwrapped OrderChangeNotification with SellerId/AmazonOrderId stripped (JSONB)
+indexes:
+  - name: "amzspstream_ORDER_CHANGE__amazonOrderId"
+    columns:
+      - "amazonOrderId"

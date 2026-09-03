@@ -1,0 +1,25 @@
+name: "amzspapi_finances_v20240619__TransactionItemProjectionState"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Completeness state of the Finance item projection, one row per merchant. READY means the projected item rows can be trusted for the recorded extractorVersion; BACKFILLING, VERIFYING, STALE and FAILED all mean they cannot. Having rows, or merely having agreeing counts, does not establish readiness."
+primaryKey:
+  - "merchantId"
+columns: |
+  name	type	nullable	check	description
+  merchantId	TEXT			Amazon Seller ID; the whole primary key
+  extractorVersion	INTEGER		"extractorVersion" > 0	Extractor version this state describes; first version is 1
+  status	TEXT		"status" IN ('BACKFILLING', 'VERIFYING', 'READY', 'STALE', 'FAILED')	BACKFILLING | VERIFYING | READY | STALE | FAILED
+  cursorTransactionKey	TEXT	true
+  snapshotMaxTransactionKey	TEXT	true
+  processedTransactionCount	INTEGER		"processedTransactionCount" >= 0	Transactions processed by the current run
+  sourceTransactionCount	INTEGER		"sourceTransactionCount" >= 0	Source Transactions counted at the last verification
+  sourceItemCount	INTEGER		"sourceItemCount" >= 0	Expected item count summed from parent markers at the last verification
+  projectedItemCount	INTEGER		"projectedItemCount" >= 0	Item-summary rows counted at the last verification
+  invalidTransactionCount	INTEGER		"invalidTransactionCount" >= 0	Transactions whose extraction produced an invalid diagnostic
+  mismatchedTransactionCount	INTEGER		"mismatchedTransactionCount" >= 0	Transactions whose markers, ordinals, counts or source times disagreed
+  startedAt	TIMESTAMPTZ			Start of the current backfill/verification run
+  verifiedAt	TIMESTAMPTZ	true
+  lastError	TEXT	true
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ

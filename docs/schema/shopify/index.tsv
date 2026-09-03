@@ -1,0 +1,13 @@
+name	kind	access	columns	category	description
+shopify_customers_v1__Customer	table	read	17	Shopify	One Shopify Customer per (shopId, id), where id is the customer's legacyResourceId.
+shopify_discounts_v1__Discount	table	read	28	Shopify	One Shopify discount per (shopId, id), where id is a DiscountCodeNode or DiscountAutomaticNode GID.
+shopify_discounts_v1__DiscountRedeemCode	table	read	8	Shopify	One Shopify DiscountRedeemCode per (shopId, id) — a redeemable code belonging to one discount.
+shopify_inventory_v1__InventoryLevel	table	read	20	Shopify	One Shopify InventoryLevel per (shopId, locationId, inventoryItemId) — a natural triple, because a level is the intersection of a location and an item and its own GID carries a query string.
+shopify_locations_v1__Location	table	read	16	Shopify	One Shopify Location per (shopId, id), where id is the location's legacyResourceId.
+shopify_orders_v1__Order	table	read	46	Shopify	One Shopify Order per (shopId, id), where id is the order's legacyResourceId.
+shopify_orders_v1__OrderLineItem	table	read	25	Shopify	One Shopify order line item per (shopId, id), where id is the numeric tail of the LineItem GID and orderId is parsed from the bulk JSONL __parentId.
+shopify_products_v1__Product	table	read	14	Shopify	One Shopify Product per (shopId, id), where id is the product's legacyResourceId.
+shopify_products_v1__ProductVariant	table	read	17	Shopify	One Shopify ProductVariant per (shopId, id), where id is the variant's legacyResourceId and productId is parsed from the bulk JSONL __parentId.
+shopify_reports_v1__SalesDaily	table	read	23	Shopify	One shop-local day of the Shopify ShopifyQL `sales` dataset per (shopId, day).
+shopify_reports_v1__SessionsDaily	table	read	12	Shopify	One shop-local day of the Shopify ShopifyQL `sessions` dataset per (shopId, day).
+shopify_shop_v1__Shop	table	read	7	Shopify	One row per Shopify store naming it: myshopify domain, trading name, timezone and shop currency, keyed by the Shopify shop id.

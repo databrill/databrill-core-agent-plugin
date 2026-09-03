@@ -1,0 +1,71 @@
+name: "amazon_orders_by_day_and_sku"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Daily order-item totals per SKU from amzspapi_orders_v0__OrderItem: one row per (local date, merchant_id, marketplace_id, sku, asin, currency), with the order count, quantities ordered and shipped, and price, tax and promotion totals both including and excluding tax. The date is the marketplace's local date — the marketplace time zone, falling back to the country's and then to UTC. Lines with a zero ordered quantity are excluded."
+columns: |
+  name	type	nullable
+  time_unit	TEXT
+  local_date_first	TEXT
+  local_date_last	TEXT
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  sku	TEXT
+  asin	TEXT	true
+  currency	TEXT	true
+  order_count	INTEGER
+  total_quantity_ordered	INTEGER	true
+  total_quantity_shipped	INTEGER	true
+  total_price	NUMERIC	true
+  total_tax	NUMERIC	true
+  total_promo	NUMERIC	true
+  total_promo_tax	NUMERIC	true
+  total_excl_tax	NUMERIC	true
+  total_incl_tax	NUMERIC	true
+  avg_line_price	NUMERIC	true
+  first_order_time	TIMESTAMPTZ	true
+  last_order_time	TIMESTAMPTZ	true
+definition: |
+  SELECT
+  	'day'::text AS time_unit,
+  	date(o."time" AT TIME ZONE COALESCE(m.time_zone, c.time_zone, 'UTC')) AS local_date_first,
+  	date(o."time" AT TIME ZONE COALESCE(m.time_zone, c.time_zone, 'UTC')) AS local_date_last,
+  	o."merchantId" AS merchant_id,
+  	o."marketplaceId" AS marketplace_id,
+  	o."doc"->>'SellerSKU' AS sku,
+  	o."doc"->>'ASIN' AS asin,
+  	(o."doc"->'ItemPrice')->>'CurrencyCode' AS currency,
+  	count(*) AS order_count,
+  	sum((o."doc"->'QuantityOrdered')::integer) AS total_quantity_ordered,
+  	sum((o."doc"->'QuantityShipped')::integer) AS total_quantity_shipped,
+  	sum(((o."doc"->'ItemPrice')->>'Amount')::numeric) AS total_price,
+  	sum(((o."doc"->'ItemTax')->>'Amount')::numeric) AS total_tax,
+  	sum(((o."doc"->'PromotionDiscount')->>'Amount')::numeric) AS total_promo,
+  	sum(((o."doc"->'PromotionDiscountTax')->>'Amount')::numeric) AS total_promo_tax,
+  	sum(
+  		COALESCE(((o."doc"->'ItemPrice')->>'Amount')::numeric, 0)
+  		- COALESCE(((o."doc"->'PromotionDiscount')->>'Amount')::numeric, 0)
+  	) AS total_excl_tax,
+  	sum(
+  		COALESCE(((o."doc"->'ItemPrice')->>'Amount')::numeric, 0)
+  		+ COALESCE(((o."doc"->'ItemTax')->>'Amount')::numeric, 0)
+  		- COALESCE(((o."doc"->'PromotionDiscount')->>'Amount')::numeric, 0)
+  		- COALESCE(((o."doc"->'PromotionDiscountTax')->>'Amount')::numeric, 0)
+  	) AS total_incl_tax,
+  	avg(((o."doc"->'ItemPrice')->>'Amount')::numeric)::numeric(12,2) AS avg_line_price,
+  	min(o."time") AS first_order_time,
+  	max(o."time") AS last_order_time
+  FROM "amzspapi_orders_v0__OrderItem" o
+  LEFT JOIN "amazon_marketplace" m ON o."marketplaceId" = m."marketplace_id"
+  LEFT JOIN "amazon_country" c ON m."country_code" = c."country_code"
+  WHERE (o."doc"->'QuantityOrdered')::integer > 0
+  GROUP BY
+  	date(o."time" AT TIME ZONE COALESCE(m.time_zone, c.time_zone, 'UTC')),
+  	o."merchantId",
+  	o."marketplaceId",
+  	o."doc"->>'SellerSKU',
+  	o."doc"->>'ASIN',
+  	(o."doc"->'ItemPrice')->>'CurrencyCode'
+  ORDER BY
+  	date(o."time" AT TIME ZONE COALESCE(m.time_zone, c.time_zone, 'UTC')) DESC,
+  	o."doc"->>'SellerSKU';

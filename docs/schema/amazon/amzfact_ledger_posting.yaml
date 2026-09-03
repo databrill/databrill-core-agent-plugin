@@ -1,0 +1,17 @@
+name: "amzfact_ledger_posting"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "One posting of a ledger transaction: a signed amount against an account. The postings of one transactionId sum to zero. Keyed on (transactionId, ordinal) because a multi-unit line produces postings identical in every other column."
+primaryKey:
+  - "transactionId"
+  - "ordinal"
+columns: |
+  name	type	nullable	check	description
+  transactionId	TEXT			The amzfact_ledger_transaction this posting belongs to
+  ordinal	INTEGER		"ordinal" >= 0	Position within the transaction's postings, from 0. Required: a multi-unit line can produce several postings identical in every other column. Also the order the beancount export prints.
+  account	TEXT			Full account name, e.g. Income:Amazon:<sellingPartnerId>:<marketplaceId>:ProductCharges. The scope segments are why two marketplaces can never share an account and a multi-currency total is unrepresentable rather than merely avoided. Profit is derived from the ROOT, never a list.
+  amount	DOUBLE PRECISION			Signed amount: Amazon's breakdown amount NEGATED, or the document's totalAmount unnegated on the settlement leg. The postings of one transaction sum to zero.
+  path	JSONB			Breakdown path from level 1 to the deepest node, as a JSONB array. EMPTY on the settlement leg and the imbalance plug, and that emptiness is the discriminator readers test.
+  sku	TEXT	true		The item this posting came from; null at document grain and on the settlement leg. Null rather than an empty-string sentinel, because a sentinel type-checks everywhere a real SKU is expected and would flow silently into per-SKU joins.
+  asin	TEXT	true

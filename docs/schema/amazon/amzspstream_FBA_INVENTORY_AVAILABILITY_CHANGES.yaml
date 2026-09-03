@@ -1,0 +1,20 @@
+name: "amzspstream_FBA_INVENTORY_AVAILABILITY_CHANGES"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon FBA_INVENTORY_AVAILABILITY_CHANGES notifications. One row per marketplace entry, so a single message fans out into one row per marketplace. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 keyed on (notificationId, marketplaceId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification EventTime
+  merchantId	TEXT	Seller id from Payload.SellerId
+  sku	TEXT	Seller SKU from Payload.SKU
+  fnsku	TEXT	Fulfillment network SKU from Payload.FNSKU
+  asin	TEXT	ASIN from Payload.ASIN
+  marketplaceId	TEXT	Marketplace id from the FulfillmentInventoryByMarketplace entry
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API NotificationVersion from the envelope
+  payloadVersion	TEXT	SP-API PayloadVersion from the envelope
+  payload	JSONB	FulfillmentInventoryByMarketplace entry with MarketplaceId stripped (JSONB)

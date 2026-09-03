@@ -1,0 +1,27 @@
+name: "shopify_products_v1__ProductVariant"
+kind: "table"
+access: "read"
+category: "Shopify"
+description: "One Shopify ProductVariant per (shopId, id), where id is the variant's legacyResourceId and productId is parsed from the bulk JSONL __parentId. Money is an exact decimal string in NUMERIC with the shop currency beside it. Refreshed as a whole set; updatedAt marks which rows the latest successful refresh returned."
+primaryKey:
+  - "shopId"
+  - "id"
+columns: |
+  name	type	nullable	description
+  shopId	BIGINT		The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  id	BIGINT		`ProductVariant.legacyResourceId`, the REST Admin API id that appears in the merchant's admin URLs; `UnsignedInt64!` on the pinned API version. THE KEY: the full GID is `gid://shopify/ProductVariant/<this>` and is not stored, because nothing here rebuilds one. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a Shopify field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping AND the whole-set refresh marker: every row of a successful refresh carries that run's single instant, and rows older than it are deleted for this shop. Not a Shopify field
+  productId	BIGINT		The parent Product's id, parsed out of the bulk JSONL's `__parentId`. NOT a selectable GraphQL field. Always present; a variant without one is a decode failure. Joins to `shopify_products_v1__Product.id`
+  inventoryItemId	BIGINT		The inventory item's numeric id, parsed out of `ProductVariant.inventoryItem.id`; `InventoryItem!` in the schema. The join key to `shopify_inventory_v1__InventoryLevel.inventoryItemId`
+  title	TEXT		`ProductVariant.title`; `String!` (commonly "Default Title")
+  sku	TEXT	true	`ProductVariant.sku`; `String` (NULLABLE in the schema) though usually filled. Kept nullable because one catalogue's SKU discipline is not evidence about every merchant's, and a variant genuinely may carry none
+  barcode	TEXT	true	`ProductVariant.barcode`; `String`, often null
+  position	INTEGER		`ProductVariant.position` within its product; `Int!`
+  inventoryQuantity	INTEGER	true	`ProductVariant.inventoryQuantity`; `Int` (NULLABLE in the schema — Shopify returns none for an untracked variant)
+  price	NUMERIC		`ProductVariant.price`; `Money!`. An exact decimal STRING stored NUMERIC, never a float. Denominated in `currencyCode`
+  compareAtPrice	NUMERIC	true	`ProductVariant.compareAtPrice`; `Money` (nullable) and usually null. Same exact-decimal treatment as `price`, denominated in `currencyCode`
+  currencyCode	TEXT		The currency BOTH amounts above are denominated in. Shopify's scalar Money carries no code, so this is `shop.currencyCode` from `wsid_shopify_shop_v1__Shop`, captured at import time. A products run refuses to write until it is known, so this column is never a guess
+  shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `ProductVariant.createdAt`; `DateTime!`. Prefixed `shopify` so it cannot be confused with our own `createdAt` bookkeeping column
+  shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `ProductVariant.updatedAt`; `DateTime!`. NOT a watermark — this family is a whole-set refresh
+  doc	JSONB		The verbatim validated ProductVariant node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no vendored Shopify type exists

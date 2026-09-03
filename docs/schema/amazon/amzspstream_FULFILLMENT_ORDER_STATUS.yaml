@@ -1,0 +1,19 @@
+name: "amzspstream_FULFILLMENT_ORDER_STATUS"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "Append-only landing table for Amazon FULFILLMENT_ORDER_STATUS notifications, one row per message, carrying the seller fulfillment order id, event type and fulfillment order status. Re-delivering the same notification is a no-op."
+primaryKey:
+  - "id"
+columns: |
+  name	type	description
+  id	TEXT	Deterministic UUIDv7 = generateDeterministicUuidV7(eventTime, notificationId) (primary key)
+  eventTime	TIMESTAMPTZ	Notification EventTime
+  merchantId	TEXT	Seller id from FulfillmentOrderStatusNotification.SellerId
+  sellerFulfillmentOrderId	TEXT	Seller fulfillment order id from FulfillmentOrderStatusNotification.SellerFulfillmentOrderId
+  eventType	TEXT	Event type from FulfillmentOrderStatusNotification.EventType
+  fulfillmentOrderStatus	TEXT	Fulfillment order status from FulfillmentOrderStatusNotification.FulfillmentOrderStatus
+  receivedAt	TIMESTAMPTZ	When the consumer processed the message
+  notificationVersion	TEXT	SP-API NotificationVersion from the envelope
+  payloadVersion	TEXT	SP-API PayloadVersion from the envelope
+  payload	JSONB	Unwrapped FulfillmentOrderStatusNotification with the four promoted keys stripped (JSONB)

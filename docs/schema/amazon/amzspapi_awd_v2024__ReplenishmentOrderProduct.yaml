@@ -1,0 +1,15 @@
+name: "amzspapi_awd_v2024__ReplenishmentOrderProduct"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "One requested product line on an AWD replenishment order, one row per (merchantId, orderId, sku), so replenishment demand is joinable by SKU. quantity is the REQUESTED amount in single product units, unlike the inbound-shipment side, which reports cases. Amazon exposes no shipped quantity for this leg."
+primaryKey:
+  - "merchantId"
+  - "orderId"
+  - "sku"
+columns: |
+  name	type	description
+  merchantId	TEXT
+  orderId	TEXT	The owning replenishment order (repl-<uuid>)
+  sku	TEXT
+  quantity	INTEGER	Requested quantity in single product units (not CASES)

@@ -1,0 +1,12 @@
+name: "databrill_schema_version"
+kind: "table"
+access: "read"
+category: "Schema metadata"
+description: "Records which version of the published Databrill tenant schema contract this database satisfies, one row per component. Written by the vendor's provisioning path and read by the published client package to tell you whether your installed package and this database still agree."
+primaryKey:
+  - "component"
+columns: |
+  name	type	default
+  component	TEXT
+  version	TEXT
+  updatedAt	TIMESTAMPTZ	now()

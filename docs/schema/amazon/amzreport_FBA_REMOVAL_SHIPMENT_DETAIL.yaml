@@ -1,0 +1,27 @@
+name: "amzreport_FBA_REMOVAL_SHIPMENT_DETAIL"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Removal-shipment tracking from GET_FBA_FULFILLMENT_REMOVAL_SHIPMENT_DETAIL_DATA, one row per (merchant, request time, order, SKU, index), with the carrier, tracking number, disposition and shipped quantity."
+primaryKey:
+  - "merchant_id"
+  - "request_time"
+  - "order_id"
+  - "sku"
+  - "index"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  request_time	TIMESTAMPTZ
+  order_id	TEXT
+  sku	TEXT
+  index	INTEGER
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  fnsku	TEXT	true
+  shipment_date	TIMESTAMPTZ	true
+  disposition	TEXT	true
+  shipped_quantity	NUMERIC	true
+  carrier	TEXT	true
+  tracking_number	TEXT	true
+  removal_order_type	TEXT	true

@@ -1,0 +1,90 @@
+name: "amazon_sales_and_traffic"
+kind: "view"
+access: "read"
+category: "Curated views"
+description: "Flattened view of sales and traffic by SKU and date: the amzreport_SALES_AND_TRAFFIC__skuByDay report with every sales and traffic metric extracted into its own column rather than left nested."
+columns: |
+  name	type
+  merchant_id	TEXT
+  marketplace_id	TEXT
+  date	TEXT
+  sku	TEXT
+  parent_asin	TEXT
+  child_asin	TEXT
+  created_at	TIMESTAMPTZ
+  updated_at	TIMESTAMPTZ
+  units_ordered	NUMERIC
+  total_order_items	NUMERIC
+  units_ordered_b2b	NUMERIC
+  total_order_items_b2b	NUMERIC
+  ordered_product_sales	NUMERIC
+  ordered_product_sales_b2b	NUMERIC
+  sessions	NUMERIC
+  page_views	NUMERIC
+  sessions_b2b	NUMERIC
+  page_views_b2b	NUMERIC
+  browser_sessions	NUMERIC
+  browser_page_views	NUMERIC
+  buy_box_percentage	NUMERIC
+  mobile_app_sessions	NUMERIC
+  session_percentage	NUMERIC
+  browser_sessions_b2b	NUMERIC
+  mobile_app_page_views	NUMERIC
+  browser_page_views_b2b	NUMERIC
+  buy_box_percentage_b2b	NUMERIC
+  page_views_percentage	NUMERIC
+  mobile_app_sessions_b2b	NUMERIC
+  mobile_app_page_views_b2b	NUMERIC
+  unit_session_percentage	NUMERIC
+  browser_session_percentage	NUMERIC
+  unit_session_percentage_b2b	NUMERIC
+  browser_page_views_percentage	NUMERIC
+  mobile_app_session_percentage	NUMERIC
+  mobile_app_page_views_percentage	NUMERIC
+definition: |
+  SELECT
+    "merchantId" as merchant_id,
+    "marketplaceId" as marketplace_id,
+    "date" as date,
+    "sku" as sku,
+    "parentAsin" as parent_asin,
+    "childAsin" as child_asin,
+    "createdAt" as created_at,
+    "updatedAt" as updated_at,
+
+    -- Sales metrics
+    (sales->>'unitsOrdered')::decimal as units_ordered,
+    (sales->>'totalOrderItems')::decimal as total_order_items,
+    (sales->>'unitsOrderedB2B')::decimal as units_ordered_b2b,
+    (sales->>'totalOrderItemsB2B')::decimal as total_order_items_b2b,
+    (sales->'orderedProductSales'->>'amount')::decimal as ordered_product_sales,
+    (sales->'orderedProductSalesB2B'->>'amount')::decimal as ordered_product_sales_b2b,
+
+    -- Traffic metrics
+    (traffic->>'sessions')::decimal as sessions,
+    (traffic->>'pageViews')::decimal as page_views,
+    (traffic->>'sessionsB2B')::decimal as sessions_b2b,
+    (traffic->>'pageViewsB2B')::decimal as page_views_b2b,
+    (traffic->>'browserSessions')::decimal as browser_sessions,
+    (traffic->>'browserPageViews')::decimal as browser_page_views,
+    (traffic->>'buyBoxPercentage')::decimal as buy_box_percentage,
+    (traffic->>'mobileAppSessions')::decimal as mobile_app_sessions,
+    (traffic->>'sessionPercentage')::decimal as session_percentage,
+    (traffic->>'browserSessionsB2B')::decimal as browser_sessions_b2b,
+    (traffic->>'mobileAppPageViews')::decimal as mobile_app_page_views,
+    (traffic->>'browserPageViewsB2B')::decimal as browser_page_views_b2b,
+    (traffic->>'buyBoxPercentageB2B')::decimal as buy_box_percentage_b2b,
+    (traffic->>'pageViewsPercentage')::decimal as page_views_percentage,
+    (traffic->>'mobileAppSessionsB2B')::decimal as mobile_app_sessions_b2b,
+    (traffic->>'mobileAppPageViewsB2B')::decimal as mobile_app_page_views_b2b,
+    (traffic->>'unitSessionPercentage')::decimal as unit_session_percentage,
+    (traffic->>'browserSessionPercentage')::decimal as browser_session_percentage,
+    (traffic->>'unitSessionPercentageB2B')::decimal as unit_session_percentage_b2b,
+    (traffic->>'browserPageViewsPercentage')::decimal as browser_page_views_percentage,
+    (traffic->>'mobileAppSessionPercentage')::decimal as mobile_app_session_percentage,
+    (traffic->>'mobileAppPageViewsPercentage')::decimal as mobile_app_page_views_percentage
+
+  FROM "amzreport_SALES_AND_TRAFFIC__skuByDay"
+  ORDER BY
+    date desc,
+    sku asc

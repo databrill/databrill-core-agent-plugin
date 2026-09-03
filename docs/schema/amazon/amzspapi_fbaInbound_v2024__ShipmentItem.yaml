@@ -1,0 +1,21 @@
+name: "amzspapi_fbaInbound_v2024__ShipmentItem"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "One line item on an FBA inbound shipment, one row per (merchantId, shipmentId, index), where index is the position of the line within one full walk of that shipment's items. There is no natural key: Amazon returns several entries for the same msku in one shipment that differ only in quantity, so each walk deletes the shipment's rows and reinserts them. quantity is the planned and shipped quantity; received quantity is not exposed here and comes from amzreport_LEDGER_DETAIL through the shipment confirmation id."
+primaryKey:
+  - "merchantId"
+  - "shipmentId"
+  - "index"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT
+  shipmentId	TEXT
+  index	INTEGER		1-based position of the line item within one full listShipmentItems walk
+  msku	TEXT
+  fnsku	TEXT	true
+  asin	TEXT	true
+  quantity	INTEGER	true
+  labelOwner	TEXT	true
+  prepInstructions	JSONB	true
+  lastSeenAt	TIMESTAMPTZ	true

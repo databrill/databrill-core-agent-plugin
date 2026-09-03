@@ -1,0 +1,25 @@
+name: "amzreport_SEARCH_CATALOG_PERFORMANCE"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Brand Analytics search catalogue performance per ASIN and reporting period, from GET_BRAND_ANALYTICS_SEARCH_CATALOG_PERFORMANCE_REPORT. The impression, click, cart-add and purchase blocks hold absolute metrics; unlike amzreport_SEARCH_QUERY_PERFORMANCE there is no search-query dimension."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "timeUnit"
+  - "dateFirst"
+  - "asin"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  timeUnit	TEXT
+  dateFirst	DATE
+  dateLast	DATE
+  asin	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  impressionData	JSONB
+  clickData	JSONB
+  cartAddData	JSONB
+  purchaseData	JSONB

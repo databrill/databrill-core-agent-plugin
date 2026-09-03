@@ -52,6 +52,10 @@ lagging connector drops out. `tfl_products_v1__Inventory` carries the same
 current on-hand without the warehouse split and can hold products that have no
 warehouse row, so the two row counts differ legitimately.
 
+For the declared columns and types of any `tfl_*` table, read
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/tfl/index.tsv` and then that table's `.yaml`
+beside it.
+
 Amazon FBA stock is a different fulfilment network: see
 `dbl-metrics-amazon-inventory`. Never add TFL and Amazon units into one figure
 without labelling which network each part comes from.

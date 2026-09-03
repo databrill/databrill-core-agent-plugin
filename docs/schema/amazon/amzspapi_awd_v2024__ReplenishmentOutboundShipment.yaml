@@ -1,0 +1,16 @@
+name: "amzspapi_awd_v2024__ReplenishmentOutboundShipment"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "An outbound shipment summary on an AWD replenishment order, one row per (merchantId, shipmentId) — the only record of the AWD-to-FBA shipping leg, which is why it is a table rather than JSON on the order. Summary-only by Amazon's design: these shipment ids are in a different namespace from inbound shipment ids and have no detail call, so no per-SKU quantities exist for this leg. DELIVERED and RECEIVED are the practical terminal states."
+primaryKey:
+  - "merchantId"
+  - "shipmentId"
+columns: |
+  name	type	description
+  merchantId	TEXT
+  shipmentId	TEXT	Outbound shipment ID (repl-ship-<uuid>); NOT fetchable via getInboundShipment
+  orderId	TEXT	The owning replenishment order (repl-<uuid>)
+  shipmentStatus	TEXT	OutboundShipmentStatus; DELIVERED/RECEIVED are the practical terminal states
+  shipmentCreatedAt	TIMESTAMPTZ	API createdAt
+  shipmentUpdatedAt	TIMESTAMPTZ	API updatedAt

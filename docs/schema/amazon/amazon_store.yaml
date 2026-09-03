@@ -1,0 +1,19 @@
+name: "amazon_store"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "One row per (merchant, marketplace) storefront the seller sells on, with its marketplace code, country and display name. isReal is false for the synthetic entries Amazon returns alongside genuine storefronts, such as the Non-Amazon set and the invoicing shadow marketplace."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+columns: |
+  name	type
+  merchantId	TEXT
+  marketplaceId	TEXT
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  marketplaceCode	TEXT
+  countryCode	TEXT
+  storeName	TEXT
+  isActive	BOOLEAN
+  isReal	BOOLEAN

@@ -1,0 +1,24 @@
+name: "amzspapi_searchCatalogItems_v2020__target"
+kind: "table"
+access: "read"
+category: "Amazon catalog"
+description: "Registry of SP-API searchCatalogItems scrape units: one row per (merchant, marketplace, keyword, locale), addressed by the deterministic targetId that keys its scrapes and ranks."
+primaryKey:
+  - "targetId"
+columns: |
+  name	type	description
+  targetId	BIGINT	Signed BIGINT primary key; a deterministic hash of (workspace, merchantId, marketplaceId, keyword, locale), so the same search target always gets the same id
+  merchantId	TEXT	Amazon Seller ID
+  marketplaceId	TEXT	Amazon Marketplace ID
+  keyword	TEXT	The search term scraped from SP-API's searchCatalogItems endpoint
+  locale	TEXT	Resolved marketplace defaultLanguageCode for this scrape unit
+  createdAt	TIMESTAMPTZ	When this target row was first created
+  updatedAt	TIMESTAMPTZ	When this target row was last updated
+indexes:
+  - name: "amzspapi_searchCatalogItems_v2020__target__merchantId__marketplaceId__keyword__locale"
+    columns:
+      - "merchantId"
+      - "marketplaceId"
+      - "keyword"
+      - "locale"
+    unique: true

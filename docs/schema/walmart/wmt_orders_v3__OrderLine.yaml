@@ -1,0 +1,28 @@
+name: "wmt_orders_v3__OrderLine"
+kind: "table"
+access: "read"
+category: "Walmart"
+description: "One line of a Walmart Marketplace order, keyed (connectorId, purchaseOrderId, lineNumber). status, trackingNumber and carrierName are taken from the first order-line-status element; the full array is kept in doc, so a quantity-weighted status can be recomputed without a re-fetch."
+primaryKey:
+  - "connectorId"
+  - "purchaseOrderId"
+  - "lineNumber"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of the Walmart connector that fetched this line
+  purchaseOrderId	TEXT		The parent order's `order.purchaseOrderId`
+  lineNumber	TEXT		`orderLine.lineNumber`; a string in the payload, not a number
+  sku	TEXT		`orderLine.item.sku`
+  productName	TEXT	true
+  quantity	INTEGER		`orderLine.orderLineQuantity.amount`, which arrives as a STRING and is parsed to an int
+  unitPrice	NUMERIC	true
+  shippingPrice	NUMERIC	true
+  taxAmount	NUMERIC	true
+  status	TEXT		`orderLineStatuses.orderLineStatus[0].status`, falling back to the literal 'Unknown'. This is the ONLY place Walmart exposes order status — the order header carries none. Examples: Created, Acknowledged, Shipped, Delivered, Cancelled
+  fulfillmentType	TEXT	true
+  trackingNumber	TEXT	true
+  carrierName	TEXT	true
+  time	TIMESTAMPTZ		The PARENT ORDER's orderDate (epoch millis inbound), copied onto the line so the line table can be scanned by order date without a join
+  doc	JSONB		The full verbatim orderLine payload, INCLUDING the complete orderLineStatus array that the `status` column collapses to element [0]; persisted as JSONB. Typed `Unknown` rather than a struct because no vendored API type exists to pin a struct against
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ

@@ -1,0 +1,41 @@
+name: "amzreport_SETTLEMENT_V2"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Transaction rows of a V2 settlement report (GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_V2), one row per (merchant, settlement, index), where index is the 1-based position in the report excluding its summary row. The settlement's own totals are in amzreport_SETTLEMENT_V2__summary."
+primaryKey:
+  - "merchant_id"
+  - "settlement_id"
+  - "index"
+columns: |
+  name	type	nullable
+  merchant_id	TEXT
+  settlement_id	TEXT
+  index	INTEGER
+  transaction_type	TEXT	true
+  order_id	TEXT	true
+  merchant_order_id	TEXT	true
+  adjustment_id	TEXT	true
+  shipment_id	TEXT	true
+  marketplace_name	TEXT	true
+  amount_type	TEXT	true
+  amount_description	TEXT	true
+  amount	NUMERIC	true
+  fulfillment_id	TEXT	true
+  posted_date_time	TIMESTAMPTZ	true
+  order_item_code	TEXT	true
+  merchant_order_item_id	TEXT	true
+  merchant_adjustment_item_id	TEXT	true
+  sku	TEXT	true
+  quantity_purchased	INTEGER	true
+  promotion_id	TEXT	true
+indexes:
+  - name: "amzreport_SETTLEMENT_V2__posted_date_time"
+    columns:
+      - "posted_date_time"
+    using: "BRIN"
+  - name: "amzreport_SETTLEMENT_V2__merchant_id__order_id__sku"
+    columns:
+      - "merchant_id"
+      - "order_id"
+      - "sku"

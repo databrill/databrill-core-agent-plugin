@@ -1,0 +1,42 @@
+name: "amzfact_fnsku_fbaInventory"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "FBA inventory at the physical grain: one row per (merchant, marketplace, FNSKU), with the whole quantity tree flattened. Derived from amzspapi_fbaInventory_v1__InventorySummary, whose per-seller-SKU grain repeats a commingled pool once per label and overstates units by ~58%."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "fnsku"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant (seller) id owning the pool
+  marketplaceId	TEXT		Marketplace the quantities were reported for; quantities are per marketplace
+  fnsku	TEXT		Amazon fulfillment network SKU — the physical pool. Equals the ASIN for commingled items.
+  createdAt	TIMESTAMPTZ
+  updatedAt	TIMESTAMPTZ
+  asin	TEXT	true	ASIN of the pool, denormalised to save a join on every rollup
+  condition	TEXT	true	Item condition as the seller described it. Not part of the key; the writer reports a pool whose summaries disagree on it.
+  source	TEXT		Which writer last wrote this row. A literal union so a second source needs no DDL.
+  observedAtPoll	TIMESTAMPTZ	true	Instant the poll response reported this state, not our write clock
+  observedAtStream	TIMESTAMPTZ	true	Instant the notification stream reported this state. Always null until that writer exists.
+  contentHash	TEXT		Digest over the quantity and identity state, used as the upsert's whereDistinct guard so an unchanged pool is not rewritten
+  totalQuantity	INTEGER	true
+  fulfillableQuantity	INTEGER	true
+  inboundWorkingQuantity	INTEGER	true
+  inboundShippedQuantity	INTEGER	true
+  inboundReceivingQuantity	INTEGER	true
+  totalReservedQuantity	INTEGER	true
+  pendingCustomerOrderQuantity	INTEGER	true
+  pendingTransshipmentQuantity	INTEGER	true
+  fcProcessingQuantity	INTEGER	true
+  totalResearchingQuantity	INTEGER	true
+  researchingQuantityInShortTerm	INTEGER	true
+  researchingQuantityInMidTerm	INTEGER	true
+  researchingQuantityInLongTerm	INTEGER	true
+  totalUnfulfillableQuantity	INTEGER	true
+  customerDamagedQuantity	INTEGER	true
+  warehouseDamagedQuantity	INTEGER	true
+  distributorDamagedQuantity	INTEGER	true
+  carrierDamagedQuantity	INTEGER	true
+  defectiveQuantity	INTEGER	true
+  expiredQuantity	INTEGER	true

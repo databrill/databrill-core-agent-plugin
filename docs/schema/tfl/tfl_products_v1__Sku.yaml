@@ -1,0 +1,16 @@
+name: "tfl_products_v1__Sku"
+kind: "table"
+access: "read"
+category: "The Fulfillment Lab"
+description: "One The Fulfillment Lab (GFS) SKU header per (connectorId, sku), with its vendor-assigned type. The products a SKU ships, and their bundle multipliers, are in tfl_products_v1__SkuProduct."
+primaryKey:
+  - "connectorId"
+  - "sku"
+columns: |
+  name	type	nullable	description
+  connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this SKU
+  sku	TEXT		`sku.sku`, the merchant's SKU string. Unique, and used as the identity
+  createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
+  updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
+  type	TEXT	true	`sku.type`; observed "Shippable Sku", "Excluded Sku" and one more. Schema.String and NOT Schema.Literal ON PURPOSE: these are vendor strings that can gain members without notice, and a Literal would make a new value a decode failure for the whole page
+  doc	JSONB		The full verbatim SKU payload from the API, including the `products[]` array that is materialised into `tfl_products_v1__SkuProduct`; persisted as JSONB. Typed `Unknown` because no vendored API type exists to pin a struct against
