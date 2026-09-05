@@ -28,4 +28,4 @@ columns: |
   qualityControl	INTEGER	true	`quantities(names: ["quality_control"])`. Nullable for the reason given on `reserved`
   shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `InventoryLevel.createdAt`; `DateTime!`
   shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `InventoryLevel.updatedAt`; `DateTime!`. DO NOT USE IT AS A FRESHNESS SIGNAL AND DO NOT FILTER ON IT: a level can carry a per-quantity `updatedAt` newer than this value, which is why this family keeps no watermark. `fetchedAt` is the column that answers when we last confirmed the row
-  doc	JSONB		The verbatim validated InventoryLevel node from the bulk JSONL, persisted as JSONB, including its `__parentId` and the per-quantity `updatedAt` instants that no column promotes. Typed `Unknown` because no vendored Shopify type exists
+  doc	JSONB		The verbatim validated InventoryLevel node from the bulk JSONL, persisted as JSONB, including its `__parentId` and the per-quantity `updatedAt` instants that no column promotes. Typed `Unknown` because no copied-in Shopify type exists

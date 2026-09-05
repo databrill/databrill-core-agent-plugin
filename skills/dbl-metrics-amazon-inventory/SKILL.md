@@ -9,6 +9,11 @@ metadata:
 
 # How much Amazon FBA stock is there?
 
+On a user- or organization-scoped connector, call `listWorkspaces`, select the
+workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
+connector URL supplies that `wsid`. Never infer it from stores or from a registry
+that happens to contain one entry.
+
 There is no dedicated MCP tool for FBA stock levels yet. Answer with the `core`
 MCP server's `executeSql` against **`amzfact_fnsku_fbaInventory`**, and use no
 other table for a units total.

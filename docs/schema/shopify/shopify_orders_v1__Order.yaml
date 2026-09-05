@@ -53,4 +53,4 @@ columns: |
   totalRefundedShopCurrency	TEXT		`Order.totalRefundedSet.shopMoney.currencyCode`
   totalRefundedPresentmentAmount	NUMERIC		`Order.totalRefundedSet.presentmentMoney.amount`
   totalRefundedPresentmentCurrency	TEXT		`Order.totalRefundedSet.presentmentMoney.currencyCode`
-  doc	JSONB		The verbatim validated Order node from the bulk JSONL, persisted as JSONB. Holds `tags`, `email`, `phone`, `note`, the full addresses and everything else the pinned query returns but does not promote, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` because no vendored Shopify type exists to pin a struct against. Never logged
+  doc	JSONB		The verbatim validated Order node from the bulk JSONL, persisted as JSONB. Holds `tags`, `email`, `phone`, `note`, the full addresses and everything else the pinned query returns but does not promote, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` because no copied-in Shopify type exists to pin a struct against. Never logged

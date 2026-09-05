@@ -9,6 +9,11 @@ metadata:
 
 # What is in the Shopify catalogue?
 
+On a user- or organization-scoped connector, call `listWorkspaces`, select the
+workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
+connector URL supplies that `wsid`. Never infer it from stores or from a registry
+that happens to contain one entry.
+
 Use `executeSql` against `shopify_products_v1__Product` and
 `shopify_products_v1__ProductVariant`, one row per `(shopId, id)`, the variant
 carrying its parent `productId`.

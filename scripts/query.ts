@@ -15,7 +15,7 @@ interface QueryArguments {
 	readonly format: OutputFormat;
 	readonly output?: string;
 	readonly params: readonly QueryParameter[];
-	readonly wsid?: string;
+	readonly wsid: string;
 }
 
 const ALLOWED_START = /^(SELECT|WITH|EXPLAIN|SHOW|TABLE|VALUES)\b/i;
@@ -98,7 +98,7 @@ function parseArguments(args: readonly string[]): QueryArguments {
 
 	if (positional.length !== 1) {
 		throw new Error(
-			"Usage: query.ts [--wsid ID] [--format json|csv] [--output FILE] [--params JSON_ARRAY] QUERY.sql",
+			"Usage: query.ts --wsid ID [--format json|csv] [--output FILE] [--params JSON_ARRAY] QUERY.sql",
 		);
 	}
 
@@ -167,7 +167,6 @@ async function main(): Promise<void> {
 		max: 1,
 		idle_timeout: 5,
 		connect_timeout: 10,
-		connection: { search_path: connection.schema },
 	});
 
 	try {

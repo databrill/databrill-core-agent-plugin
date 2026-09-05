@@ -7,7 +7,7 @@ tfl_orders_v1__OrderItem	table	read	12	The Fulfillment Lab	One line of a The Ful
 tfl_otsShipments_v1__OtsShipment	table	read	16	The Fulfillment Lab	One The Fulfillment Lab (GFS) off-the-shelf shipment header per (connectorId, id), with its warehouse, status, category and reference identifiers.
 tfl_otsShipments_v1__OtsShipmentItem	table	read	8	The Fulfillment Lab	One line of a The Fulfillment Lab (GFS) off-the-shelf shipment, keyed (connectorId, otsShipmentId, productId).
 tfl_products_v1__Inventory	table	read	9	The Fulfillment Lab	Current The Fulfillment Lab (GFS) product inventory per (connectorId, productId) — quantity, allocated and available — overwritten each cycle.
-tfl_products_v1__Sku	table	read	6	The Fulfillment Lab	One The Fulfillment Lab (GFS) SKU header per (connectorId, sku), with its vendor-assigned type.
+tfl_products_v1__Sku	table	read	6	The Fulfillment Lab	One The Fulfillment Lab (GFS) SKU header per (connectorId, sku), with its GFS-assigned type.
 tfl_products_v1__SkuProduct	table	read	8	The Fulfillment Lab	Maps a The Fulfillment Lab (GFS) SKU to the products it ships, one row per (connectorId, sku, productId), with qtyMultiplier expressing bundles.
 tfl_products_v1__WarehouseInventory	table	read	11	The Fulfillment Lab	Daily snapshot of The Fulfillment Lab (GFS) warehouse inventory per (connectorId, localdate, productId, warehouseId).
 tfl_shipments_v1__Shipment	table	read	11	The Fulfillment Lab	One The Fulfillment Lab (GFS) shipment per (connectorId, id), with its fulfilment, container, shipping and total charges.

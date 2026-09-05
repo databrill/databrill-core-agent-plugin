@@ -25,8 +25,9 @@ recommendations.
 - `maxAvailable`: optional maximum sellable units for low-stock questions.
 - `limit`: 1–1000 rows, default 250.
 
-On a multi-workspace connector, call `listWorkspaces` and pass the intended
-`wsid`. TFL tools cannot infer a workspace from an Amazon country.
+On user- and organization-scoped connectors, call `listWorkspaces` and pass the
+selected `wsid`, even if only one is listed. A workspace-scoped connector
+supplies it in the URL. TFL tools never infer a workspace from a country.
 
 ## Read the result
 

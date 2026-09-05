@@ -36,8 +36,9 @@ intentionally fixes the connector to that one workspace.
 Then verify data with:
 
 ```text
-Using Databrill, show which Amazon stores are available, then summarize traffic
-and conversion for the last four complete weeks. State the latest data date.
+Using Databrill, list my workspaces, select the intended wsid explicitly, show
+which Amazon stores it has, then summarize traffic and conversion for the last
+four complete weeks. State the workspace and latest data date.
 ```
 
 ## Cowork
@@ -101,11 +102,12 @@ then start a new session. Also check
 [What data the MCP returns](data-coverage.md): some database data does not yet
 have a dedicated MCP tool.
 
-### A multi-workspace question is ambiguous
+### A data call says wsid is required
 
 Ask Claude to call `listWorkspaces`, select a workspace id, then make one data
-call per workspace. Do not total currencies across workspaces unless you also
-specify a currency-conversion method.
+call per workspace with that `wsid`. This also applies when the user-scoped or
+organization-scoped directory contains one workspace. Do not total currencies
+across workspaces unless you also specify a currency-conversion method.
 
 ## Official Claude references
 

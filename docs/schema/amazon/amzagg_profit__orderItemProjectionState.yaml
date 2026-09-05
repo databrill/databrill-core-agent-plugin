@@ -2,7 +2,7 @@ name: "amzagg_profit__orderItemProjectionState"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Completeness state of the amzagg_profit__orderItem projection, one row per merchant. READY-gating on this row, including the covered date window, is what makes a delete-and-replace rebuild safe to serve."
+description: "Completeness state of the amzagg_profit__orderItem projection, one row per merchant. Reading only a READY scope on this row, including the covered date window, is what makes a delete-and-replace rebuild safe to serve."
 primaryKey:
   - "merchantId"
 columns: |

@@ -14,8 +14,10 @@ Fetch advertising metrics from the **`core`** MCP server's
 
 ## Call
 
-If the connector exposes `listWorkspaces`, select the intended workspace and
-pass its `wsid`. Query workspaces separately and keep currencies separate.
+On user- and organization-scoped connectors, call `listWorkspaces` and pass the
+selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
+infer a target from `stores` or a one-entry directory. Query workspaces
+separately and keep currencies separate.
 
 `loadAds` parameters:
 

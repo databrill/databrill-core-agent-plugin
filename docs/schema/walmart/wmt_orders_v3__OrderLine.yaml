@@ -23,6 +23,6 @@ columns: |
   trackingNumber	TEXT	true
   carrierName	TEXT	true
   time	TIMESTAMPTZ		The PARENT ORDER's orderDate (epoch millis inbound), copied onto the line so the line table can be scanned by order date without a join
-  doc	JSONB		The full verbatim orderLine payload, INCLUDING the complete orderLineStatus array that the `status` column collapses to element [0]; persisted as JSONB. Typed `Unknown` rather than a struct because no vendored API type exists to pin a struct against
+  doc	JSONB		The full verbatim orderLine payload, INCLUDING the complete orderLineStatus array that the `status` column collapses to element [0]; persisted as JSONB. Typed `Unknown` rather than a struct because no copied-in API type exists to pin a struct against
   createdAt	TIMESTAMPTZ
   updatedAt	TIMESTAMPTZ

@@ -9,6 +9,11 @@ metadata:
 
 # What sold on Shopify?
 
+On a user- or organization-scoped connector, call `listWorkspaces`, select the
+workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
+connector URL supplies that `wsid`. Never infer it from stores or from a registry
+that happens to contain one entry.
+
 Use `executeSql` against `shopify_orders_v1__Order` (one row per
 `(shopId, id)`) and `shopify_orders_v1__OrderLineItem` (one row per line, parent
 `orderId`).

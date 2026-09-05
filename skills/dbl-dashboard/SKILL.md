@@ -7,6 +7,11 @@ description: Design or construct a dashboard, report, chart, table, or recurring
 
 Read `${CLAUDE_PLUGIN_ROOT}/docs/dashboards.md` before selecting data or charts.
 
+On a user- or organization-scoped connector, call `listWorkspaces`, select the
+workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
+connector URL supplies that `wsid`. Never infer it from stores or from a registry
+that happens to contain one entry.
+
 Start by writing the dashboard contract: audience/decision, workspace and
 stores, complete periods, freshness, metric definitions, grain, filters,
 currency, and output. Use dedicated MCP tools for supported measures; use

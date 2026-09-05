@@ -32,4 +32,4 @@ columns: |
   originalTotalCurrency	TEXT		`LineItem.originalTotalSet.shopMoney.currencyCode`
   discountedTotalAmount	NUMERIC		`LineItem.discountedTotalSet.shopMoney.amount`; `MoneyBag!`, so always present
   discountedTotalCurrency	TEXT		`LineItem.discountedTotalSet.shopMoney.currencyCode`
-  doc	JSONB		The verbatim validated LineItem node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no vendored Shopify type exists. Never logged
+  doc	JSONB		The verbatim validated LineItem node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no copied-in Shopify type exists. Never logged

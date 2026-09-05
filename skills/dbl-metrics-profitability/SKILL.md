@@ -14,8 +14,10 @@ Fetch the per-advertised-ASIN rollup and profitability from the
 
 ## Call
 
-If the connector exposes `listWorkspaces`, select the intended workspace and
-pass its `wsid`. Cost inputs and currencies belong to that workspace only.
+On user- and organization-scoped connectors, call `listWorkspaces` and pass the
+selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
+infer a target from `stores` or a one-entry directory. Cost inputs and
+currencies belong to that workspace only.
 
 `loadEconomics` parameters:
 

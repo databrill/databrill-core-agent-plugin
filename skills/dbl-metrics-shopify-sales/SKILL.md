@@ -9,6 +9,11 @@ metadata:
 
 # How is the Shopify store performing?
 
+On a user- or organization-scoped connector, call `listWorkspaces`, select the
+workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
+connector URL supplies that `wsid`. Never infer it from stores or from a registry
+that happens to contain one entry.
+
 There is no dedicated MCP tool for Shopify. Use `executeSql` against
 `shopify_reports_v1__SalesDaily` and `shopify_reports_v1__SessionsDaily`, one
 row per `(shopId, day)`.

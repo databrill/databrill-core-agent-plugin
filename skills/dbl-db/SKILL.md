@@ -9,6 +9,10 @@ Prefer a dedicated MCP tool whenever it covers the requested metric. Read
 `${CLAUDE_PLUGIN_ROOT}/docs/common-questions.md` and
 `${CLAUDE_PLUGIN_ROOT}/docs/data-coverage.md` to route the question.
 
+On user- and organization-scoped connectors, call `listWorkspaces` and pass the
+selected `wsid` to every data tool. A workspace-scoped connector supplies the
+wsid in its URL. Never infer a target from `stores` or from a one-entry directory.
+
 If no MCP tool covers it:
 
 1. identify the workspace, marketplace, period, grain, and currency;

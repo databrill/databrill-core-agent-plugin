@@ -2,9 +2,8 @@
 
 The plugin has one setting: `mcp_url`. Leaving it empty is the normal setup: the
 plugin then uses the user-scoped URL `https://mcp.databrill.com/mcp/user`, which
-covers every workspace the signed-in Databrill user can access. Most users have
-exactly one workspace, so that is the workspace they get, without anyone having
-to look up an id.
+covers every workspace the signed-in Databrill user can access. Every data call
+on that scope still names its workspace explicitly.
 
 Set the value only to narrow the scope deliberately, using a URL supplied by
 Databrill. The shared package contains no client ids, workspace ids, database
@@ -26,8 +25,7 @@ https://mcp.databrill.com/mcp/user
 
 The connector exposes every workspace the signed-in user can currently access,
 including workspaces in different organizations. It exposes `listWorkspaces`,
-and data tools accept an optional `wsid`. For a single-workspace user this
-behaves like a single-workspace connector.
+and every data tool requires `wsid`, even when the directory contains one entry.
 
 ### One workspace
 
@@ -50,7 +48,7 @@ Use:
 https://mcp.databrill.com/mcp/org/{orgId}
 ```
 
-The connector exposes `listWorkspaces`. Data tools accept an optional `wsid`.
+The connector exposes `listWorkspaces`. Every data tool requires `wsid`.
 Choose this when the intended workspaces are in one Databrill organization and
 unrelated user memberships should remain outside the Claude session.
 
@@ -87,16 +85,17 @@ them is `dbl-brand-config`.
 each analysis:
 
 1. list and identify the intended workspaces;
-2. make one metric call per workspace, passing `wsid` when required;
+2. make one metric call per workspace and pass its `wsid`;
 3. preserve each workspace label and marketplace in the result;
 4. compare like periods and definitions;
 5. do not add monetary values in different currencies without an explicit FX
    method;
 6. say which workspaces failed or had no data.
 
-The server may infer a workspace when a merchant or country belongs to exactly
-one workspace. Pass `wsid` explicitly whenever the choice is ambiguous. One tool
-call never silently fans out across all workspaces.
+The server never infers a workspace from registry size, merchant, country, or
+`stores`. `listWorkspaces` discovers ids; it does not select a target for the
+next call. A workspace-scoped URL is the only form where a data tool may omit
+the argument, because the URL already contains the wsid.
 
 Example:
 
@@ -119,16 +118,7 @@ credentials in a skill, prompt, repository, n8n expression, or screenshot.
 The optional Deno helpers use a separate database configuration. They do not use
 the hosted MCP URL or OAuth token.
 
-Single database:
-
-```bash
-export POSTGRES_URL='postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require'
-export PGSCHEMA='public'
-```
-
-If the database uses a workspace schema, set `PGSCHEMA=w{wsid}`.
-
-Multiple databases or schemas:
+Configure one or more workspace-specific credentials:
 
 ```bash
 export DATABRILL_CONFIG='/absolute/path/to/databrill.config.json'
@@ -162,9 +152,13 @@ Example `databrill.config.json`:
 }
 ```
 
-Select one with `--wsid 100000001`. Environment placeholders keep secrets out of
-the JSON file. Use a Databrill-provisioned read-only `agent` credential where
-available. See [Installing Deno and running the helpers](deno.md).
+Select one with required `--wsid 100000001`. Environment placeholders keep
+secrets out of the JSON file. Each URL must authenticate as that workspace's
+Databrill-provisioned role, whose role-level `search_path` already starts with
+the configured schema. The helpers rely on that and never set the path
+themselves, so a URL pointed at the wrong workspace returns that workspace's
+data rather than an error.
+See [Installing Deno and running the helpers](deno.md).
 
 ## Local MCP development
 
@@ -173,7 +167,7 @@ run the source MCP over stdio from the full-stack repository:
 
 ```bash
 cd mcp-local
-POSTGRES_URL='postgresql://...' deno run --allow-env --allow-net --allow-read \
+DATABRILL_CONFIG='./databrill.config.json' deno run --allow-env --allow-net --allow-read \
   bin/stdio.ts
 ```
 

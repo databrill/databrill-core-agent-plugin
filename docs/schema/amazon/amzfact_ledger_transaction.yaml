@@ -10,7 +10,7 @@ columns: |
   transactionId	TEXT			Amazon's Finances document id; the whole primary key, since one document is one transaction
   projectionVersion	INTEGER		"projectionVersion" > 0	Which compiled projection logic wrote this row; the first version is 1. Without wholesale rebuilds, rows written by older logic persist after a change and this is the only thing that marks them.
   kind	TEXT		"kind" IN ('sale', 'refund', 'adjustment', 'expense', 'titleTransfer', 'retrocharge', 'payout', 'ledgerAdjustment', 'chargebackRefund', 'debtRecovery', 'advertisingPayment', 'removalShipment')	Which economic event this is, read from transactionType and description together
-  transactionType	TEXT			Amazon's own transactionType, carried as metadata rather than folded into an account name
+  transactionType	TEXT			Amazon's own transactionType, carried as metadata rather than merged into an account name
   transactionStatus	TEXT	true		Amazon's transactionStatus: RELEASED, DEFERRED, DEFERRED_RELEASED
   description	TEXT			Amazon's document description; part of what decides the kind
   merchantId	TEXT			Amazon sellingPartnerId; the account names carry exactly this value

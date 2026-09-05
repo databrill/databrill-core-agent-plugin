@@ -16,4 +16,4 @@ columns: |
   quantity	INTEGER		`product.quantity`, total on hand. MEASURED integral
   allocated	INTEGER		`product.allocated`, reserved against open orders. MEASURED integral
   available	INTEGER		`product.available`, sellable on hand. MEASURED integral
-  doc	JSONB		The full verbatim product payload from the API; persisted as JSONB. Typed `Unknown` because no vendored API type exists to pin a struct against
+  doc	JSONB		The full verbatim product payload from the API; persisted as JSONB. Typed `Unknown` because no copied-in API type exists to pin a struct against

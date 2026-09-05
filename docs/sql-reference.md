@@ -14,7 +14,7 @@ includes table names:
 SELECT "merchantId", "date" FROM "amzreport_SEARCH_QUERY_PERFORMANCE" ...
 ```
 
-Unquoted, Postgres folds `amzreport_SEARCH_QUERY_PERFORMANCE` to lower case and
+Unquoted, Postgres lowercases `amzreport_SEARCH_QUERY_PERFORMANCE` and
 the relation is not found. Quoting an all-lowercase name is harmless, so quote
 everything.
 

@@ -2,7 +2,7 @@ name: "amzfact_ledger_build"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "What one ledger write covered and what it could not place, one row per (merchantId, dateFirst, dateLast). Not a gating table: no status, no READY check. It records the three things a run encountered that produced no transaction and no posting."
+description: "What one ledger write covered and what it could not place, one row per (merchantId, dateFirst, dateLast). Reading the ledger is deliberately NOT conditional on this table: no status, no READY check. It records the three things a run encountered that produced no transaction and no posting."
 primaryKey:
   - "merchantId"
   - "dateFirst"

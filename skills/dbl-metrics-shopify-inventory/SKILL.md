@@ -9,6 +9,11 @@ metadata:
 
 # How much Shopify stock is there?
 
+On a user- or organization-scoped connector, call `listWorkspaces`, select the
+workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
+connector URL supplies that `wsid`. Never infer it from stores or from a registry
+that happens to contain one entry.
+
 Cross-cutting shape and traps for every `shopify_*` table:
 `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md`. For the declared columns and
 types of any `shopify_*` table, read

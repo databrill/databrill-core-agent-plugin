@@ -1,7 +1,7 @@
 export interface ConnectionConfig {
 	readonly postgresUrl: string;
 	readonly schema: string;
-	readonly wsid?: string;
+	readonly wsid: string;
 	readonly label?: string;
 }
 
@@ -70,21 +70,11 @@ function workspaceConnection(raw: unknown, wsid: string): ConnectionConfig {
 }
 
 export async function resolveConnection(
-	wsidArgument?: string,
+	wsidArgument: string,
 ): Promise<ConnectionConfig> {
 	const configPath = Deno.env.get("DATABRILL_CONFIG");
 	if (configPath === undefined || configPath === "") {
-		const postgresUrl = Deno.env.get("POSTGRES_URL");
-		if (postgresUrl === undefined || postgresUrl === "") {
-			throw new Error(
-				"Set POSTGRES_URL, or set DATABRILL_CONFIG and pass --wsid",
-			);
-		}
-		return {
-			postgresUrl,
-			schema: Deno.env.get("PGSCHEMA") || "public",
-			wsid: wsidArgument,
-		};
+		throw new Error("Set DATABRILL_CONFIG; unscoped POSTGRES_URL mode is not supported");
 	}
 
 	const text = await Deno.readTextFile(configPath);
@@ -96,10 +86,7 @@ export async function resolveConnection(
 		throw new Error("Configuration workspaces must not be empty");
 	}
 
-	const wsid = wsidArgument ?? (wsids.length === 1 ? wsids[0] : undefined);
-	if (wsid === undefined) {
-		throw new Error(`Pass --wsid to choose one workspace: ${wsids.join(", ")}`);
-	}
+	const wsid = wsidArgument;
 	if (!(wsid in workspaces)) {
 		throw new Error(
 			`Unknown wsid ${wsid}. Configured workspaces: ${wsids.join(", ")}`,
@@ -111,7 +98,7 @@ export async function resolveConnection(
 
 export function parseWsidArgument(
 	args: readonly string[],
-): { readonly wsid?: string; readonly rest: readonly string[] } {
+): { readonly wsid: string; readonly rest: readonly string[] } {
 	const rest: string[] = [];
 	let wsid: string | undefined;
 
@@ -128,6 +115,9 @@ export function parseWsidArgument(
 		}
 		rest.push(argument);
 	}
+	if (wsid === undefined || wsid.trim() === "") {
+		throw new Error("Pass --wsid ID; every database command must name its workspace explicitly");
+	}
 
-	return { wsid, rest };
+	return { wsid: wsid.trim(), rest };
 }

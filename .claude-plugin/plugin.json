@@ -1,6 +1,6 @@
 {
 	"name": "databrill-core",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"description": "Explore Databrill data, answer commerce questions, and build reports with hosted MCP tools and read-only Deno helpers.",
 	"author": { "name": "Databrill" },
 	"mcpServers": "./.mcp.json",

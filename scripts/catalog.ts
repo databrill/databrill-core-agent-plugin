@@ -72,9 +72,7 @@ async function main(): Promise<void> {
 			WHERE "columns"."table_schema" = ${connection.schema}
 			ORDER BY "columns"."table_name", "columns"."ordinal_position"
 		`;
-		const label = connection.wsid === undefined
-			? "POSTGRES_URL"
-			: `${connection.label ?? "workspace"} (${connection.wsid})`;
+		const label = `${connection.label ?? "workspace"} (${connection.wsid})`;
 		console.log(renderMarkdown(label, connection.schema, rows));
 	} finally {
 		await sql.end();

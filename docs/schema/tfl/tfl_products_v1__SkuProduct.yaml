@@ -16,4 +16,4 @@ columns: |
   updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
   productName	TEXT	true	`sku.products[].productName`, promoted for readability only. NOT an identity and NOT joinable: two productIds have been seen sharing one name inside this array. Use `productId` and `tfl_products_v1__Inventory` for anything real
   qtyMultiplier	INTEGER		`sku.products[].qtyMultiplier` — how many units of this product one unit of the SKU ships, i.e. how bundles are expressed. MEASURED integral
-  doc	JSONB		The verbatim `products[]` element from the SKU payload; persisted as JSONB. Typed `Unknown` because no vendored API type exists to pin a struct against
+  doc	JSONB		The verbatim `products[]` element from the SKU payload; persisted as JSONB. Typed `Unknown` because no copied-in API type exists to pin a struct against

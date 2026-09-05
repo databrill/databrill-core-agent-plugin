@@ -21,4 +21,4 @@ columns: |
   shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `Product.updatedAt`; `DateTime!`. Prefixed `shopify` for the same reason as `shopifyCreatedAt`. NOT a watermark — this family is a whole-set refresh and reads every product every run
   shopifyPublishedAt	TIMESTAMPTZ	true	SOURCE instant: `Product.publishedAt`; `DateTime` (nullable in the schema) — null on an unpublished product
   totalInventory	INTEGER		`Product.totalInventory`; `Int!`
-  doc	JSONB		The verbatim validated Product node from the bulk JSONL, persisted as JSONB. Holds `tags` and anything else the pinned query returns but does not promote, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` rather than a struct because no vendored Shopify type exists to pin a struct against
+  doc	JSONB		The verbatim validated Product node from the bulk JSONL, persisted as JSONB. Holds `tags` and anything else the pinned query returns but does not promote, which is what makes a later promotion possible without a re-fetch. Typed `Unknown` rather than a struct because no copied-in Shopify type exists to pin a struct against

@@ -24,4 +24,4 @@ columns: |
   currencyCode	TEXT		The currency BOTH amounts above are denominated in. Shopify's scalar Money carries no code, so this is `shop.currencyCode` from `wsid_shopify_shop_v1__Shop`, captured at import time. A products run refuses to write until it is known, so this column is never a guess
   shopifyCreatedAt	TIMESTAMPTZ		SOURCE instant: `ProductVariant.createdAt`; `DateTime!`. Prefixed `shopify` so it cannot be confused with our own `createdAt` bookkeeping column
   shopifyUpdatedAt	TIMESTAMPTZ		SOURCE instant: `ProductVariant.updatedAt`; `DateTime!`. NOT a watermark — this family is a whole-set refresh
-  doc	JSONB		The verbatim validated ProductVariant node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no vendored Shopify type exists
+  doc	JSONB		The verbatim validated ProductVariant node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no copied-in Shopify type exists

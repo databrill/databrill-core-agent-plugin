@@ -20,6 +20,6 @@ columns: |
   firstInStockDate	TIMESTAMPTZ	true
   modifiedDate	TIMESTAMPTZ	true
   time	TIMESTAMPTZ		OURS, not from the payload: the snapshot time of the latest run that touched this row. NOT IN THE PRIMARY KEY — it is overwritten on every run rather than appended. It is the ONLY staleness signal this table has: a row whose time predates the most recent inventory run was not refreshed by that run, so treat it as stale, not as zero
-  doc	JSONB		THE NODE (`node`) verbatim, NOT the item — the row's grain IS the node, so the node is its verbatim payload. Consequence: sibling nodes of the same item are not recoverable from any single row's doc, and sku/offerId appear only as their own columns. Persisted as JSONB; typed `Unknown` because no vendored API type exists to pin a struct against
+  doc	JSONB		THE NODE (`node`) verbatim, NOT the item — the row's grain IS the node, so the node is its verbatim payload. Consequence: sibling nodes of the same item are not recoverable from any single row's doc, and sku/offerId appear only as their own columns. Persisted as JSONB; typed `Unknown` because no copied-in API type exists to pin a struct against
   createdAt	TIMESTAMPTZ
   updatedAt	TIMESTAMPTZ

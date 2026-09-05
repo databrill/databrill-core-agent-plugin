@@ -16,7 +16,7 @@ columns: |
   asnStatusId	INTEGER		`asn.asnStatusId`; a small integer code. The API exposes no matching status text
   categoryId	INTEGER		`asn.categoryId`; a small integer code, constant so far
   warehouseId	INTEGER		`asn.warehouseId`; more than one value has been seen, which is the standing evidence that an account will not stay single-warehouse and why `warehouseId` is in the warehouse-inventory key
-  carrier	TEXT	true	`asn.carrier`; a free-text vendor string, casing not normalised by GFS
+  carrier	TEXT	true	`asn.carrier`; a free-text string from GFS, casing not normalised
   carrierWebAddress	TEXT	true	`asn.carrierWebAddress`; usually null
   trackingNumber	TEXT	true	`asn.trackingNumber`. Can hold SEVERAL comma-separated numbers in one string, so it must not be treated as a single identifier
   referenceNumber	TEXT	true	`asn.referenceNumber`; often null
@@ -27,4 +27,4 @@ columns: |
   receivedQuantity	INTEGER		`asn.receivedQuantity` at header level; MEASURED zero on every row so far
   deliveredQuantity	INTEGER		`asn.deliveredQuantity`; MEASURED integral
   detailsFetchedAt	TIMESTAMPTZ	true	OURS, NOT GFS'S: when this ASN's detail route was successfully fetched and its items written. NULL means still pending. MUST be excluded from `updateColumns` on the header upsert, or the daily header refresh nulls it on any doc change and details are re-fetched forever. Stamped by a dedicated update AFTER the child-item upsert succeeds, so a crash in between simply leaves it null and the next run retries
-  doc	JSONB		The full verbatim ASN payload from the API; persisted as JSONB, including the always-null `carrierPhoneNumber` and the raw `estimatedDeliveryDate` string. Typed `Unknown` because no vendored API type exists to pin a struct against
+  doc	JSONB		The full verbatim ASN payload from the API; persisted as JSONB, including the always-null `carrierPhoneNumber` and the raw `estimatedDeliveryDate` string. Typed `Unknown` because no copied-in API type exists to pin a struct against

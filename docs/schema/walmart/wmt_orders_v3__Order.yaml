@@ -17,6 +17,6 @@ columns: |
   estimatedShipDate	TIMESTAMPTZ	true
   shipNodeType	TEXT	true
   shippingInfo	JSONB	true
-  doc	JSONB		The full verbatim order payload from the API; persisted as JSONB. Typed `Unknown` rather than a struct because no vendored API type exists to pin a struct against, and because the payload's undeclared extras are exactly what this column exists to retain
+  doc	JSONB		The full verbatim order payload from the API; persisted as JSONB. Typed `Unknown` rather than a struct because no copied-in API type exists to pin a struct against, and because the payload's undeclared extras are exactly what this column exists to retain
   createdAt	TIMESTAMPTZ
   updatedAt	TIMESTAMPTZ

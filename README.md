@@ -51,7 +51,8 @@ remote connector, but it does not install this skill package.
 
 Leaving the MCP URL setting empty is the normal choice. The plugin then uses
 `https://mcp.databrill.com/mcp/user`, which exposes every workspace the
-signed-in user is allowed to access — for most users, their one workspace.
+signed-in user is allowed to access. Call `listWorkspaces`, then pass the
+selected `wsid` to every data tool.
 
 Set the URL explicitly to narrow that:
 
@@ -60,8 +61,9 @@ Set the URL explicitly to narrow that:
 - `https://mcp.databrill.com/mcp/org/{orgId}` exposes the authorized workspaces
   in one organization.
 
-The URL selects a scope; OAuth permissions remain authoritative. Multi-workspace
-calls still query one workspace at a time. See
+The URL selects a scope; OAuth permissions remain authoritative. A
+workspace-scoped URL supplies the wsid itself; user- and organization-scoped
+data calls require it as a tool argument. See
 [Configuration and workspace scopes](docs/configuration.md).
 
 ## Guides

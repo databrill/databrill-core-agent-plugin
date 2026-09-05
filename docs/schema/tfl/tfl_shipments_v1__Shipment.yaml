@@ -18,4 +18,4 @@ columns: |
   shippingCharge	DOUBLE PRECISION	`shipment.shippingCharge`. MEASURED non-integral; DOUBLE PRECISION
   totalCharge	DOUBLE PRECISION	`shipment.totalCharge`. MEASURED non-integral; DOUBLE PRECISION
   shipDate	TIMESTAMPTZ	SOURCE ZONE: US EASTERN WALL TIME (America/New_York), localised on ingestion. `shipment.shipDate` carries NO offset designator, so nothing in the value reveals its zone; MEASURED to sit in the Eastern family alongside `order.shipDate`. The raw string survives in `doc`, so the decision is reversible without a re-fetch
-  doc	JSONB	The full verbatim shipment payload from the API; persisted as JSONB, including the raw `shipDate` string. Typed `Unknown` because no vendored API type exists to pin a struct against
+  doc	JSONB	The full verbatim shipment payload from the API; persisted as JSONB, including the raw `shipDate` string. Typed `Unknown` because no copied-in API type exists to pin a struct against

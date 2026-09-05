@@ -63,7 +63,8 @@ by exact product id/name/SKU, warehouse, or maximum available units.
 
 Available only on organization- and user-scoped connectors. It returns the
 currently authorized workspace directory used to select one workspace for a
-subsequent tool call.
+subsequent tool call. Every data tool on those scopes requires the selected
+`wsid`; the directory never selects one implicitly.
 
 ## Present in client databases but not yet exposed by a dedicated MCP tool
 

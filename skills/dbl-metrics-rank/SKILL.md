@@ -14,8 +14,10 @@ tool.
 
 ## Call
 
-If the connector exposes `listWorkspaces`, select the intended workspace and
-pass its `wsid`; do not merge rank histories across accounts.
+On user- and organization-scoped connectors, call `listWorkspaces` and pass the
+selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
+infer a target from `stores` or a one-entry directory; do not merge rank
+histories across accounts.
 
 `loadRank` parameters:
 

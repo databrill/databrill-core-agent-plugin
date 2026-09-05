@@ -52,12 +52,6 @@ environment file where possible.
 From the plugin directory:
 
 ```bash
-deno run --allow-env --allow-read --allow-net scripts/catalog.ts
-```
-
-For a configured multi-workspace file:
-
-```bash
 deno run --allow-env --allow-read --allow-net scripts/catalog.ts \
   --wsid 100000001
 ```
@@ -82,24 +76,23 @@ ORDER BY "marketplace_code";
 Run it as JSON:
 
 ```bash
-deno run --allow-env --allow-read --allow-net scripts/query.ts query.sql
+deno run --allow-env --allow-read --allow-net scripts/query.ts \
+  --wsid 100000001 query.sql
 ```
 
 Or export CSV:
 
 ```bash
 deno run --allow-env --allow-read --allow-net --allow-write=. scripts/query.ts \
-  --format csv --output listing-counts.csv query.sql
+  --wsid 100000001 --format csv --output listing-counts.csv query.sql
 ```
 
 For placeholders, use `$1`, `$2`, and pass a JSON array:
 
 ```bash
 deno run --allow-env --allow-read --allow-net scripts/query.ts \
-  --params '["US","2026-07-01"]' query.sql
+  --wsid 100000001 --params '["US","2026-07-01"]' query.sql
 ```
-
-With multi-workspace configuration, add `--wsid`.
 
 The helper accepts one read-only statement beginning with `SELECT`, `WITH`,
 `EXPLAIN`, `SHOW`, `TABLE`, or `VALUES`. It rejects modifying keywords and also

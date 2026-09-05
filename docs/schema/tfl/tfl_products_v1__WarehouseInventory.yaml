@@ -20,4 +20,4 @@ columns: |
   quantity	INTEGER		`row.quantity`, on hand at this warehouse on `localdate`. MEASURED integral
   allocated	INTEGER		`row.allocated`, reserved at this warehouse on `localdate`. MEASURED integral
   available	INTEGER		`row.available`, sellable at this warehouse on `localdate`. MEASURED integral
-  doc	JSONB		The full verbatim warehouse-inventory row from the API; persisted as JSONB, including the `productName` that is deliberately not promoted here. Typed `Unknown` because no vendored API type exists to pin a struct against
+  doc	JSONB		The full verbatim warehouse-inventory row from the API; persisted as JSONB, including the `productName` that is deliberately not promoted here. Typed `Unknown` because no copied-in API type exists to pin a struct against

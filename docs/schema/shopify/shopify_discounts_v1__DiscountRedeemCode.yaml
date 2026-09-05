@@ -15,4 +15,4 @@ columns: |
   fetchedAt	TIMESTAMPTZ	OUR row bookkeeping AND the whole-set refresh marker, as on the parent table: every row of a successful run carries that run's single instant whether or not any value changed, and rows older than it are deleted for this shop. Not a Shopify field
   code	TEXT	`DiscountRedeemCode.code`; `String!`. The string a shopper types at checkout, and the value that joins to an order's discount codes. NOT the primary key — nothing says a retired code string cannot be reused on a later discount
   asyncUsageCount	INTEGER	`DiscountRedeemCode.asyncUsageCount`; `Int!`. Redemptions of THIS code, counted asynchronously. It is a per-code breakdown of the parent's own `asyncUsageCount`, and the two are equal only when a discount has exactly one code
-  doc	JSONB	The verbatim validated DiscountRedeemCode node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no vendored Shopify type exists
+  doc	JSONB	The verbatim validated DiscountRedeemCode node from the bulk JSONL, persisted as JSONB, including its `__parentId`. Typed `Unknown` because no copied-in Shopify type exists
