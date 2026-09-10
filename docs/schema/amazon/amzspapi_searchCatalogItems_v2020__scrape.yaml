@@ -14,4 +14,4 @@ columns: |
   pageCount	INTEGER		Number of result pages actually fetched
   itemCount	INTEGER		Total number of ranked items recorded for this scrape
   status	TEXT		Outcome of the scrape: always 'ok' — abandoned scrapes are header-less (engine rebuild)
-  error	TEXT	true	Reserved; always NULL now that only completed ('ok') scrapes write a header
+  error	TEXT	true	Reserved; always NULL. Only completed ('ok') scrapes write a header

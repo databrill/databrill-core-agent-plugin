@@ -61,10 +61,12 @@ by exact product id/name/SKU, warehouse, or maximum available units.
 
 ### `listWorkspaces`
 
-Available only on organization- and user-scoped connectors. It returns the
-currently authorized workspace directory used to select one workspace for a
-subsequent tool call. Every data tool on those scopes requires the selected
-`wsid`; the directory never selects one implicitly.
+Every returned workspace includes its id, label, merchants, and countries on all
+connector scopes. A workspace-scoped connector returns one entry for its active
+workspace, including that workspace's merchant and country metadata. The URL
+fixes the target, so data tools need no `wsid` argument. On organization-
+and user-scoped connectors, select a workspace from the returned directory and
+pass its `wsid` to every data tool; the directory never selects one implicitly.
 
 ## Present in client databases but not yet exposed by a dedicated MCP tool
 

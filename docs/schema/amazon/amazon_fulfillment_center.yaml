@@ -1,0 +1,16 @@
+name: "amazon_fulfillment_center"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "Core fulfillment-center reference: one canonical country and established physical/forwarding address arrays per fulfillment-center code. No diagnostic evidence or history is stored."
+primaryKey:
+  - "fulfillmentCenter"
+columns: |
+  name	type	nullable	description
+  fulfillmentCenter	TEXT		Amazon fulfillment-center code, which globally identifies the facility by itself.
+  createdAt	TIMESTAMPTZ		When the core reference row was first stored. Preserved from core when synchronized to a tenant.
+  updatedAt	TIMESTAMPTZ		When canonical values last changed in core. Preserved from core when synchronized to a tenant; unchanged canonical values do not advance it.
+  region	TEXT		Amazon region from authenticated connector metadata; a facility property, not part of its identity. Never inferred from country or address.
+  countryCode	TEXT	true	Country elected from retained ledger rows or explicitly chosen; null means unresolved or unknown.
+  physicalAddresses	JSONB		Normalized facility addresses with an established physical role; stored together as a JSONB array.
+  forwardingAddresses	JSONB		Normalized forwarding addresses with an established role; their countries do not elect the center country. Stored together as a JSONB array.

@@ -25,8 +25,8 @@ or org id. Explain that OAuth membership, not the URL, controls access.
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid` to every data tool, even if only one is listed. A
-workspace-scoped connector carries the wsid in its URL, so `listWorkspaces` and
-the tool argument are intentionally absent.
+workspace-scoped connector carries the wsid in its URL. Its `listWorkspaces`
+returns only the active workspace, and data tools need no `wsid` argument.
 
 When troubleshooting, inspect connector status first, then distinguish URL
 configuration, OAuth authentication, authorization membership, and unsupported

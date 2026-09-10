@@ -29,9 +29,8 @@ Verify which workspaces the connector can see:
 Use Databrill to list my available workspaces. Do not query metrics yet.
 ```
 
-Expect one workspace unless your Databrill login covers several. If
-`listWorkspaces` is unavailable, you entered a workspace-scoped URL, which
-intentionally fixes the connector to that one workspace.
+Expect one workspace unless your Databrill login covers several. On a
+workspace-scoped URL, `listWorkspaces` always returns just the active workspace.
 
 Then verify data with:
 
@@ -40,6 +39,9 @@ Using Databrill, list my workspaces, select the intended wsid explicitly, show
 which Amazon stores it has, then summarize traffic and conversion for the last
 four complete weeks. State the workspace and latest data date.
 ```
+
+On a workspace-scoped URL, `listWorkspaces` identifies the one active workspace.
+Data calls need no `wsid` argument: the URL fixes which workspace the answer covers.
 
 ## Cowork
 

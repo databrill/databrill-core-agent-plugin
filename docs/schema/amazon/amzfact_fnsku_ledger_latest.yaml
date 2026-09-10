@@ -1,0 +1,24 @@
+name: "amzfact_fnsku_ledger_latest"
+kind: "table"
+access: "read"
+category: "Amazon inventory and offers"
+description: "Current position per FBA ledger key (merchant, fulfillment center, FNSKU, disposition): the key's newest amzfact_fnsku_ledger_history row extended by the detail events after the merchant's newest summary day, collapsed to one row. Rows carry different dates."
+primaryKey:
+  - "merchantId"
+  - "fulfillmentCenter"
+  - "fnsku"
+  - "disposition"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon merchant (seller) id owning the units
+  fulfillmentCenter	TEXT		Amazon fulfillment-center code the units sat in, exactly as the ledger reports spell it
+  fnsku	TEXT		Amazon fulfillment network SKU, the physical pool
+  disposition	TEXT		Ledger disposition such as SELLABLE or CUSTOMER_DAMAGED, exactly as reported
+  date	DATE		Business day the row describes; sparse, not one row per day
+  source	TEXT		SUMMARY when the row is a DAILY/FC ledger summary row, which is authoritative; DETAIL when it is estimated from detail events after the merchant's newest summary day
+  startingWarehouseBalance	INTEGER		Units in the warehouse at the start of the day: the summary's own figure for SUMMARY, the key's newest summary ending balance carried through earlier estimate days for DETAIL, 0 when the summary has never listed the key
+  endingWarehouseBalance	INTEGER		Starting balance plus every signed movement of the day
+  netMovement	INTEGER		Signed sum of the day's movements as the source reports them; in-transit units are excluded
+  inTransitBetweenWarehouses	INTEGER	true	Units in transit between centers, a separate state only the summary reports; null for DETAIL
+  sourceRowCount	INTEGER		1 for SUMMARY; the number of detail events aggregated into the row for DETAIL
+  anchorDate	DATE	true	Day of the key's newest summary row, whose ending balance the estimate starts from; null when the summary has never listed the key and the estimate starts from zero

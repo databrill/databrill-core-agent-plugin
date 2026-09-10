@@ -23,9 +23,9 @@ Reading these same tables is `dbl-db`'s job.
   many rows in one call with a multi-row `VALUES` list, not with several
   statements.
 - **`wsid`** (required on a user- or organization-scoped connector) — the
-  workspace to write to, as a string. The SQL tools never infer it, not even when
-  the connector reaches exactly one workspace; omitting it is refused with "The
-  SQL tools require an explicit wsid argument on this scope". Call
+  workspace to write to, as a string. No tool ever infers it, not even when the
+  connector reaches exactly one workspace; omitting it is refused with `Pass
+  "wsid" explicitly`, followed by the configured workspace ids. Call
   `listWorkspaces` for the options. A workspace-scoped connector fixes the
   workspace instead, does not announce the parameter, and refuses a call that
   names a different one.

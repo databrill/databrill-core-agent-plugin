@@ -35,8 +35,9 @@ Use:
 https://mcp.databrill.com/mcp/workspace/{wsid}
 ```
 
-All metric tools operate in that workspace, so their calls do not need a `wsid`
-parameter, and the connector does not expose `listWorkspaces`. Choose this when
+All data tools operate in that workspace, so their calls do not need a `wsid`
+parameter. `listWorkspaces` returns a list containing only that active workspace,
+with its label, merchants, and countries. Choose this when
 a user has access to several workspaces but a session should stay in one of
 them.
 
