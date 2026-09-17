@@ -90,13 +90,13 @@ is better. Compare like categories; a product can have several category ranks.
 
 Question: How many units of Amazon FBA stock do we hold?
 
-Preferred path: `executeSql` against `amzfact_fnsku_fbaInventory`, one row per
+Preferred path: `executeSql` against `amzfact_fnsku_fbaInventory_latest`, one row per
 `(merchantId, marketplaceId, fnsku)` — see `dbl-metrics-amazon-inventory`.
 Always filter to one marketplace; FNSKUs overlap across marketplaces, so a
 cross-marketplace total double counts. Never total
 `amzspapi_fbaInventory_v1__InventorySummary` or the
 `amazon_fba_inventory_summary` view: they are keyed by seller SKU and repeat a
-commingled pool once per label, which overstates fulfillable units
+commingled FNSKU once per label, which overstates fulfillable units
 substantially.
 
 Question: Should advertising change because of Amazon inventory?
@@ -105,7 +105,7 @@ Preferred path: `inventoryPacing`. It combines Amazon FBA inventory runway and
 ad spend. Call out the worst-variant caveat and any inbound stock. Its unit
 counts come from the per-seller-SKU table and are overstated where stock is
 commingled, so confirm a `hold` or `ramp` against
-`amzfact_fnsku_fbaInventory` before acting.
+`amzfact_fnsku_fbaInventory_latest` before acting.
 
 Question: What stock is held by The Fulfillment Lab?
 
@@ -166,7 +166,7 @@ total would be an estimate.
 
 Question: Which products are at risk of storage fees or overstock?
 
-Amazon path: take unit counts from `amzfact_fnsku_fbaInventory` and the ads
+Amazon path: take unit counts from `amzfact_fnsku_fbaInventory_latest` and the ads
 decision from `inventoryPacing`. Inspect `amzreport_FBA_INVENTORY_PLANNING` for
 inventory age and storage-fee detail, which the fact table does not carry — but
 do not take its unit totals over the fact table's. `amazon_fba_inventory_summary`

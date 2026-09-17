@@ -15,16 +15,16 @@ connector URL supplies that `wsid`. Never infer it from `stores` or from a
 `listWorkspaces` result with one entry.
 
 There is no dedicated MCP tool for FBA stock levels yet. Answer with the `core`
-MCP server's `executeSql` against **`amzfact_fnsku_fbaInventory`**, and use no
+MCP server's `executeSql` against **`amzfact_fnsku_fbaInventory_latest`**, and use no
 other table for a units total.
 
-## Use `amzfact_fnsku_fbaInventory`, not the raw summary table
+## Use `amzfact_fnsku_fbaInventory_latest`, not the raw summary table
 
-`amzfact_fnsku_fbaInventory` holds one row per
-`(merchantId, marketplaceId, fnsku)` — one row per _physical pool_.
+`amzfact_fnsku_fbaInventory_latest` holds one row per
+`(merchantId, marketplaceId, fnsku)` — one row per _FNSKU_.
 
 `amzspapi_fbaInventory_v1__InventorySummary` and the
-`amazon_fba_inventory_summary` view are keyed by _seller SKU_. A commingled pool
+`amazon_fba_inventory_summary` view are keyed by _seller SKU_. A commingled FNSKU
 is repeated once per seller SKU pointing at it, each repetition carrying the
 same quantities, so summing them counts the same physical units several times.
 On a catalogue with commingled stock the per-seller-SKU total, on-hand and
@@ -61,7 +61,7 @@ Key: `merchantId`, `marketplaceId`, `fnsku`. Denormalised: `asin`, `condition`.
 Quantities, all nullable — **NULL means Amazon did not report it, not zero**, so
 use `COALESCE(...,0)` when you sum and say so if a figure is mostly NULL:
 
-- `totalQuantity` — everything Amazon holds for the pool.
+- `totalQuantity` — everything Amazon holds for the FNSKU.
 - `fulfillableQuantity` — sellable now. This is the number for "in stock".
 - `inboundWorkingQuantity`, `inboundShippedQuantity`, `inboundReceivingQuantity`.
 - `totalReservedQuantity` and its parts `pendingCustomerOrderQuantity`,
@@ -70,13 +70,47 @@ use `COALESCE(...,0)` when you sum and say so if a figure is mostly NULL:
   `warehouseDamagedQuantity`, `distributorDamagedQuantity`,
   `carrierDamagedQuantity`, `defectiveQuantity`, `expiredQuantity`.
 - `totalResearchingQuantity` and its short/mid/long-term parts.
+- `futureSupplyBuyableQuantity` — units Amazon already lets customers buy ahead
+  of their arrival (future supply). Not part of `totalQuantity`, and an FNSKU can
+  be buyable through it while `fulfillableQuantity` is 0.
+  `reservedFutureSupplyQuantity` is the reserved part of future supply.
 
 Freshness: `observedAtPoll` is the instant Amazon reported the state, not our
 write clock. Report `MAX("observedAtPoll")` alongside any total.
 `observedAtStream` is null until the stream writer exists — ignore it.
 
-A pool that has gone to zero keeps its row, so filter
+An FNSKU that has gone to zero keeps its row, so filter
 `COALESCE("totalQuantity",0) > 0` for a "what do we hold" list.
+
+This table is the current state only. `amzfact_fnsku_fbaInventory_history` has
+one row per FNSKU per marketplace-local day on which its state changed, with the
+lowest, highest, first and last fulfillable and buyable future-supply quantities
+among the changes recorded that day. A missing day means unchanged since the
+previous row, and there are no rows before the history table was deployed to the
+workspace.
+
+`…Last` is exact. `…First`, `…Min` and `…Max` leave out the value the FNSKU
+carried into the day, so an FNSKU at 10 all morning that drops to 0 at 15:00 has
+`fulfillableMax` 0. For the whole day, read the previous row's `…Last` with
+`LAG`:
+
+```sql
+SELECT "fnsku", "date",
+       COALESCE("prevLast", "fulfillableFirst") AS "openingFulfillable",
+       GREATEST("fulfillableMax", "prevLast")   AS "dayMaxFulfillable",
+       LEAST("fulfillableMin", "prevLast")      AS "dayMinFulfillable",
+       "fulfillableLast"                        AS "closingFulfillable"
+FROM (
+  SELECT *, LAG("fulfillableLast") OVER (
+           PARTITION BY "merchantId", "marketplaceId", "fnsku" ORDER BY "date") AS "prevLast"
+  FROM "amzfact_fnsku_fbaInventory_history"
+  WHERE "marketplaceId" = 'ATVPDKIKX0DER'
+) h
+WHERE "date" >= DATE '2026-09-01';
+```
+
+Filter on `date` outside the subquery, as above, so the first day in range still
+sees the row before it.
 
 For the declared columns and types of any Amazon table, read
 `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's
@@ -94,41 +128,41 @@ SELECT SUM(COALESCE("totalQuantity", 0))       AS "totalUnits",
          + COALESCE("inboundWorkingQuantity", 0)) AS "inbound",
        SUM(COALESCE("totalUnfulfillableQuantity", 0)) AS "unfulfillable",
        MAX("observedAtPoll") AS "asOf"
-FROM "amzfact_fnsku_fbaInventory"
+FROM "amzfact_fnsku_fbaInventory_latest"
 WHERE "marketplaceId" = 'ATVPDKIKX0DER';
 ```
 
-By ASIN (a pool has one ASIN, so this needs no dedupe):
+By ASIN (an FNSKU has one ASIN, so this needs no dedupe):
 
 ```sql
 SELECT "asin",
        SUM(COALESCE("fulfillableQuantity", 0)) AS "fulfillable",
        SUM(COALESCE("totalQuantity", 0))       AS "totalUnits"
-FROM "amzfact_fnsku_fbaInventory"
+FROM "amzfact_fnsku_fbaInventory_latest"
 WHERE "marketplaceId" = 'ATVPDKIKX0DER' AND "asin" IS NOT NULL
 GROUP BY "asin"
 ORDER BY "fulfillable" DESC
 LIMIT 50;
 ```
 
-By seller SKU — join identity, and note that several SKUs can share one pool, so
-the pool's units are shown against each label and must not be totalled:
+By seller SKU — join identity, and note that several SKUs can share one FNSKU, so
+the FNSKU's units are shown against each label and must not be totalled:
 
 ```sql
 SELECT i."sku", i."asin", f."fnsku",
-       COALESCE(f."fulfillableQuantity", 0) AS "poolFulfillable"
+       COALESCE(f."fulfillableQuantity", 0) AS "fnskuFulfillable"
 FROM "amzfact_sku_identity" AS i
-JOIN "amzfact_fnsku_fbaInventory" AS f
+JOIN "amzfact_fnsku_fbaInventory_latest" AS f
   ON f."merchantId" = i."merchantId" AND f."fnsku" = i."fnsku"
 WHERE f."marketplaceId" = 'ATVPDKIKX0DER'
-ORDER BY "poolFulfillable" DESC
+ORDER BY "fnskuFulfillable" DESC
 LIMIT 50;
 ```
 
 ## If the table is missing or empty
 
-`amzfact_fnsku_fbaInventory` is created on first write, so a workspace whose FBA
-backfill has not run yet has no table. Say the fact table is not populated in
+`amzfact_fnsku_fbaInventory_latest` is created on first write, so a workspace the
+fact writer has not reached yet has no table. Say the fact table is not populated in
 that workspace and that the raw per-seller-SKU table overstates units; do not
 silently fall back to it, and do not report zero stock.
 

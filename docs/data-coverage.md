@@ -47,7 +47,7 @@ organic-channel signals.
 Joins Amazon FBA inventory runway with current advertising spend and recommends
 pause, throttle, hold, or ramp by product family. It reads the per-seller-SKU
 inventory table, so its unit counts and runways are overstated wherever stock is
-commingled; take the units themselves from `amzfact_fnsku_fbaInventory` via
+commingled; take the units themselves from `amzfact_fnsku_fbaInventory_latest` via
 `executeSql`. There is no dedicated MCP tool for FBA stock levels yet.
 
 ### `loadTflInventory`
@@ -79,7 +79,7 @@ contain:
 - returns, reimbursements, removals, storage fees, coupons, and promotions;
 - settlement, ledger, transaction, posting, and projected-profit data;
 - advertising campaign/entity exports and Amazon Marketing Stream events;
-- FBA stock levels at the physical-pool grain (`amzfact_fnsku_fbaInventory`,
+- FBA stock levels at the FNSKU grain (`amzfact_fnsku_fbaInventory_latest`,
   with `amzfact_sku_identity` for the seller-SKU mapping) — the only correct
   source for a units total, per marketplace;
 - FBA inventory planning and per-seller-SKU inventory summaries;
@@ -121,7 +121,7 @@ Prefer these views for human-authored SQL where they fit:
 - `amazon_sales_and_traffic`
 - `amazon_orders_by_day_and_sku`
 - `amazon_fba_inventory_summary` (per seller SKU — for labels only, never for a
-  units total; use `amzfact_fnsku_fbaInventory` for units)
+  units total; use `amzfact_fnsku_fbaInventory_latest` for units)
 - `amazon_listing_all` and `amazon_listing_open`
 - `amazon_ads_campaign`, `amazon_ads_adgroup`, `amazon_ads_ad`, and
   `amazon_ads_target`

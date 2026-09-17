@@ -13,7 +13,7 @@ columns: |
   name	type	nullable	description
   merchantId	TEXT		Amazon merchant (seller) id owning the units
   fulfillmentCenter	TEXT		Amazon fulfillment-center code the units sat in, exactly as the ledger reports spell it
-  fnsku	TEXT		Amazon fulfillment network SKU, the physical pool
+  fnsku	TEXT		Amazon fulfillment network SKU, which identifies the physical units
   disposition	TEXT		Ledger disposition such as SELLABLE or CUSTOMER_DAMAGED, exactly as reported
   date	DATE		Business day the row describes; sparse, not one row per day
   source	TEXT		SUMMARY when the row is a DAILY/FC ledger summary row, which is authoritative; DETAIL when it is estimated from detail events after the merchant's newest summary day

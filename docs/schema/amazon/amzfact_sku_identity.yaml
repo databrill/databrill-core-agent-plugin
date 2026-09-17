@@ -12,7 +12,7 @@ columns: |
   sku	TEXT		The seller's own SKU, as the inventory response reported it. May not exist as a listing.
   createdAt	TIMESTAMPTZ
   updatedAt	TIMESTAMPTZ
-  fnsku	TEXT	true	The pool this label points at; joins to amzfact_fnsku_fbaInventory.fnsku
+  fnsku	TEXT	true	The FNSKU this label points at; joins to amzfact_fnsku_fbaInventory_latest.fnsku
   asin	TEXT	true
   condition	TEXT	true	Item condition as the seller described it
   source	TEXT		Which writer last wrote this row. A literal union so a second source needs no DDL.

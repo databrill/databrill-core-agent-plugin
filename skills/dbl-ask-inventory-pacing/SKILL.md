@@ -84,13 +84,13 @@ observed — don't extrapolate to zero or past the maximum seen.
 
 - **Its unit counts are overstated where stock is commingled.** `inventoryPacing`
   reads `amzspapi_fbaInventory_v1__InventorySummary`, which is keyed by seller
-  SKU and repeats one physical pool once per SKU pointing at it, which inflates
+  SKU and repeats one FNSKU once per SKU pointing at it, which inflates
   fulfillable units substantially. Runway, and therefore the action, is too
   optimistic in the same proportion. Before acting on a `hold` or `ramp`, re-read
   the true units with `dbl-metrics-amazon-inventory`
-  (`amzfact_fnsku_fbaInventory`) and recompute the runway against the same
+  (`amzfact_fnsku_fbaInventory_latest`) and recompute the runway against the same
   velocity. A `pause` is safe to act on: the real runway is shorter still.
-- Runway can overestimate when FBA inventory is pooled across EU marketplaces
+- Runway can overestimate when FBA inventory is one stock region shared across EU marketplaces
   (no programmatic split). Cross-check with `dbl-metrics-traffic` velocity if a
   call is close.
 - When a tool's output is too large to return inline it is written to a file
