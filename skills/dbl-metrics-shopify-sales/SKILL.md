@@ -11,8 +11,8 @@ metadata:
 
 On a user- or organization-scoped connector, call `listWorkspaces`, select the
 workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
-connector URL supplies that `wsid`. Never infer it from stores or from a registry
-that happens to contain one entry.
+connector URL supplies that `wsid`. Never infer it from `stores` or from a
+`listWorkspaces` result with one entry.
 
 There is no dedicated MCP tool for Shopify. Use `executeSql` against
 `shopify_reports_v1__SalesDaily` and `shopify_reports_v1__SessionsDaily`, one
@@ -100,9 +100,8 @@ say which.
 
 ## Check coverage before quoting a period
 
-These tables can start well after the store did, sometimes holding only the last
-few weeks. Establish the range first and state it; do not present a partial
-window as a full one:
+These tables can start well after the store did. Establish the range first and
+state it; do not present a partial window as a full one:
 
 ```sql
 SELECT "shopId", MIN("day") AS "from", MAX("day") AS "to", COUNT(*) AS "days"
@@ -110,16 +109,16 @@ FROM "shopify_reports_v1__SessionsDaily" GROUP BY "shopId";
 ```
 
 For history older than the reports, go to `dbl-metrics-shopify-orders` — the
-orders table on that same workspace reached back to 2015 — and say that the two
-sources count differently.
+orders table can reach back much further — and say that the two sources count
+differently.
 
 ## Which days are still moving
 
 `SalesDaily.updatedAt` means _when this day's numbers last changed_, not when we
 last looked. Recent days revise as returns land. If the user is comparing a
 just-ended period, check whether its days are still being revised before
-treating the comparison as settled. On `SessionsDaily` a completed day has never
-been observed to change, so an old `updatedAt` there is normal.
+treating the comparison as settled. On `SessionsDaily` a completed day's numbers
+settle when the shop-local day closes, so an old `updatedAt` there is normal.
 
 ## Diagnosing a change
 

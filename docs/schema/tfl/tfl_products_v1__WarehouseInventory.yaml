@@ -13,10 +13,10 @@ columns: |
   connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this snapshot row
   localdate	DATE		SOURCE ZONE: AMERICA/NEW_YORK. The `yyyy-MM-dd` Eastern calendar day of OUR FETCH, not of a payload field — the endpoint carries no timestamp. Not the UTC day: a poll between midnight UTC and midnight Eastern would be mislabelled. Stored DATE, matching the repo's `localdate` convention so joins to `amzreport_ALL_ORDERS.localdate` line up
   productId	INTEGER		`row.productId`, joining to `tfl_products_v1__Inventory.productId` by convention
-  warehouseId	INTEGER		`row.warehouseId`. In the key even at one warehouse: the endpoint exists to split by warehouse, and a key cannot be widened later because these tables have no ALTER path
+  warehouseId	INTEGER		`row.warehouseId`. In the key even for an account with a single warehouse: the endpoint exists to split by warehouse, and a key cannot be widened later because these tables have no ALTER path
   createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
   updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
-  warehouseName	TEXT	true	`row.warehouseName` (observed: Tampa). Nullable per the connector-wide rule that a promoted string is nullable unless the corpus proves otherwise
+  warehouseName	TEXT	true	`row.warehouseName`. Nullable per the connector-wide rule that a promoted string is nullable unless the corpus proves otherwise
   quantity	INTEGER		`row.quantity`, on hand at this warehouse on `localdate`. MEASURED integral
   allocated	INTEGER		`row.allocated`, reserved at this warehouse on `localdate`. MEASURED integral
   available	INTEGER		`row.available`, sellable at this warehouse on `localdate`. MEASURED integral

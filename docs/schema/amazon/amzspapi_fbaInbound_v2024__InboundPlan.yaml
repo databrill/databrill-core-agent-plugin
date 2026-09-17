@@ -15,7 +15,7 @@ columns: |
   sourceAddress	JSONB	true
   placementOption	JSONB	true
   packingOption	JSONB	true
-  isAwd	BOOLEAN		false	True when getInboundPlan returned the AWD-trap signature; see file JSDoc for details
+  isAwd	BOOLEAN		false	True when getInboundPlan returned the AWD-trap signature: an HTTP 400 whose error message names Amazon Warehousing and Distribution
   planLastUpdatedAt	TIMESTAMPTZ	true
   lastSeenAt	TIMESTAMPTZ	true
   lastFetchedAt	TIMESTAMPTZ	true

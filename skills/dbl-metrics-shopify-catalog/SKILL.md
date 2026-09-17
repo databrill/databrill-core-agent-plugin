@@ -11,8 +11,8 @@ metadata:
 
 On a user- or organization-scoped connector, call `listWorkspaces`, select the
 workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
-connector URL supplies that `wsid`. Never infer it from stores or from a registry
-that happens to contain one entry.
+connector URL supplies that `wsid`. Never infer it from `stores` or from a
+`listWorkspaces` result with one entry.
 
 Use `executeSql` against `shopify_products_v1__Product` and
 `shopify_products_v1__ProductVariant`, one row per `(shopId, id)`, the variant
@@ -43,15 +43,15 @@ because the family is a whole-set read.
 `ProductVariant.price` and `compareAtPrice` are exact decimal strings in NUMERIC
 — never cast to float. Shopify's scalar `Money` carries no currency code, so the
 `currencyCode` column beside them is the **shop's** currency captured at import
-time, not a per-row fact. `compareAtPrice` is null on most rows; a non-null
-value is the struck-through reference price.
+time, not a per-row fact. `compareAtPrice` is nullable; a non-null value is the
+struck-through reference price.
 
 ## Status and visibility
 
 - `Product.status` — `ACTIVE`, `DRAFT`, `ARCHIVED`. Stored as text, not an enum:
   Shopify may add a member in any quarterly version.
-- `Product.shopifyPublishedAt` — null means unpublished, which is a minority of
-  products but not a rare one. A product can be `ACTIVE` and unpublished.
+- `Product.shopifyPublishedAt` — null means unpublished. A product can be
+  `ACTIVE` and unpublished.
 - `Product.totalInventory` is Shopify's own rollup. For anything more than a
   headline figure use `dbl-metrics-shopify-inventory`, which has the per-location
   detail and the `tracked` filter that makes the numbers mean something.
@@ -69,10 +69,9 @@ value is the struck-through reference price.
 
 ## SKU is the cross-source key, and it is not guaranteed
 
-`sku` is nullable on both the variant and the line item, though it was filled on
-every row of the store it was profiled against. It is how Shopify lines up with
-TFL (`tfl_products_v1__SkuProduct`) and, where the merchant uses one scheme,
-with Amazon seller SKUs.
+`sku` is nullable on both the variant and the line item. Where the merchant
+fills it, it is how Shopify lines up with TFL (`tfl_products_v1__SkuProduct`)
+and, where the merchant uses one scheme, with Amazon seller SKUs.
 
 Check before relying on it — a null or duplicate SKU breaks a cross-source join
 silently:

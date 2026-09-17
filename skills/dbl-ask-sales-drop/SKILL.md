@@ -21,8 +21,8 @@ defensible attribution.
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
-infer a target from `stores` or a one-entry directory; do not fan this diagnosis
-out silently.
+infer a target from `stores` or a `listWorkspaces` result with one entry; do not
+fan this diagnosis out silently.
 
 `salesDropDiagnosis` parameters:
 
@@ -62,11 +62,11 @@ For the declared columns and types of those tables, or of any other Amazon
 table, read `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that
 table's `.yaml` beside it.
 
-## "The store looks fine" is usually not the answer
+## "The store looks fine" is not the answer until you break it down
 
-This tool works at store level, and for a catalogue of a thousand-plus products
-the store total is an average that hides almost everything. A store down 4.7% —
-statistically nothing — can contain a family down 40% that has sold out.
+This tool works at store level, and for a large catalogue the store total is an
+average that hides almost everything. A store whose total has barely moved can
+contain a family that has collapsed because it sold out.
 
 So when the store-level verdict is "no meaningful drop", break it down before
 reporting that: `loadTraffic` or `loadAds` with `groupBy: "family"` (or
@@ -74,11 +74,10 @@ reporting that: `loadTraffic` or `loadAds` with `groupBy: "family"` (or
 a diversified catalogue this is the normal case, not an edge case. See
 `${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`.
 
-Also look for **absence, not just decline**. The clearest evidence a family had
-sold out was rows disappearing — the count of its products tracked in the
-bestseller rankings fell from 88 to 12 in one week. Count distinct ASINs with
-rank rows, with sessions, or with ad impressions per period; a collapse in the
-count means stockout, suppression, or delisting.
+Also look for **absence, not just decline**. A family that sells out can show it
+as rows disappearing — its products drop out of the bestseller rankings. Count
+distinct ASINs with rank rows, with sessions, or with ad impressions per period;
+a collapse in the count means stockout, suppression, or delisting.
 `${CLAUDE_PLUGIN_ROOT}/docs/diagnosis-methods.md` has both methods in full.
 
 ## Follow-ups

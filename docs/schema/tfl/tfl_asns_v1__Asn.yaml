@@ -14,17 +14,17 @@ columns: |
   updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
   asnNumber	TEXT	true	`asn.asnNumber`, the human-facing ASN reference. A STRING even when it looks numeric
   asnStatusId	INTEGER		`asn.asnStatusId`; a small integer code. The API exposes no matching status text
-  categoryId	INTEGER		`asn.categoryId`; a small integer code, constant so far
-  warehouseId	INTEGER		`asn.warehouseId`; more than one value has been seen, which is the standing evidence that an account will not stay single-warehouse and why `warehouseId` is in the warehouse-inventory key
+  categoryId	INTEGER		`asn.categoryId`; a small integer code
+  warehouseId	INTEGER		`asn.warehouseId`; an account can use more than one warehouse, which is why `warehouseId` is in the warehouse-inventory key
   carrier	TEXT	true	`asn.carrier`; a free-text string from GFS, casing not normalised
-  carrierWebAddress	TEXT	true	`asn.carrierWebAddress`; usually null
+  carrierWebAddress	TEXT	true	`asn.carrierWebAddress`; nullable
   trackingNumber	TEXT	true	`asn.trackingNumber`. Can hold SEVERAL comma-separated numbers in one string, so it must not be treated as a single identifier
-  referenceNumber	TEXT	true	`asn.referenceNumber`; often null
-  specialInstructions	TEXT	true	`asn.specialInstructions`; usually null
-  shippingContainer	TEXT	true	`asn.shippingContainer`; observed "boxes" and "pallets"
-  estimatedDeliveryDate	TEXT	true	SOURCE ZONE: GENUINELY UNMEASURED — stored VERBATIM as TEXT and NEVER parsed or timezone-converted. `asn.estimatedDeliveryDate`. MEASURED only that it is round-hour (06:00, 16:00) with no fractional seconds and no designator, which reads as a human-scheduled appointment slot rather than a system timestamp; it matches none of the serializer families we did measure. A zone guess here would produce a plausible-looking lie in a column with no ALTER path
+  referenceNumber	TEXT	true	`asn.referenceNumber`; nullable
+  specialInstructions	TEXT	true	`asn.specialInstructions`; nullable
+  shippingContainer	TEXT	true	`asn.shippingContainer`; e.g. "boxes", "pallets"
+  estimatedDeliveryDate	TEXT	true	SOURCE ZONE: GENUINELY UNMEASURED — stored VERBATIM as TEXT and NEVER parsed or timezone-converted. `asn.estimatedDeliveryDate`. MEASURED only that it is round-hour with no fractional seconds and no designator, which reads as a human-scheduled appointment slot rather than a system timestamp; it matches none of the serializer families we did measure. A zone guess here would produce a plausible-looking lie in a column with no ALTER path
   expectedQuantity	INTEGER		`asn.expectedQuantity`; MEASURED integral
-  receivedQuantity	INTEGER		`asn.receivedQuantity` at header level; MEASURED zero on every row so far
+  receivedQuantity	INTEGER		`asn.receivedQuantity` at header level; not known to be populated, so do not read a zero as nothing received
   deliveredQuantity	INTEGER		`asn.deliveredQuantity`; MEASURED integral
   detailsFetchedAt	TIMESTAMPTZ	true	OURS, NOT GFS'S: when this ASN's detail route was successfully fetched and its items written. NULL means still pending. MUST be excluded from `updateColumns` on the header upsert, or the daily header refresh nulls it on any doc change and details are re-fetched forever. Stamped by a dedicated update AFTER the child-item upsert succeeds, so a crash in between simply leaves it null and the next run retries
-  doc	JSONB		The full verbatim ASN payload from the API; persisted as JSONB, including the always-null `carrierPhoneNumber` and the raw `estimatedDeliveryDate` string. Typed `Unknown` because no copied-in API type exists to pin a struct against
+  doc	JSONB		The full verbatim ASN payload from the API; persisted as JSONB, including the `carrierPhoneNumber`, which no column promotes, and the raw `estimatedDeliveryDate` string. Typed `Unknown` because no copied-in API type exists to pin a struct against

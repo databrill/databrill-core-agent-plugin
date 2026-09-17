@@ -12,7 +12,7 @@ columns: |
   name	type	nullable	description
   connectorId	TEXT		The Databrill connector id of The Fulfillment Lab connector that fetched this ASN item
   asnId	INTEGER		The parent ASN's `asn.id`, joining to `tfl_asns_v1__Asn.id`
-  kind	TEXT		Which ASN array this element came from. Renders TEXT. In the key because a line id is not proven unique ACROSS the three arrays — `inserts` and `containers` were empty on all 12 sampled ASNs, so there is no evidence either way and the key cannot be widened later
+  kind	TEXT		Which ASN array this element came from. Renders TEXT. In the key because a line id is not proven unique ACROSS the three arrays, and the key cannot be widened later
   id	INTEGER		The element's own LINE id (`products[].id`). NOT the product reference — see `itemId`
   createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
   updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field

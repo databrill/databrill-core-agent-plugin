@@ -23,7 +23,7 @@ columns: |
   deliveryStatus	TEXT		Delivery status: NOT_DELIVERING, DELIVERING
   deliveryReasons	JSONB	true	Delivery reasons array (e.g., CAMPAIGN_PAUSED) (JSONB)
   adVersionId	TEXT	true	Ad version ID
-  name	TEXT	true	Ad name (often ASIN value)
+  name	TEXT	true	Ad name (can be the ASIN)
 indexes:
   - name: "amzadapi_exports_v1__ad__campaign_not_delivering"
     columns:

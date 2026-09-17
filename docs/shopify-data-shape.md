@@ -74,9 +74,9 @@ counts sessions, not orders.
 ## Trap 4: a missing day in SalesDaily means zero sales, not missing data
 
 ShopifyQL returns no row for a day with no sales, so `SalesDaily` is sparse
-while `SessionsDaily` is dense. How sparse it is varies by shop: over one date
-range, one shop can have a sales row for every day while another is missing
-several, and every absent day has sessions and zero orders.
+while `SessionsDaily` is dense. How sparse it is varies by shop: one shop can
+have a sales row for every day of a range while another is missing several, and
+every absent day has sessions and zero orders.
 
 Consequences:
 
@@ -85,12 +85,11 @@ Consequences:
 - `COALESCE` the sales measures to 0 after the join.
 - A `COUNT(*)` over `SalesDaily` is not a number of days elapsed.
 
-`conversion_rate` also disagrees with a day's own order count more often than
-you would expect: a day can carry sessions and orders and still report a
-`conversion_rate` of 0. It attributes a completed checkout to a session, and an
-order can be placed in a session the report does not credit. Report it as
-returned and do not present it beside an order count as though the two must
-agree.
+`conversion_rate` can also disagree with a day's own order count: a day can
+carry sessions and orders and still report a `conversion_rate` of 0. It
+attributes a completed checkout to a session, and an order can be placed in a
+session the report does not credit. Report it as returned and do not present it
+beside an order count as though the two must agree.
 
 ## Trap 5: `day` is a shop-local calendar day
 
@@ -107,11 +106,11 @@ and call the result a daily sales report.
 
 ## Trap 6: signs and units in the report measures
 
-- `discounts` and `returns` are **negative** in normal operation, on nearly
-  every day that carries either. Do not negate them again, and do not `ABS()`
-  them into a positive "discount total" without saying so.
+- `discounts` and `returns` are **negative** in normal operation. Do not negate
+  them again, and do not `ABS()` them into a positive "discount total" without
+  saying so.
 - `taxes` and `cost_of_goods_sold` admit either sign.
-- Every rate is a **unit fraction**: `bounce_rate` 0.7658 means 76.58%, and
+- Every rate is a **unit fraction**: `bounce_rate` 0.25 means 25%, and
   `returning_customer_rate` likewise. Multiply by 100 for display.
 - `average_session_duration` is in **seconds**, the only column in that family
   that is not money, a count or a fraction.
@@ -139,8 +138,8 @@ Three different conventions live in this schema:
 - On the two `shopify_reports_v1__*` tables `updatedAt` means something else and
   more useful: **when that day's numbers last changed**, because nothing in that
   family is ever deleted. Reading it tells you which days are still being
-  revised. On `SessionsDaily` a completed day has never been observed to change,
-  so an old `updatedAt` there is normal.
+  revised. On `SessionsDaily` a completed day's numbers settle when the
+  shop-local day closes, so an old `updatedAt` there is normal.
 - Three tables have **no `updatedAt` column at all** and use `fetchedAt` as the
   run marker: `shopify_inventory_v1__InventoryLevel`,
   `shopify_discounts_v1__Discount` and
@@ -160,31 +159,29 @@ two different facts that the column cannot tell apart. See
 
 ## Trap 9: null is not zero, and a severed reference is not a bug
 
-- `OrderLineItem.productId` is null on a small but steady fraction of rows. That
-  is the fingerprint of a **deleted product**, not a dangling id. `variantId`
-  likewise. Use `LEFT JOIN` and report the unmatched rows rather than dropping
-  them.
-- `Order.customerId` is null on a small number of orders. Guest or removed
-  customer.
+- `OrderLineItem.productId` can be null. That is the fingerprint of a **deleted
+  product**, not a dangling id. `variantId` likewise. Use `LEFT JOIN` and report
+  the unmatched rows rather than dropping them.
+- `Order.customerId` can be null. Guest or removed customer.
 - Inventory's `reserved`, `safetyStock`, `damaged` and `qualityControl` are null
   when the merchant's plan does not enable that state.
 
 ## Trap 10: test and cancelled orders are real rows
 
 `Order.test` is a real boolean with real `true` rows. Filter `WHERE NOT "test"`
-on any revenue question. `shopifyCancelledAt` is filled on a small percentage of
-orders and `totalRefundedShopAmount` is 0 rather than null on an unrefunded
-order, so net revenue is `totalPriceShopAmount - totalRefundedShopAmount` and
-needs no COALESCE.
+on any revenue question. `shopifyCancelledAt` is set only on cancelled orders,
+and `totalRefundedShopAmount` is 0 rather than null on an unrefunded order, so
+net revenue is `totalPriceShopAmount - totalRefundedShopAmount` and needs no
+COALESCE.
 
 ## Trap 11: not every line item is a product
 
 Add-on services sell as ordinary line items, and a shipping-protection or
 warranty line can outrank real products in a units ranking. A best-seller list
 that does not exclude these is wrong in the way the client will notice first.
-Its `productId` is usually null, so it also inflates any "deleted product"
-count. Check the titles before presenting a ranking, exclude non-products, and
-say that you did.
+Its `productId` can be null, so it also inflates any "deleted product" count.
+Check the titles before presenting a ranking, exclude non-products, and say that
+you did.
 
 ## Trap 12: `quantity` is not `currentQuantity`
 

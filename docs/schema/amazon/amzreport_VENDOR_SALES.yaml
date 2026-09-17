@@ -1,0 +1,35 @@
+name: "amzreport_VENDOR_SALES"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Amazon Vendor Retail Analytics sales per merchant, marketplace, distributor view, selling program, report period, period start and ASIN, from GET_VENDOR_SALES_REPORT. The MANUFACTURING and SOURCING views overlap and can repeat the same shipped values for an ASIN, so filter to one distributorView and one reportPeriod before summing. A missing row and an all-zero row both mean no activity: a request covering several periods adds all-zero rows, so a row count does not show completeness. Summing a period's rows for one distributorView gives the report's totals for that period, except that money can differ by a few cents from Amazon's separately rounded totals."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "distributorView"
+  - "sellingProgram"
+  - "reportPeriod"
+  - "startDate"
+  - "asin"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		SP-API selling partner id of the Amazon vendor group the report was requested for, of the form amzn1.vg.<number>. The same key as merchantId in amazon_merchant and amazon_store.
+  marketplaceId	TEXT		Marketplace the report covers
+  distributorView	TEXT		Amazon distributor view: MANUFACTURING (products the vendor manufactures) or SOURCING (products Amazon sourced from the vendor). SOURCING rows carry no ordered measures.
+  sellingProgram	TEXT		Amazon selling program: RETAIL, BUSINESS or FRESH
+  reportPeriod	TEXT		Length of the period the row covers: DAY, WEEK, MONTH, QUARTER or YEAR. A week or month can start on the same date as a day, so filter to one reportPeriod before summing.
+  startDate	DATE		First day of the period
+  asin	TEXT		ASIN the row's measures are for
+  createdAt	TIMESTAMPTZ		When this row was first written
+  updatedAt	TIMESTAMPTZ		When this row was last written. Every refetch rewrites the row, so a newer value does not mean the measures changed.
+  endDate	DATE		Last day of the period, inclusive
+  lastUpdatedDate	DATE		Last day of data Amazon had processed across the vendor's whole dataset when the report ran, as the report stated it. Not specific to this row's period.
+  orderedUnits	INTEGER	true	Units customers ordered in the period. Can be negative; Amazon does not document why. Null on SOURCING rows, where Amazon omits the ordered measures.
+  orderedRevenueAmount	DOUBLE PRECISION	true	Revenue of the ordered units, in orderedRevenueCurrencyCode. Can be negative. Null on SOURCING rows. Stored as a double: round to 2 decimals for Amazon's figure, and do not sum across currency codes.
+  orderedRevenueCurrencyCode	TEXT	true	ISO 4217 currency of orderedRevenueAmount
+  shippedUnits	INTEGER		Units shipped to customers in the period
+  shippedRevenueAmount	DOUBLE PRECISION	true	Revenue of the shipped units, in shippedRevenueCurrencyCode. Stored as a double: round to 2 decimals for Amazon's figure, and do not sum across currency codes.
+  shippedRevenueCurrencyCode	TEXT	true	ISO 4217 currency of shippedRevenueAmount
+  shippedCogsAmount	DOUBLE PRECISION	true	Cost of goods sold for the shipped units, in shippedCogsCurrencyCode. Stored as a double: round to 2 decimals for Amazon's figure, and do not sum across currency codes.
+  shippedCogsCurrencyCode	TEXT	true	ISO 4217 currency of shippedCogsAmount
+  customerReturns	INTEGER		Units customers returned in the period

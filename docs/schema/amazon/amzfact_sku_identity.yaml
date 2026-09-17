@@ -2,7 +2,7 @@ name: "amzfact_sku_identity"
 kind: "table"
 access: "read"
 category: "Amazon inventory and offers"
-description: "What a seller SKU points at: one row per (merchant, seller SKU) carrying FNSKU, ASIN and condition. Not keyed by marketplace — identity does not vary by marketplace, as measured across every observed pair."
+description: "What a seller SKU points at: one row per (merchant, seller SKU) carrying FNSKU, ASIN and condition. Not keyed by marketplace — identity does not vary by marketplace. If it ever did, contentHash would flap between marketplaces, which is visible rather than silent."
 primaryKey:
   - "merchantId"
   - "sku"

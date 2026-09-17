@@ -11,8 +11,8 @@ metadata:
 
 On a user- or organization-scoped connector, call `listWorkspaces`, select the
 workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
-connector URL supplies that `wsid`. Never infer it from stores or from a registry
-that happens to contain one entry.
+connector URL supplies that `wsid`. Never infer it from `stores` or from a
+`listWorkspaces` result with one entry.
 
 There is no dedicated MCP tool for FBA stock levels yet. Answer with the `core`
 MCP server's `executeSql` against **`amzfact_fnsku_fbaInventory`**, and use no
@@ -44,9 +44,9 @@ a cross-marketplace or worldwide total, say that this table cannot answer it and
 report per-marketplace figures instead. Do not sum them into one number.
 
 (The cross-marketplace total would need `amzreport_LEDGER_SUMMARY` or
-`amzreport_LEDGER_DETAIL`. That route is not explored yet, the ledger reports lag
-by several days, and most workspaces do not have those tables at all. Do not
-reach for them without the operator's direction.)
+`amzreport_LEDGER_DETAIL`. That route is not explored yet, Amazon's ledger
+reports lag by several days, and a workspace may not have those tables at all.
+Do not reach for them without the operator's direction.)
 
 Summing across _merchants_ within one marketplace is fine: different merchants
 own different physical units.

@@ -16,8 +16,8 @@ tool.
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
-infer a target from `stores` or a one-entry directory; do not merge rank
-histories across accounts.
+infer a target from `stores` or a `listWorkspaces` result with one entry; do not
+merge rank histories across accounts.
 
 `loadRank` parameters:
 
@@ -28,8 +28,8 @@ histories across accounts.
 Example: "is B012345678's rank in US improving" →
 `loadRank({ stores: "US", when: "P4W", products: "B012345678" })`.
 
-`products` also takes a family name, which is usually what a client means by "the
-product" — a family can hold 90+ variants
+`products` also takes a family name, which may be what a client means by "the
+product" — a family can hold many variants
 (`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`).
 
 ## Read the output
@@ -43,9 +43,9 @@ Caveat: `categoryName` only resolves where the client DB has
 `amazon_browse_node`; otherwise it falls back to `subcategory <code>` (the rank
 numbers are still exact).
 
-A drop in the _number of ASINs with rank rows_ is a strong stockout signal — one
-family fell from 88 tracked products to 12 in a week when it sold out. Count
-rows, not just ranks.
+A drop in the _number of ASINs with rank rows_ is a strong stockout signal — a
+family that sells out loses its products from the rankings. Count rows, not just
+ranks.
 
 ## SQL fallback
 

@@ -2,8 +2,8 @@
 
 `loadSqp` handles this correctly. Read this before writing SQL against
 `amzreport_SEARCH_QUERY_PERFORMANCE` yourself, or before interpreting anyone
-else's search-term numbers — there are two ways to be confidently wrong by an
-order of magnitude.
+else's search-term numbers — there are two ways to be confidently and badly
+wrong.
 
 ## One row = one ASIN × one search query × one period
 
@@ -29,9 +29,8 @@ when we had no event of that type.
 
 The `total*` numbers are the same market figure copied onto every one of our
 ASIN rows for that query and week. `SUM(totalQueryImpressionCount)` inflates the
-market by however many of our ASINs happened to appear on the term — often by
-two orders of magnitude on a popular query — and the derived "impression share"
-collapses to nonsense.
+market by however many of our ASINs happened to appear on the term, and the
+derived "impression share" collapses to nonsense.
 
 Take `MAX` within (search query, period) first, then sum across periods:
 
@@ -80,8 +79,8 @@ per impression.
 
 ## Analyse at family level
 
-Individual ASINs get 0–2 purchases on a given search term per week, which is too
-few to conclude anything. Filter to a family — `loadSqp({ products: "…" })`, or
+An individual ASIN can get too few purchases on a search term in a week to
+conclude anything. Filter to a family — `loadSqp({ products: "…" })`, or
 join `brand_config_amazon_asin` in SQL (see
 [Product families](product-hierarchy.md)) — before comparing conversion.
 
@@ -91,7 +90,8 @@ join `brand_config_amazon_asin` in SQL (see
 against the market's typical price for the same search term, and
 `asinMedianPurchasePrice` versus `totalMedianPurchasePrice` does the same for
 purchases. When a term shows healthy click share and weak purchase share, this
-pair usually explains it — and it is already in the row, no extra query needed.
+pair is the first place to look — and it is already in the row, no extra query
+needed.
 Watch the currency code and never compare across marketplaces without
 converting.
 

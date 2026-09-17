@@ -16,8 +16,8 @@ Fetch advertising metrics from the **`core`** MCP server's
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
-infer a target from `stores` or a one-entry directory. Query workspaces
-separately and keep currencies separate.
+infer a target from `stores` or a `listWorkspaces` result with one entry. Query
+workspaces separately and keep currencies separate.
 
 `loadAds` parameters:
 
@@ -42,7 +42,8 @@ If that breakdown returns one row, the store runs one ad format — say so
 explicitly rather than reporting an empty-looking result.
 
 Group by `family` (or `parentAsin`) whenever the question is about a product:
-a single variant may sell two units a week while its family sells hundreds. See
+a single variant may sell too few units to conclude anything while its family
+sells enough to. See
 `${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`.
 
 ## Read the output
@@ -52,7 +53,8 @@ a single variant may sell two units a week while its family sells hundreds. See
 revenue`, halo
 (`*HaloOut`, `*HaloIn`), and — with `derived` — `ctr, cr, cpc, acos,
 roas`.
-`meta.dateDataLatest` shows how fresh the ad data is (it lags 1–2 days).
+`meta.dateDataLatest` shows how fresh the ad data is (Amazon's ad reports
+lag 1–2 days).
 
 State each metric with its value and attach the ASIN/family to any named entity
 (see voice guidance). ACOS = spend/sales (lower is better); ROAS = sales/spend.
@@ -69,9 +71,9 @@ too high" or "why did efficiency drop". The short form:
    `buy_box_percentage`; if stock is at or near zero, say so and hand off to
    `dbl-ask-inventory-pacing`.
 2. **Never report a ratio alone.** Fetch the store-wide figure for the same
-   period (`groupBy: "store"`) and the same product in a prior period. 50.9%
-   ACOS only means something against a 26.7% store average and its own 30.8%
-   last month — which also gives a defensible target.
+   period (`groupBy: "store"`) and the same product in a prior period. A
+   product's ACOS only means something against its store's average and its own
+   earlier value — which also gives a defensible target.
 3. **Decompose a move.** `ACOS = CPC ÷ (CR × AOV)`. Measure all three across
    both periods; the culprit names itself instead of being guessed.
 4. **Then test allocation.** If conversion or AOV is the culprit, hold each
@@ -80,7 +82,7 @@ too high" or "why did efficiency drop". The short form:
    problem — a completely different fix.
 
 With one ad format, break down by campaign _type_ (auto / broad / product
-targeting / manual keyword), which many accounts encode in campaign names.
+targeting / manual keyword), which an account may encode in its campaign names.
 
 ## SQL fallback (only for things the tool can't express)
 
@@ -90,10 +92,6 @@ numbers. For the declared columns and types of any Amazon table, read
 `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's
 `.yaml` beside it.
 
-- `product_overview_ad_asin__day` — per ASIN per day: `ad_impressions`,
-  `ad_clicks`, `ad_orders`, `ad_spend`, `ad_revenue`. This is the rollup
-  `loadAds` reads and it matches the tool exactly. Use it for efficiency. It is
-  provisioned per workspace, so confirm it with `listTables` first.
 - `amzadapi_reports_v1__search_asin_placement__byDay` — adds `adProduct`,
   `campaignId`, `target`, `searchTerm`, `placementClassification`, `totalCost`;
   search-term grain, so aggregate before use.

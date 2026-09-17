@@ -2,7 +2,7 @@ name: "amzspapi_awd_v2024__InboundShipmentSkuQuantity"
 kind: "table"
 access: "read"
 category: "Amazon inventory and offers"
-description: "One SKU line on an AWD inbound shipment, one row per (merchantId, shipmentId, sku). Quantities are stored exactly as Amazon reports them, together with their unit, which is commonly CASES; product units are not materialised — derive them as quantity times unitsPerCase when the unit is CASES. unitsPerCase comes from the matching inbound order and is null until that order has been fetched. Both shortfalls and over-receipts occur in real data."
+description: "One SKU line on an AWD inbound shipment, one row per (merchantId, shipmentId, sku). Quantities are stored exactly as Amazon reports them, together with their unit, which is commonly CASES; product units are not materialised — derive them as quantity times unitsPerCase when the unit is CASES. unitsPerCase comes from the matching inbound order and is null until that order has been fetched. Both shortfalls and over-receipts occur."
 primaryKey:
   - "merchantId"
   - "shipmentId"

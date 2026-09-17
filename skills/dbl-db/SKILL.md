@@ -11,7 +11,8 @@ Prefer a dedicated MCP tool whenever it covers the requested metric. Read
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid` to every data tool. A workspace-scoped connector supplies the
-wsid in its URL. Never infer a target from `stores` or from a one-entry directory.
+wsid in its URL. Never infer a target from `stores` or from a `listWorkspaces`
+result with one entry.
 
 If no MCP tool covers it:
 

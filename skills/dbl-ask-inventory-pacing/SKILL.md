@@ -18,8 +18,8 @@ yourself.
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
-infer a target from `stores` or a one-entry directory; do not fan this analysis
-out silently.
+infer a target from `stores` or a `listWorkspaces` result with one entry; do not
+fan this analysis out silently.
 
 `inventoryPacing` parameters:
 
@@ -57,16 +57,17 @@ out-of-stock child.
 
 ## Answer "by how much?"
 
-The tool returns a category; clients always ask the follow-up. Get a number by
-comparing the period before a spend change with the period after:
+The tool returns a category; the follow-up is always "by how much?". Get a
+number by comparing the period before a spend change with the period after,
+taking ad spend per day and units per day in each:
 
-|                | Before | After  |
-| -------------- | ------ | ------ |
-| ad spend / day | $1.70  | $59.00 |
-| units / day    | 3.0    | 6.9    |
+```text
+cost_per_extra_unit = (spend_after - spend_before)
+                      ÷ (units_after - units_before)
+```
 
-$57.30 of extra daily spend bought 3.9 extra units/day → about $14.70 per extra
-unit, against a $33 selling price. Then solve backwards for the target:
+Set that cost against the selling price to see whether an extra unit is worth
+buying. Then solve backwards for the target:
 
 ```text
 target_units_per_day = available ÷ target_runway_days
@@ -74,8 +75,7 @@ target_spend_per_day = spend_before + (target_units_per_day - units_before)
                                       × cost_per_extra_unit
 ```
 
-which in that case gave about $18/day to stretch the stock to 30 days. Use
-`loadAds` (spend) and `loadTraffic` (units) for the two windows. State the
+Use `loadAds` (spend) and `loadTraffic` (units) for the two windows. State the
 assumption: the relationship is locally linear over the spend range actually
 observed — don't extrapolate to zero or past the maximum seen.
 `${CLAUDE_PLUGIN_ROOT}/docs/diagnosis-methods.md` has the full method.

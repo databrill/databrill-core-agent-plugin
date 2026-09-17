@@ -8,7 +8,7 @@ primaryKey:
   - "id"
 columns: |
   name	type	description
-  shopId	BIGINT	The Shopify shop id this row came from — see `shopify_products_v1__Product.ts`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
+  shopId	BIGINT	The Shopify shop id this row came from — see `shopify_products_v1__Product.shopId`. String-typed with a BIGINT column, because the postgres driver round-trips BIGINT as a string
   id	TEXT	Full Shopify `DiscountRedeemCode` GID, e.g. `gid://shopify/DiscountRedeemCode/<n>`. Distinct on every row
   discountGid	TEXT	The owning discount's GID, from the bulk JSONL's `__parentId`; always a `DiscountCodeNode` GID, because the four members that declare a `codes` connection are exactly the four code members. Refers to `shopify_discounts_v1__Discount.id`; no declared foreign key
   createdAt	TIMESTAMPTZ	OUR row bookkeeping: when this row was first written. Not a Shopify field

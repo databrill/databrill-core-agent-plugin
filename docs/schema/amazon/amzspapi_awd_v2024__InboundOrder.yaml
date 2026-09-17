@@ -10,7 +10,7 @@ columns: |
   name	type	nullable	description
   merchantId	TEXT
   orderId	TEXT		AWD inbound order ID (STAR- prefix)
-  orderStatus	TEXT		InboundStatus from the API; observed CONFIRMED/CLOSED/CANCELLED
+  orderStatus	TEXT		InboundStatus from the API, e.g. CONFIRMED, CLOSED, CANCELLED
   externalReferenceId	TEXT	true
   originAddress	JSONB	true
   packagesToInbound	JSONB		DistributionPackageQuantity[]; source of unitsPerCase and SKU→ASIN mapping; JSONB

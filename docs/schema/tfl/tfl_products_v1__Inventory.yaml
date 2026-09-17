@@ -12,7 +12,7 @@ columns: |
   productId	INTEGER		`product.productId`, GFS's own product id. Unique
   createdAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was first written. Not a GFS field
   updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
-  productName	TEXT	true	`product.productName`. The only clean product name in the API, and distinct per product as observed. Nullable per the connector-wide rule that a promoted string is nullable unless the data proves otherwise, since a NOT NULL violation would abort the whole snapshot page rather than one row
+  productName	TEXT	true	`product.productName`. The only clean product name in the API. Nullable per the connector-wide rule that a promoted string is nullable unless the data proves otherwise, since a NOT NULL violation would abort the whole snapshot page rather than one row
   quantity	INTEGER		`product.quantity`, total on hand. MEASURED integral
   allocated	INTEGER		`product.allocated`, reserved against open orders. MEASURED integral
   available	INTEGER		`product.available`, sellable on hand. MEASURED integral

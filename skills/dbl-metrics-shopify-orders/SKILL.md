@@ -11,8 +11,8 @@ metadata:
 
 On a user- or organization-scoped connector, call `listWorkspaces`, select the
 workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
-connector URL supplies that `wsid`. Never infer it from stores or from a registry
-that happens to contain one entry.
+connector URL supplies that `wsid`. Never infer it from `stores` or from a
+`listWorkspaces` result with one entry.
 
 Use `executeSql` against `shopify_orders_v1__Order` (one row per
 `(shopId, id)`) and `shopify_orders_v1__OrderLineItem` (one row per line, parent
@@ -31,8 +31,8 @@ declared columns and types of any `shopify_*` table, read
   unfiltered `SUM` adds two currencies together. Filter or group by currency.
 - **Net revenue is `"totalPriceShopAmount" - "totalRefundedShopAmount"`.** The
   refund column is 0, never null, on an unrefunded order.
-- **Decide on cancellations.** `shopifyCancelledAt` is filled on a small
-  percentage of orders. Exclude them or say you did not.
+- **Decide on cancellations.** `shopifyCancelledAt` is set on cancelled orders.
+  Exclude them or say you did not.
 - **These totals will not match `shopify_reports_v1__SalesDaily`**, by design —
   over the same window the two disagree on revenue and on the number of orders.
   Pick the source the question is about and name it. See
@@ -82,18 +82,18 @@ across shops.
 
 **Exclude add-on services before presenting a ranking.** They sell as ordinary
 line items, and a shipping-protection or warranty line can outrank real products
-by units in a month on very little revenue. Check the titles, drop the
-non-products, and say you did.
+by units on very little revenue. Check the titles, drop the non-products, and
+say you did.
 
 ## Joining to the catalogue
 
 `productId` and `variantId` on a line item are **nullable, and null is
-meaningful** — Shopify severs the reference when a product is deleted, on a
-small but steady fraction of rows. `LEFT JOIN` to
-`shopify_products_v1__Product` / `shopify_products_v1__ProductVariant` and
-report the unmatched rows as "deleted products" rather than dropping them. The
-line item keeps `title`, `sku` and `vendor` as they were at the time of sale,
-which is often the better source for a historical report anyway.
+meaningful** — Shopify severs the reference when a product is deleted.
+`LEFT JOIN` to `shopify_products_v1__Product` /
+`shopify_products_v1__ProductVariant` and report the unmatched rows as "deleted
+products" rather than dropping them. The line item keeps `title`, `sku` and
+`vendor` as they were at the time of sale, which makes it the better source for
+a historical report anyway.
 
 ## Geography
 
@@ -137,23 +137,21 @@ them, which is **not the same as an empty value**. `nodeType` is the coarse
 code-versus-automatic split, derived from the GID independently of
 `discountType`, so the two can be checked against each other.
 
-In practice `DiscountCodeBasic` is the overwhelming majority of the rows, and
-the other members appear in small numbers or not at all — so a report that only
-ever sees Basic rows has still not been tested against the union.
+A store need not use every member, so a report that has only ever seen
+`DiscountCodeBasic` rows has still not been tested against the union.
 
 The nulls that will mislead a report:
 
 - **`usageLimit` is null for two indistinguishable reasons** — an automatic
   discount does not declare the field at all, and a code discount declares it
-  null meaning _unlimited_. It is non-null on only a small minority of rows.
-  Never render a null as "unlimited" without checking `nodeType` first.
+  null meaning _unlimited_. Never render a null as "unlimited" without checking
+  `nodeType` first.
 - **`summary` is absent on the two App members**, so it is null on every App
   row. For those, `appDiscountTypeTitle` is the closest thing to a description.
 - **`shortSummary` is declared only by the Basic and FreeShipping members** —
   null on every Bxgy and App row.
-- **`totalSalesAmount` null means never redeemed**, not missing: it is non-null
-  on roughly half the rows. Paired with `totalSalesCurrency`, null exactly when
-  it is.
+- **`totalSalesAmount` null means never redeemed**, not missing. Paired with
+  `totalSalesCurrency`, null exactly when it is.
 - **`endsAt` null means no end date.**
 - **`appliesOncePerCustomer` null means the discount is automatic.**
 - **`codeCount` is null on automatic discounts** and, where present, equals the
@@ -167,21 +165,20 @@ The nulls that will mislead a report:
 enum so a new Shopify member arrives as a row instead of an ingest failure.
 `discountClasses` is a JSONB array over `PRODUCT` / `ORDER` / `SHIPPING`, not a
 scalar. `asyncUsageCount` is a redemption count on both tables and is **not** a
-freshness signal — whether a redemption moves `shopifyUpdatedAt` has never been
-observed. Member-specific fields no column promotes stay in `doc`, which does
-**not** contain the redeem codes; those are their own rows.
+freshness signal — whether a redemption moves `shopifyUpdatedAt` is unknown.
+Member-specific fields no column promotes stay in `doc`, which does **not**
+contain the redeem codes; those are their own rows.
 
-The table may cover fewer shops than the workspace has — one workspace had
-discounts on 2 of its 3 shops.
+The table may cover fewer shops than the workspace has.
 
 Order-level discount money is `totalDiscountsShopAmount` on the order, and it is
 positive there (unlike the report table's `discounts`, which is negative).
 
 ## History
 
-This family reaches much further back than the daily reports — one workspace held
-orders from 2015 while the reports started a month ago. It is the right source
-for any long-run trend, provided you say it counts differently from the reports.
+This family can reach much further back than the daily reports, which may have
+started only recently. It is the right source for any long-run trend, provided
+you say it counts differently from the reports.
 
 ## Follow-ups
 

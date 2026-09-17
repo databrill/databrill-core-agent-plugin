@@ -1,0 +1,23 @@
+name: "amzreport_VENDOR_TRAFFIC"
+kind: "table"
+access: "read"
+category: "Amazon reports"
+description: "Amazon Vendor Retail Analytics glance views per merchant, marketplace, report period, period start and ASIN, from GET_VENDOR_TRAFFIC_REPORT. Far more ASINs are viewed than ordered, so a conversion rate joins from this table to amzreport_VENDOR_SALES and keeps the traffic rows. A missing row and an all-zero row both mean no views: a request covering several periods adds all-zero rows. Summing a period's rows gives the report's total glance views for that period."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "reportPeriod"
+  - "startDate"
+  - "asin"
+columns: |
+  name	type	description
+  merchantId	TEXT	SP-API selling partner id of the Amazon vendor group the report was requested for, of the form amzn1.vg.<number>. The same key as merchantId in amazon_merchant and amazon_store.
+  marketplaceId	TEXT	Marketplace the report covers
+  reportPeriod	TEXT	Length of the period the row covers: DAY, WEEK, MONTH, QUARTER or YEAR. A week or month can start on the same date as a day, so filter to one reportPeriod before summing.
+  startDate	DATE	First day of the period
+  asin	TEXT	ASIN the row's glance views are for
+  createdAt	TIMESTAMPTZ	When this row was first written
+  updatedAt	TIMESTAMPTZ	When this row was last written. Every refetch rewrites the row, so a newer value does not mean the measures changed.
+  endDate	DATE	Last day of the period, inclusive
+  lastUpdatedDate	DATE	Last day of data Amazon had processed across the vendor's whole dataset when the report ran, as the report stated it. Not specific to this row's period.
+  glanceViews	INTEGER	Number of times customers viewed the ASIN's product detail page in the period

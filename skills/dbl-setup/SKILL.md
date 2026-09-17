@@ -19,9 +19,9 @@ specifically needs direct database scripts.
 
 The MCP URL setting is optional, and leaving it empty is the normal setup: it
 uses the user-scoped URL, which covers every workspace the signed-in user can
-access. A workspace- or organization-scoped
-URL only narrows that, and Databrill supplies it complete — never guess a wsid
-or org id. Explain that OAuth membership, not the URL, controls access.
+access. A workspace- or organization-scoped URL only narrows that, and Databrill
+supplies it complete — never guess a wsid or org id. Explain that OAuth
+membership, not the URL, controls access.
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid` to every data tool, even if only one is listed. A

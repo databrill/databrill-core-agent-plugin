@@ -2,7 +2,7 @@ name: "amzfact_fnsku_fbaInventory"
 kind: "table"
 access: "read"
 category: "Amazon inventory and offers"
-description: "FBA inventory at the physical grain: one row per (merchant, marketplace, FNSKU), with the whole quantity tree flattened. Derived from amzspapi_fbaInventory_v1__InventorySummary, whose per-seller-SKU grain repeats a commingled pool once per label and overstates units by ~58%."
+description: "FBA inventory at the physical grain: one row per (merchant, marketplace, FNSKU), with the whole quantity tree flattened. Derived from amzspapi_fbaInventory_v1__InventorySummary, whose per-seller-SKU grain repeats a commingled pool once per label and overstates units."
 primaryKey:
   - "merchantId"
   - "marketplaceId"

@@ -1,13 +1,13 @@
 # Product families and the catalogue hierarchy
 
-Most Databrill catalogues are large and organised into **families** — groups of
-variants of the same item. A workspace with over a thousand selling ASINs can map
-them into a few hundred families, and one family can hold 90+ child ASINs.
+Databrill catalogues can be large and are organised into **families** — groups
+of variants of the same item. A workspace maps many ASINs into far fewer
+families, and one family can hold many child ASINs.
 
-Family is very often the right level to analyse at. A single variant may sell
-two units a week — far too few to conclude anything from — while its family
-sells hundreds. Before reporting "no signal", check whether you were looking at
-a variant when you should have been looking at its family.
+Family is often the right level to analyse at. A single variant may sell too few
+units to conclude anything from while its family sells enough to show a trend.
+Before reporting "no signal", check whether you were looking at a variant when
+you should have been looking at its family.
 
 ## Use the tools first
 
@@ -31,17 +31,17 @@ loadTraffic({ stores: "US", when: "P8W", groupBy: "family", products: "Garlic_Pr
 
 ```sql
 SELECT f."family",
-       count(DISTINCT p."asin")                                        AS asins,
-       ROUND(sum(p."ad_spend")::numeric, 2)                            AS spend,
-       ROUND(sum(p."ad_revenue")::numeric, 2)                          AS revenue,
-       ROUND((sum(p."ad_spend") / NULLIF(sum(p."ad_revenue"), 0))::numeric, 4) AS acos
-FROM "product_overview_ad_asin__day" p
-JOIN "brand_config_amazon_asin"   a ON a."asin"   = p."asin"
+       count(DISTINCT s."child_asin")                    AS asins,
+       sum(s."sessions")                                 AS sessions,
+       sum(s."units_ordered")                            AS units,
+       ROUND(sum(s."ordered_product_sales")::numeric, 2) AS sales
+FROM "amazon_sales_and_traffic" s
+JOIN "brand_config_amazon_asin"   a ON a."asin"   = s."child_asin"
 JOIN "brand_config_amazon_family" f ON f."family" = a."family"
-WHERE p."merchant_id" = $1 AND p."marketplace_id" = $2
-  AND p."date" >= $3 AND p."date" < $4
+WHERE s."merchant_id" = $1 AND s."marketplace_id" = $2
+  AND s."date" >= $3 AND s."date" < $4
 GROUP BY 1
-ORDER BY spend DESC
+ORDER BY sales DESC
 ```
 
 Use `a."family"` alone when you only need the key; join
@@ -49,13 +49,13 @@ Use `a."family"` alone when you only need the key; join
 `countryToFamily` is populated, prefer
 `COALESCE(a."countryToFamily"->>$country, a."family")`.
 
-## The `brand_ontology_*` views are often empty — that is not "no family data"
+## The `brand_ontology_*` views can be empty — that is not "no family data"
 
 `brand_ontology_amazon_asin` and `brand_ontology_amazon_family` are the
-better-named objects, and they are frequently empty while the `brand_config_*`
-tables underneath are fully populated — `brand_config_amazon_asin` and
+better-named objects, and they can be empty while the `brand_config_*` tables
+underneath are fully populated — `brand_config_amazon_asin` and
 `brand_config_amazon_family` carrying a full mapping while both
-`brand_ontology_*` views return no rows at all.
+`brand_ontology_*` views return no rows.
 
 The cause is in the view definitions, not the data.
 `brand_ontology_amazon_family` inner-joins `brand_config_ontology_category`, and
@@ -73,5 +73,5 @@ concluding the catalogue has no hierarchy.
 `amazon_sales_and_traffic` carries `parent_asin` / `child_asin` — Amazon's own
 variation relationship, which is per marketplace and independent of the
 Databrill family. `loadAds` exposes both (`groupBy: "parentAsin"` and
-`groupBy: "family"`). They usually agree, but do not treat them as the same key,
+`groupBy: "family"`). They may agree, but do not treat them as the same key,
 and say which one a rollup used.

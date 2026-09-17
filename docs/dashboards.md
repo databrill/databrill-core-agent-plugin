@@ -82,7 +82,7 @@ and pass dates/stores through Query Parameters.
 
 ## 6. Ask Claude for an artifact
 
-Anup-style exploration prompt:
+Exploration prompt:
 
 ```text
 Use Databrill to build an exploratory dashboard for [decision]. First state the

@@ -17,8 +17,8 @@ reports, per search query and ASIN, our counts and the whole-market totals — s
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
-infer a target from `stores` or a one-entry directory; keep search shares
-separate by account and marketplace.
+infer a target from `stores` or a `listWorkspaces` result with one entry; keep
+search shares separate by account and marketplace.
 
 `loadSqp` parameters:
 
@@ -46,10 +46,11 @@ missing rows can themselves be a low-velocity signal.
 Each row also carries our median price and the market's median price for that
 search term (`asinMedianClickPrice` vs `totalMedianClickPrice`, same for cart
 adds and purchases). When click share is healthy but purchase share is weak,
-that pair usually explains it — no extra query needed.
+that pair is the first place to look — it is already in the row, no extra query
+needed.
 
-Work at family level. Individual ASINs get 0–2 purchases per search term per
-week, far too few to conclude anything: pass a family to `products`, or join
+Work at family level. An individual ASIN can get too few purchases on a search
+term in a week to conclude anything: pass a family to `products`, or join
 `brand_config_amazon_asin` in SQL
 (`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`).
 
@@ -61,9 +62,8 @@ two traps produce confidently wrong numbers:
 - **Market totals repeat, they don't add up.** Each row is one ASIN × one query
   × one period, and the `total*` figures are the same market number copied onto
   every one of our ASIN rows. Summing them inflates the market by however many
-  of our ASINs appeared on the term, often by two orders of magnitude. Take
-  `MAX` within (search query, period), then sum across periods; our own `asin*`
-  counts are summed normally.
+  of our ASINs appeared on the term. Take `MAX` within (search query, period),
+  then sum across periods; our own `asin*` counts are summed normally.
 - **`totalClickRate` is not a click-through rate.** It is divided by
   `searchQueryVolume`, not impressions, so it reads far above the real market
   CTR. Compute market CTR as `totalClickCount ÷ totalQueryImpressionCount`

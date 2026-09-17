@@ -14,21 +14,21 @@ columns: |
   updatedAt	TIMESTAMPTZ		OUR row bookkeeping: when this row was last written. Not a GFS field
   cartOrderId	TEXT		`order.cartOrderId` — the MERCHANT's cart order id (a Shopify order id, or an Amazon order number). The cross-connector join key to the Shopify connector. A join key, never the identity
   cartOrderNumber	TEXT	true	`order.cartOrderNumber`; the merchant-facing order number, a string
-  status	TEXT	true	`order.status`; observed Canceled / Shipped and others. GFS string
-  storeName	TEXT	true	`order.storeName`. Non-null in practice but RELAXED to nullable: one account's storefront naming is not evidence about every account's
-  financialStatus	TEXT	true	`order.financialStatus`. Only "paid" has been observed, which makes a refund or unpaid state plausible and merely unobserved — hence nullable, and hence NOT a Schema.Literal
-  shipmentId	INTEGER	true	`order.shipmentId`, joining to `tfl_shipments_v1__Shipment.id` by convention (no declared FK). Non-null in practice but RELAXED to nullable: an unshipped order plausibly carries none
-  warehouseId	INTEGER	true	`order.warehouseId`; occasionally null
-  warehouseName	TEXT	true	`order.warehouseName`; occasionally null
+  status	TEXT	true	`order.status`; a GFS string, e.g. Canceled, Shipped
+  storeName	TEXT	true	`order.storeName`. RELAXED to nullable: nothing in the API guarantees a storefront name on every account
+  financialStatus	TEXT	true	`order.financialStatus`. A GFS string; a refund or unpaid state is plausible — hence nullable, and hence NOT a Schema.Literal
+  shipmentId	INTEGER	true	`order.shipmentId`, joining to `tfl_shipments_v1__Shipment.id` by convention (no declared FK). RELAXED to nullable: an unshipped order plausibly carries none
+  warehouseId	INTEGER	true	`order.warehouseId`; nullable
+  warehouseName	TEXT	true	`order.warehouseName`; nullable
   shipMethod	TEXT	true	`order.shipMethod`; the merchant's shipping option label
   tracking	TEXT	true	`order.tracking`; null on unshipped orders
   trackingUrl	TEXT	true	`order.trackingUrl`; null on unshipped orders
   dhlEcomNumber	TEXT	true	`order.dhlEcomNumber`; null on unshipped orders
   city	TEXT	true	`order.city`; geography, not person-identifying on its own
   state	TEXT	true	`order.state`; null on a non-US address
-  country	TEXT	true	`order.country`; ISO alpha-2, observed AU and US
+  country	TEXT	true	`order.country`; ISO alpha-2
   orderDate	TIMESTAMPTZ		SOURCE ZONE: US EASTERN WALL TIME (America/New_York), localised on ingestion. `order.orderDate` carries NO offset designator, so nothing in the value reveals its zone. MEASURED by differencing against `order.createdAt`: exactly 4h apart in July and 5h in January, which is the America/New_York offset pair. The raw string survives in `doc`, so this decision is reversible without a re-fetch
   shipDate	TIMESTAMPTZ	true	SOURCE ZONE: US EASTERN WALL TIME (America/New_York), localised on ingestion, on the same measurement as `orderDate`. `order.shipDate`; null on unshipped orders
-  gfsCreatedAt	TIMESTAMPTZ		SOURCE ZONE: UTC, parsed directly with NO localisation. `order.createdAt`, prefixed `gfs` so it does not collide with our own `createdAt` bookkeeping column. MEASURED: it runs exactly 4h ahead of `orderDate` in July and 5h ahead in January on nearly every row — the signature of a UTC stamp beside an Eastern one
-  gfsModifiedAt	TIMESTAMPTZ	true	SOURCE ZONE: US EASTERN WALL TIME (America/New_York) BY DECREE, localised on ingestion — and the source was MEASURED MIXED: `order.modifiedAt`'s offset splits three ways in winter, Eastern for cart-side stamps, UTC when GFS itself touched the row. So SOME STORED VALUES ARE KNOWABLY DISPLACED BY 4-5 HOURS. THIS COLUMN MUST NEVER BE USED AS A WATERMARK OR IN ANY SYNC LOGIC. The raw string is kept verbatim in `doc` for anyone who needs to re-derive it
-  doc	JSONB		The full verbatim order payload from the API; persisted as JSONB. Holds the buyer PII that is deliberately not promoted, the ten always-null fields, and the RAW timestamp strings — which is what makes every localisation decision above recoverable from stored data without a re-fetch. Typed `Unknown` rather than a struct because no copied-in API type exists to pin a struct against
+  gfsCreatedAt	TIMESTAMPTZ		SOURCE ZONE: UTC, parsed directly with NO localisation. `order.createdAt`, prefixed `gfs` so it does not collide with our own `createdAt` bookkeeping column. MEASURED: it runs exactly 4h ahead of `orderDate` in July and 5h ahead in January — the signature of a UTC stamp beside an Eastern one
+  gfsModifiedAt	TIMESTAMPTZ	true	SOURCE ZONE: US EASTERN WALL TIME (America/New_York) BY DECREE, localised on ingestion — and the source was MIXED: `order.modifiedAt`'s offset is Eastern for cart-side stamps and UTC when GFS itself touched the row. So SOME STORED VALUES ARE KNOWABLY DISPLACED BY 4-5 HOURS. THIS COLUMN MUST NEVER BE USED AS A WATERMARK OR IN ANY SYNC LOGIC. The raw string is kept verbatim in `doc` for anyone who needs to re-derive it
+  doc	JSONB		The full verbatim order payload from the API; persisted as JSONB. Holds the buyer PII that is deliberately not promoted, the fields no column promotes, and the RAW timestamp strings — which is what makes every localisation decision above recoverable from stored data without a re-fetch. Typed `Unknown` rather than a struct because no copied-in API type exists to pin a struct against

@@ -11,7 +11,7 @@ They do not expose credentials or arbitrary tables.
 Returns Amazon advertising impressions, clicks, add-to-cart, purchases, units,
 spend, revenue, halo metrics, and optional CTR, conversion rate, CPC, ACOS, and
 ROAS. It can group by product, campaign, ad type, placement, target, store, and
-time. Advertising data commonly lags by one or two days; use
+time. Amazon's advertising reports commonly lag by one or two days; use
 `meta.dateDataLatest`.
 
 ### `loadTraffic`
@@ -65,8 +65,9 @@ Every returned workspace includes its id, label, merchants, and countries on all
 connector scopes. A workspace-scoped connector returns one entry for its active
 workspace, including that workspace's merchant and country metadata. The URL
 fixes the target, so data tools need no `wsid` argument. On organization-
-and user-scoped connectors, select a workspace from the returned directory and
-pass its `wsid` to every data tool; the directory never selects one implicitly.
+and user-scoped connectors, select a workspace from the `listWorkspaces` result
+and pass its `wsid` to every data tool; that result never selects one
+implicitly.
 
 ## Present in client databases but not yet exposed by a dedicated MCP tool
 
@@ -112,9 +113,8 @@ schema with `scripts/catalog.ts` and check the maximum source date before
 interpreting results.
 
 A workspace may also hold rollup tables that the declared schema does not
-declare — `product_overview_ad_asin__day` (the per-ASIN daily ad rollup behind
-`loadAds`) and various `custom_report_*` / `r26*_*` relations. `listTables` for
-the workspace is authoritative in both directions.
+declare, such as `custom_report_*` / `r26*_*` relations. `listTables` for the
+workspace is authoritative in both directions.
 
 Prefer these views for human-authored SQL where they fit:
 
@@ -126,10 +126,10 @@ Prefer these views for human-authored SQL where they fit:
 - `amazon_ads_campaign`, `amazon_ads_adgroup`, `amazon_ads_ad`, and
   `amazon_ads_target`
 
-The `brand_ontology_*` views are the exception. They are frequently empty while
+The `brand_ontology_*` views are the exception. They can be **empty** even when
 `brand_config_amazon_asin` and `brand_config_amazon_family` underneath are
-fully populated, because they require an ontology category/variant layer many
-workspaces never fill in. Read row counts before trusting an empty result, and
+complete, because they require an ontology category/variant layer a workspace
+may not fill in. Read row counts before trusting an empty result, and
 see [Product families](product-hierarchy.md).
 
 JSON/document columns preserve source payloads and can be large. Select only the

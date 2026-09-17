@@ -28,8 +28,8 @@ round(double precision, integer) does not exist". Cast first:
 ROUND(sum("ad_spend")::numeric, 2)
 ```
 
-The same columns also carry float noise — a clicks total can come back as
-`84405.9999999989` — so cast before comparing or displaying counts too.
+The same columns also carry float noise — a whole-number clicks total can come
+back a tiny fraction off — so cast before comparing or displaying counts too.
 
 ## Date and store columns per relation
 
@@ -41,7 +41,6 @@ rollup tables; camelCase belongs to the raw `amzreport_*` / `amzadapi_*` tables.
 | `amazon_sales_and_traffic` (view)                         | `date`                                    | `merchant_id`, `marketplace_id`        |
 | `amzreport_SALES_AND_TRAFFIC__skuByDay`                   | `date`                                    | `merchantId`, `marketplaceId`          |
 | `amazon_fba_inventory_summary` (view)                     | `last_updated_time`                       | `merchant_id`, `marketplace_id`        |
-| `product_overview_ad_asin__day`                           | `date`                                    | `merchant_id`, `marketplace_id`        |
 | `amzadapi_reports_v1__search_asin_placement__byDay`       | `date`                                    | `merchantId`, `marketplaceId`          |
 | `amzadapi_reports_v1__product01__byDay`                   | `date`                                    | `merchantId`, `marketplaceId`          |
 | `amzreport_SEARCH_QUERY_PERFORMANCE`                      | `dateFirst` / `dateLast` (no single date) | `merchantId`, `marketplaceId`          |
@@ -89,8 +88,8 @@ aggregate it correctly once it responds.
 ## FBA inventory fans out — filter, then aggregate
 
 `amazon_fba_inventory_summary` holds one row per (merchant, marketplace, SKU),
-so one ASIN legitimately appears many times: a busy ASIN can return hundreds of
-rows, spread across several marketplaces, many SKUs and more than one merchant.
+so one ASIN legitimately appears many times: a busy ASIN returns a row for each
+SKU, marketplace and merchant it is stocked under.
 Filter merchant and marketplace together, then sum over SKUs:
 
 ```sql
@@ -107,32 +106,31 @@ count collapse into one row and real stock disappears.
 
 | Relation                                            | Has                                                                                                                         | Lacks                                                                    |
 | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `product_overview_ad_asin__day`                     | `ad_impressions`, `ad_clicks`, `ad_orders`, `ad_spend`, `ad_revenue` per ASIN per day                                       | campaign, ad format, search term                                         |
 | `amzadapi_reports_v1__search_asin_placement__byDay` | `impressions`, `clicks`, `totalCost`, `sales`, `adProduct`, `campaignId`, `target`, `searchTerm`, `placementClassification` | nothing relevant — but it is search-term grain, so aggregate before use  |
 | `amzadapi_reports_v1__product01__byDay`             | `adProduct`, purchases/sales/units incl. `*Halo*`, `detailPageViews`, `brandedSearches`                                     | **impressions, clicks and cost** — efficiency cannot be computed from it |
 
 `amzadapi_reports_v1__product01__byDay` has 61 columns and a name that sounds
-like the advertising performance table. It is not. Reach for
-`product_overview_ad_asin__day` for per-ASIN efficiency, and
-`search_asin_placement__byDay` when the question needs campaign, ad format,
-placement, or search term.
+like the advertising performance table. It is not. For per-ASIN or per-family
+efficiency, call `loadAds` with `groupBy: "asin"` or `"family"`. Query
+`search_asin_placement__byDay` directly only when the question needs campaign,
+ad format, placement, or search term.
 
-`product_overview_ad_asin__day` is the same rollup that `loadAds` reads, and
-over a checked week it matched `loadAds` exactly on spend, revenue, clicks,
-impressions and orders. Its `ad_revenue` is total attributed sales, which
-**includes** halo sales on other ASINs (`sales` = `salesPromoted` + `salesHalo`
-in the source table). It is not inflated and does not double-count, but do not
-add `loadAds`'s `revenueHaloOut` on top of `revenue` — that is a breakdown of
-it, not an addition to it. For promoted-ASIN-only revenue, subtract
-`revenueHaloOut`.
+Sponsored Brands is reported twice in `search_asin_placement__byDay`: once as a
+campaign aggregate row with an empty `advertisedProductId`, and again as
+per-ASIN breakdown rows that re-report a split of the same metrics. Summing both
+double-counts Sponsored Brands, so keep one of the two, as `loadAds` does. The
+table's `sales` is total attributed sales and **includes** halo sales on other
+ASINs (`sales` = `salesPromoted` + `salesHalo`). `loadAds` reports that total as
+`revenue`; its `revenueHaloOut` is a breakdown of it, not an addition to it. For
+promoted-ASIN-only revenue, subtract `revenueHaloOut`.
 
-Note also that `adProduct` can be an empty string on a small number of rows;
-treat `''` as "unclassified", not as a fifth ad format.
+Note also that `adProduct` can be an empty string; treat `''` as "unclassified",
+not as a fifth ad format.
 
 ## Workspace-specific relations
 
-`product_overview_ad_asin__day` and other rollups (`custom_report_*`, `r26*_*`)
-are provisioned per workspace and are not in the declared schema (for Amazon,
+Rollups such as `custom_report_*` and `r26*_*` are provisioned per workspace
+and are not in the declared schema (for Amazon,
 [`schema/amazon/index.tsv`](schema/amazon/index.tsv); the other groups are
 listed in [`schema/README.md`](schema/README.md)), which only covers the tables
 Databrill creates everywhere. Always `listTables` for the workspace you are

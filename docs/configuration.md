@@ -25,7 +25,8 @@ https://mcp.databrill.com/mcp/user
 
 The connector exposes every workspace the signed-in user can currently access,
 including workspaces in different organizations. It exposes `listWorkspaces`,
-and every data tool requires `wsid`, even when the directory contains one entry.
+and every data tool requires `wsid`, even when the `listWorkspaces` result
+contains one entry.
 
 ### One workspace
 
@@ -93,10 +94,10 @@ each analysis:
    method;
 6. say which workspaces failed or had no data.
 
-The server never infers a workspace from registry size, merchant, country, or
-`stores`. `listWorkspaces` discovers ids; it does not select a target for the
-next call. A workspace-scoped URL is the only form where a data tool may omit
-the argument, because the URL already contains the wsid.
+The server never infers a workspace from the number of `listWorkspaces` entries,
+merchant, country, or `stores`. `listWorkspaces` discovers ids; it does not
+select a target for the next call. A workspace-scoped URL is the only form where
+a data tool may omit the argument, because the URL already contains the wsid.
 
 Example:
 

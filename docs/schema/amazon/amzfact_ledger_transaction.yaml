@@ -17,7 +17,7 @@ columns: |
   marketplaceId	TEXT			Marketplace the document belongs to. Never an attribution here: every posting names its own marketplace through the account's Amazon:<sp>:<mp> scope segments.
   currency	TEXT			ISO currency of every money column on the row and on its postings. The document's own code where it states one, the marketplace default otherwise.
   status	TEXT		"status" IN ('provisional', 'authoritative')	Whether the amounts are Amazon's forecast or the settled figure. Authoritative exactly when transactionStatus is RELEASED, so provisional IS the deferred state; it is the only carrier of that.
-  postedAt	TEXT			Finances postedDate of the surviving emission, as the exact string the export writes: YYYY-MM-DDTHH:MM:SSZ. TEXT, not a timestamp — see the table docblock.
+  postedAt	TEXT			Finances postedDate of the surviving emission, as the exact string the export writes: YYYY-MM-DDTHH:MM:SSZ. TEXT, not a timestamp: a timestamp column would re-format the value on the way back out, and the export needs this exact string.
   bookedDate	DATE			Marketplace-local date of postedAt, YYYY-MM-DD. This is what a period filters on.
   provisionalAt	TEXT	true		postedDate of the superseded provisional emission, or null when we hold none
   authoritativeAt	TEXT	true		postedDate of the released emission, or null while still deferred

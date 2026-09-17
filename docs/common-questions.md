@@ -12,8 +12,8 @@ Before every answer, establish:
 - the requested grain and currency;
 - whether missing rows mean zero, unavailable data, or an unconfigured source;
 - whether the product was in stock — a stockout explains a sales fall, a
-  conversion collapse and ruined ad efficiency at once, and is by far the most
-  common cause of all three.
+  conversion collapse and ruined ad efficiency at once, so rule it out before
+  any other cause of the three.
 
 Two habits change most answers from a number into a finding: report every ratio
 against a baseline (the store's own average and the same product in a prior
@@ -139,7 +139,7 @@ Question: What sold on Shopify, and what was refunded?
 Preferred path: `shopify_orders_v1__Order` with
 `shopify_orders_v1__OrderLineItem` — see `dbl-metrics-shopify-orders`. Filter
 `NOT "test"`, use the `*ShopAmount` columns, and use `currentQuantity` for units
-sold. This family reaches back years further than the daily reports and counts
+sold. This family can reach much further back than the daily reports and counts
 differently from them; name which source you used.
 
 Question: What products, variants and prices exist on Shopify?
@@ -153,7 +153,7 @@ Question: What stock does the Shopify store hold?
 
 Preferred path: `executeSql` against `shopify_inventory_v1__InventoryLevel` —
 see `dbl-metrics-shopify-inventory`. Filter `WHERE "tracked"`; untracked levels
-are the majority and their numbers do not move with sales. Freshness is
+are returned too, and their numbers do not move with sales. Freshness is
 `fetchedAt`, never `shopifyUpdatedAt`. Negative quantities are real.
 
 Question: How much stock do we have in total, across Amazon, TFL and Shopify?
@@ -187,9 +187,9 @@ Preferred path: the metric tools take family names in `products` and
 
 Database path: use `brand_config_amazon_asin` (ASIN → family) and
 `brand_config_amazon_family`. The better-named `brand_ontology_amazon_asin` and
-`brand_ontology_amazon_family` views are frequently **empty** even when the
-config tables underneath are complete, because they require an ontology
-category/variant layer many workspaces do not fill in. An empty view is not
+`brand_ontology_amazon_family` views can be **empty** even when the config
+tables underneath are complete, because they require an ontology
+category/variant layer a workspace may not fill in. An empty view is not
 evidence that the catalogue has no families. Keep parent ASIN, child ASIN, SKU,
 and configured family distinct. See [Product families](product-hierarchy.md).
 

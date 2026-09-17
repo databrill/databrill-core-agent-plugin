@@ -16,8 +16,8 @@ Fetch per-ASIN (or per-family) Sales & Traffic metrics from the
 
 On user- and organization-scoped connectors, call `listWorkspaces` and pass the
 selected `wsid`. A workspace-scoped connector supplies it in the URL. Never
-infer a target from `stores` or a one-entry directory. Query workspaces
-separately and keep currencies separate.
+infer a target from `stores` or a `listWorkspaces` result with one entry. Query
+workspaces separately and keep currencies separate.
 
 `loadTraffic` parameters:
 
@@ -41,8 +41,8 @@ units/sessions, percent). A falling `cr` with steady `sessions` points at the
 listing/offer; falling `sessions` points at traffic (ads/rank).
 
 Group by `family` whenever the question is about a product rather than one
-variant — a variant selling two units a week carries no signal while its family
-sells hundreds (`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`).
+variant — a variant selling too few units carries no signal while its family
+sells enough to carry one (`${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`).
 
 ## SQL fallback
 

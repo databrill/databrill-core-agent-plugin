@@ -11,8 +11,8 @@ metadata:
 
 On a user- or organization-scoped connector, call `listWorkspaces`, select the
 workspace, and pass its `wsid` explicitly to every data tool. A workspace-scoped
-connector URL supplies that `wsid`. Never infer it from stores or from a registry
-that happens to contain one entry.
+connector URL supplies that `wsid`. Never infer it from `stores` or from a
+`listWorkspaces` result with one entry.
 
 Cross-cutting shape and traps for every `shopify_*` table:
 `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md`. For the declared columns and
@@ -27,10 +27,10 @@ There is no dedicated MCP tool for Shopify. Answer with the `core` MCP server's
 ## Filter to tracked items or the number is wrong
 
 `tracked` says whether a quantity means anything. Shopify keeps returning levels
-for untracked items, and their numbers do not move with sales. Untracked levels
-are a large enough share of a store's rows to change any total, and including
-them moves the available figure in the _opposite_ direction from what you would
-guess, because untracked rows carry large negative values.
+for untracked items, and their numbers do not move with sales. Including them
+changes any total, and can move the available figure in the _opposite_ direction
+from what you would guess, because untracked rows can carry large negative
+values.
 
 **Put `WHERE "tracked"` on every stock total**, and say so when you report the
 figure. If the user genuinely wants the untracked rows, report the two groups
@@ -50,8 +50,8 @@ separately rather than in one sum.
   always present. `reserved`, `safetyStock`, `damaged` and `qualityControl` are
   nullable because they depend on what the merchant's plan enables — a NULL means
   the state was absent from the response, not that it was empty.
-- **`incoming` is untested here.** It was zero on every measured row, so anything
-  keyed on it is unproven. Say so if you use it.
+- **`incoming` is untested here**, so anything keyed on it is unproven. Say so
+  if you use it.
 - **`levelGid` is provenance, not a key or a join.** Shopify returns a GID with a
   query string whose numeric part is shared by every level at a location. Key on
   `(shopId, locationId, inventoryItemId)`.
@@ -137,9 +137,9 @@ combined position, and then say which part came from where and as of when —
 units can also be physically the same stock seen twice where TFL fulfils Shopify
 orders, so a combined total is an estimate, not a measurement.
 
-That overlap is not hypothetical. A workspace can have every Shopify location
-mapped to a TFL warehouse, so the Shopify levels describe TFL's stock rather
-than a separate pool — and the two sources still disagree, because they are read
-on different clocks. Do not reconcile them by arithmetic and do not present one
-as a check on the other. Report each with its source and its timestamp, and say
-the gap is unexplained if the user needs one number.
+A workspace can have every Shopify location mapped to a TFL warehouse, so the
+Shopify levels describe TFL's stock rather than a separate pool — and the two
+sources still disagree, because they are read on different clocks. Do not
+reconcile them by arithmetic and do not present one as a check on the other.
+Report each with its source and its timestamp, and say the gap is unexplained if
+the user needs one number.

@@ -107,9 +107,10 @@ have a dedicated MCP tool.
 ### A data call says wsid is required
 
 Ask Claude to call `listWorkspaces`, select a workspace id, then make one data
-call per workspace with that `wsid`. This also applies when the user-scoped or
-organization-scoped directory contains one workspace. Do not total currencies
-across workspaces unless you also specify a currency-conversion method.
+call per workspace with that `wsid`. This also applies when a user-scoped or
+organization-scoped connector's `listWorkspaces` result contains one workspace.
+Do not total currencies across workspaces unless you also specify a
+currency-conversion method.
 
 ## Official Claude references
 
