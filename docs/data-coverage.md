@@ -12,7 +12,8 @@ Returns Amazon advertising impressions, clicks, add-to-cart, purchases, units,
 spend, revenue, halo metrics, and optional CTR, conversion rate, CPC, ACOS, and
 ROAS. It can group by product, campaign, ad type, placement, target, store, and
 time. Amazon's advertising reports commonly lag by one or two days; use
-`meta.dateDataLatest`.
+`meta.dateDataLatest`, which is null when the selected stores have no ad data.
+Rows with `haloInOnly: true` carry halo-in sales only.
 
 ### `loadTraffic`
 
@@ -27,8 +28,9 @@ by Amazon in week/month buckets, has thresholds, and lags.
 
 ### `loadRank`
 
-Returns Best Sellers Rank snapshots by ASIN and category. Lower rank is better.
-Rank availability differs by marketplace.
+Returns Best Sellers Rank by ASIN, category and day: the latest snapshot of each
+marketplace-local day, with each row marked as a subcategory or department rank.
+Lower rank is better. Rank availability differs by marketplace.
 
 ### `loadEconomics`
 
@@ -45,10 +47,10 @@ organic-channel signals.
 ### `inventoryPacing`
 
 Joins Amazon FBA inventory runway with current advertising spend and recommends
-pause, throttle, hold, or ramp by product family. It reads the per-seller-SKU
-inventory table, so its unit counts and runways are overstated wherever stock is
-commingled; take the units themselves from `amzfact_fnsku_fbaInventory_latest` via
-`executeSql`. There is no dedicated MCP tool for FBA stock levels yet.
+pause, throttle, hold, or ramp by product family. It counts each commingled
+FNSKU once per merchant and marketplace. For the unit counts themselves, query
+`amzfact_fnsku_fbaInventory_latest` via `executeSql`. There is no dedicated MCP
+tool for FBA stock levels yet.
 
 ### `loadTflInventory`
 

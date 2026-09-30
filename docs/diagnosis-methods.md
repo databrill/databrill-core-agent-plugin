@@ -16,8 +16,8 @@ even be found.
 So before diagnosing an ads or sales question on a specific product, check:
 
 - `inventoryPacing` for the family's runway, or
-- `amazon_fba_inventory_summary` for `fulfillable` by ASIN (filter merchant and
-  marketplace, then sum over SKUs — see [SQL quick reference](sql-reference.md)), and
+- `fulfillableQuantity` in `amzfact_fnsku_fbaInventory_latest` by ASIN (one
+  marketplace, summed over FNSKUs — see [SQL quick reference](sql-reference.md)), and
 - `buy_box_percentage` in `amazon_sales_and_traffic`, which falls with the offer
   even when units remain.
 
@@ -85,8 +85,8 @@ store-level analysis correctly reports "no meaningful drop" — while one family
 inside it has collapsed because it sold out.
 
 So when a store-level answer is "nothing is wrong", break it down before saying
-so: `loadTraffic` or `loadAds` with `groupBy: "family"` (or `parentAsin`) for
-both windows, ranked by absolute change in sales. For a diversified catalogue
+so: `loadTraffic` with `groupBy: "family"`, or `loadAds` with `groupBy: "family"`
+or `"parentAsin"`, for both windows, ranked by absolute change in sales. For a diversified catalogue
 this is the normal case, not an edge case.
 
 ## 5. Look for absence, not just decline
@@ -127,7 +127,7 @@ target_spend_per_day = spend_before + (target_units_per_day - units_before)
 
 State the assumption plainly — that the relationship is locally linear over the
 observed range, and that it holds only near the spend levels actually seen. Do
-not extrapolate it to zero or to double the maximum observed spend.
+not extrapolate it to zero or past the highest spend observed.
 
 Use `loadAds` (spend) and `loadTraffic` (units) over the two windows, or
 `inventoryPacing`'s `adSpendPerDay` and `velocityPerDay` for the current side.

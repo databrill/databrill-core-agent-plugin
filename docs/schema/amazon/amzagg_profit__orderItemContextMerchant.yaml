@@ -1,0 +1,17 @@
+name: "amzagg_profit__orderItemContextMerchant"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Per merchant: the projection version, booking time zone and date range of the P&L order-item context last written, the month of closed history the nightly check compared last, and the zone the stream-estimate and expense days were last rebuilt in."
+primaryKey:
+  - "merchantId"
+columns: |
+  name	type	nullable	check	description
+  merchantId	TEXT			Amazon Seller ID; the whole primary key
+  updatedAt	TIMESTAMPTZ			When the row was last written
+  projectionVersion	INTEGER		"projectionVersion" > 0	Projection version of the calculation that wrote the context
+  timeZone	TEXT			The merchant's booking time zone: the IANA zone its order-item rows' dateBooked is local to
+  dateFirst	DATE			First booked day of the calculation that wrote the context, YYYY-MM-DD
+  dateLast	DATE			Last booked day of the calculation that wrote the context, YYYY-MM-DD
+  dateClosedCheckLast	DATE	true		First day of the closed month the nightly run compared last, YYYY-MM-DD; null before the first comparison.
+  zoneDaysTimeZone	TEXT	true		The booking time zone amzagg_profit__adsStreamDay and amzagg_profit__expenseDay were last rebuilt in for the open period; null before the first rebuild. While it differs from timeZone, the next order-item recalculation rebuilds them.

@@ -40,7 +40,7 @@ rollup tables; camelCase belongs to the raw `amzreport_*` / `amzadapi_*` tables.
 | --------------------------------------------------------- | ----------------------------------------- | -------------------------------------- |
 | `amazon_sales_and_traffic` (view)                         | `date`                                    | `merchant_id`, `marketplace_id`        |
 | `amzreport_SALES_AND_TRAFFIC__skuByDay`                   | `date`                                    | `merchantId`, `marketplaceId`          |
-| `amazon_fba_inventory_summary` (view)                     | `last_updated_time`                       | `merchant_id`, `marketplace_id`        |
+| `amzfact_fnsku_fbaInventory_latest`                       | `observedAtPoll` (timestamptz)            | `merchantId`, `marketplaceId`          |
 | `amzadapi_reports_v1__search_asin_placement__byDay`       | `date`                                    | `merchantId`, `marketplaceId`          |
 | `amzadapi_reports_v1__product01__byDay`                   | `date`                                    | `merchantId`, `marketplaceId`          |
 | `amzreport_SEARCH_QUERY_PERFORMANCE`                      | `dateFirst` / `dateLast` (no single date) | `merchantId`, `marketplaceId`          |
@@ -85,19 +85,24 @@ are present before assuming the table is unusable.
 See [Search Query Performance data shape](sqp-data-shape.md) for how to
 aggregate it correctly once it responds.
 
-## FBA inventory fans out — filter, then aggregate
+## FBA inventory — one marketplace, then sum over FNSKUs
 
-`amazon_fba_inventory_summary` holds one row per (merchant, marketplace, SKU),
-so one ASIN legitimately appears many times: a busy ASIN returns a row for each
-SKU, marketplace and merchant it is stocked under.
-Filter merchant and marketplace together, then sum over SKUs:
+`amzfact_fnsku_fbaInventory_latest` holds one row per (merchant, marketplace,
+FNSKU). FNSKUs repeat across marketplaces, so filter to one marketplace; within
+it, sum over FNSKUs and merchants. The quantities are nullable, and NULL means
+Amazon did not report the figure:
 
 ```sql
-SELECT "asin", sum("fulfillable") AS fulfillable, sum("total") AS total
-FROM "amazon_fba_inventory_summary"
-WHERE "merchant_id" = $1 AND "marketplace_id" = $2
+SELECT "asin", sum(COALESCE("fulfillableQuantity", 0)) AS fulfillable,
+       sum(COALESCE("totalQuantity", 0)) AS total
+FROM "amzfact_fnsku_fbaInventory_latest"
+WHERE "marketplaceId" = 'ATVPDKIKX0DER'
 GROUP BY "asin"
 ```
+
+Do not total the per-seller-SKU `amazon_fba_inventory_summary` view or its raw
+table: a commingled FNSKU repeats once per seller SKU there. The
+`dbl-metrics-amazon-inventory` skill has the full rules.
 
 Never deduplicate with `SELECT DISTINCT`: two marketplaces holding the same unit
 count collapse into one row and real stock disappears.
@@ -122,7 +127,9 @@ double-counts Sponsored Brands, so keep one of the two, as `loadAds` does. The
 table's `sales` is total attributed sales and **includes** halo sales on other
 ASINs (`sales` = `salesPromoted` + `salesHalo`). `loadAds` reports that total as
 `revenue`; its `revenueHaloOut` is a breakdown of it, not an addition to it. For
-promoted-ASIN-only revenue, subtract `revenueHaloOut`.
+promoted-ASIN-only revenue, subtract `revenueHaloOut`. Halo-in (`*HaloIn`)
+comes from `product01__byDay`; a `loadAds` row with `haloInOnly: true` exists
+only through it and has no advertised metrics.
 
 Note also that `adProduct` can be an empty string; treat `''` as "unclassified",
 not as a fifth ad format.

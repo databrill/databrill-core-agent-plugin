@@ -100,3 +100,9 @@ converting.
 Amazon only emits an ASIN-query row above an impression threshold, and the
 report lags. A missing row is a low-velocity signal, not a zero. Say which weeks
 the data actually covers.
+
+Amazon's report leaves the search term empty on some rows. The empty term stands
+for a different, unnamed search in each period and marketplace, so it cannot be
+summed across them like a named term. `loadSqp` leaves it out of both its period
+totals and its keyword list; SQL that ranks or totals terms should add
+`"searchQuery" <> ''` too.

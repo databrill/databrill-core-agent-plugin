@@ -58,6 +58,9 @@ Never present a multi-shop total as one store's performance.
 
 ## The standard daily read
 
+In the queries below, replace `<shopId>`, `'<start>'` and `'<end>'` with literal values: `executeSql`
+takes no bind parameters.
+
 ```sql
 SELECT sh."name",
        se."day",
@@ -75,7 +78,7 @@ FROM "shopify_reports_v1__SessionsDaily" AS se
 JOIN "shopify_shop_v1__Shop" AS sh ON sh."shopId" = se."shopId"
 LEFT JOIN "shopify_reports_v1__SalesDaily" AS sa
   ON sa."shopId" = se."shopId" AND sa."day" = se."day"
-WHERE se."day" BETWEEN $start AND $end
+WHERE se."day" BETWEEN '<start>' AND '<end>'
 ORDER BY sh."name", se."day";
 ```
 
@@ -91,7 +94,7 @@ SELECT SUM(se."sessions")                                   AS "sessions",
 FROM "shopify_reports_v1__SessionsDaily" AS se
 LEFT JOIN "shopify_reports_v1__SalesDaily" AS sa
   ON sa."shopId" = se."shopId" AND sa."day" = se."day"
-WHERE se."shopId" = $shop AND se."day" BETWEEN $start AND $end;
+WHERE se."shopId" = <shopId> AND se."day" BETWEEN '<start>' AND '<end>';
 ```
 
 Note that `ordersPerSession` computed this way is **not** the source's

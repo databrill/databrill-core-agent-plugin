@@ -1,0 +1,21 @@
+name: "amzagg_profit__adsDay"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Advertising cost per store, ad day and ad product, summed from the daily ad report. The day is the ad report's day in the ads account's time zone, as Amazon reports it."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "currency"
+  - "dateAd"
+  - "adProduct"
+columns: |
+  name	type	description
+  merchantId	TEXT	Amazon Seller ID of the store
+  marketplaceId	TEXT	Marketplace of the store
+  currency	TEXT	The report's budget currency, the currency of adCost
+  dateAd	DATE	The ad report's day, YYYY-MM-DD, in the ads account's time zone as Amazon reports it
+  adProduct	TEXT	Ad product as the ad report names it (Sponsored Products, ...)
+  adCost	DOUBLE PRECISION	Advertising cost of the day, negative: the report's totalCost, negated
+  rowCount	INTEGER	Report rows summed into this row
+  isFinal	BOOLEAN	True once a report covering the day arrived that was requested at least 15 days after it

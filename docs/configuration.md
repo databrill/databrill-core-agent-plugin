@@ -175,3 +175,7 @@ DATABRILL_CONFIG='./databrill.config.json' deno run --allow-env --allow-net --al
 
 That developer workflow is not needed in Cowork and is not a client support
 prerequisite.
+
+If you register this local server in Claude Code alongside the plugin, do not
+name it `core`: the skills refer to the plugin's server as `core`, so a second
+server with that name leaves the model to choose which one a call reaches.

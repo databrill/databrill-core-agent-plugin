@@ -1,0 +1,15 @@
+name: "amazon_vendor_adapi_profile"
+kind: "table"
+access: "read"
+category: "Amazon account and marketplace dimensions"
+description: "One row per Amazon Vendor store and marketplace, holding the Advertising API profile a person assigned to it by hand. entityId is that profile's ENTITY id, which the advertising report tables carry in their merchantId column for a Vendor profile, so a query joins a Vendor store to its advertising rows through this table. entityId IS NULL means no profile is assigned (an assignment was removed); readers filter entityId IS NOT NULL."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		The Amazon Vendor store's id (`amzn1.vg.…`), the same value `amazon_store.merchantId` carries for that store
+  marketplaceId	TEXT		Amazon marketplace ID of the marketplace the assignment is for
+  createdAt	TIMESTAMPTZ		When this assignment was first recorded
+  updatedAt	TIMESTAMPTZ		When this row last changed, including a removal that set `entityId` to NULL
+  entityId	TEXT	true	The assigned Advertising API profile's ENTITY id. It is the value the advertising report tables carry in their `merchantId` column for a Vendor profile, so joining on it connects a Vendor store to its advertising rows. NULL means no profile is assigned (the assignment was removed); filter `entityId IS NOT NULL`

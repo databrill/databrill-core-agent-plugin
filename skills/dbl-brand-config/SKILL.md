@@ -60,21 +60,20 @@ RETURNING "family", "category";
 ## Read the output
 
 `writeSql` returns `meta.command` (the Postgres command tag),
-`meta.rowsAffected`, `meta.returnedRowCount`, `meta.statementTimeoutMs`, and the
-`RETURNING` rows in `data`.
+`meta.rowsAffected`, `meta.returnedRowCount`, `meta.statementTimeoutMs`,
+`meta.isTruncated`, and the `RETURNING` rows in `data`.
 
-**Never report a write as done without reading a row count.** An
+**Never report a write as done without reading `rowsAffected`.** An
 `UPDATE ... WHERE` that matched nothing and an `INSERT ... ON CONFLICT DO
 NOTHING` that conflicted on every row both succeed and both change zero rows. Say
 how many rows the statement touched, and add `RETURNING` to any statement whose
 result the user will act on.
 
-**Which count is the true one depends on `RETURNING`.** Without a `RETURNING`
-clause, read `rowsAffected`. With one, the rows come back through a cursor 100 at
-a time and `rowsAffected` counts only the last batch — a 100-row
-`INSERT ... RETURNING` reports 0 and a 101-row one reports 1. Read
-`returnedRowCount` for those, and never announce "0 rows" for a statement that
-handed you rows.
+`rowsAffected` is the statement's full count, with or without `RETURNING`.
+`returnedRowCount` is only how many `RETURNING` rows came back, and a result cap
+can hold it below `rowsAffected`; `meta.isTruncated` says when that happened.
+The cap never limits the write itself, so do not re-run a truncated statement,
+which would repeat the write — read the remaining rows with `executeSql`.
 
 ## If `writeSql` is not in the tool list
 

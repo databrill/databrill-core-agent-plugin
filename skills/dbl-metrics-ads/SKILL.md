@@ -53,11 +53,16 @@ sells enough to. See
 revenue`, halo
 (`*HaloOut`, `*HaloIn`), and — with `derived` — `ctr, cr, cpc, acos,
 roas`.
-`meta.dateDataLatest` shows how fresh the ad data is (Amazon's ad reports
-lag 1–2 days).
+A row with `haloInOnly: true` exists only because of halo-in sales (another
+product's ads were credited with selling this one): its advertised and halo-out
+metrics are zero, so leave it out of spend, ACOS and CTR comparisons and do not
+read it as an advertised product. `groupBy: "placement"` reports all halo-in on
+such a row, with a null placement. `meta.dateDataLatest` is the latest date with
+ad data for the selected stores (Amazon's ad reports lag 1–2 days); it is null
+when those stores have no ad data at all.
 
-State each metric with its value and attach the ASIN/family to any named entity
-(see voice guidance). ACOS = spend/sales (lower is better); ROAS = sales/spend.
+State each metric with its value, and name the ASIN or family beside any product
+you mention. ACOS = spend/sales (lower is better); ROAS = sales/spend.
 `revenue` is total attributed sales and already includes halo out; the
 `*HaloOut` / `*HaloIn` fields break it down, so never add them on top.
 
@@ -67,9 +72,10 @@ Read `${CLAUDE_PLUGIN_ROOT}/docs/diagnosis-methods.md` before answering "ACOS is
 too high" or "why did efficiency drop". The short form:
 
 1. **Check stock first.** A stockout wrecks every ad metric with a cause that
-   has nothing to do with ads. Check `inventoryPacing` or `fulfillable` and
-   `buy_box_percentage`; if stock is at or near zero, say so and hand off to
-   `dbl-ask-inventory-pacing`.
+   has nothing to do with ads. Check `inventoryPacing` for the family's runway,
+   or `fulfillableQuantity` in `amzfact_fnsku_fbaInventory_latest` (see
+   `dbl-metrics-amazon-inventory`), and `buy_box_percentage`; if stock is at or
+   near zero, say so and hand off to `dbl-ask-inventory-pacing`.
 2. **Never report a ratio alone.** Fetch the store-wide figure for the same
    period (`groupBy: "store"`) and the same product in a prior period. A
    product's ACOS only means something against its store's average and its own

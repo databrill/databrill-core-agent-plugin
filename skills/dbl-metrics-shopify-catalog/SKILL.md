@@ -76,11 +76,14 @@ and, where the merchant uses one scheme, with Amazon seller SKUs.
 Check before relying on it — a null or duplicate SKU breaks a cross-source join
 silently:
 
+In the queries below, replace `<shopId>` with the literal shop id: `executeSql` takes no bind
+parameters.
+
 ```sql
 SELECT COUNT(*) AS "variants",
        COUNT("sku") AS "withSku",
        COUNT(DISTINCT "sku") AS "distinctSku"
-FROM "shopify_products_v1__ProductVariant" WHERE "shopId" = $shop;
+FROM "shopify_products_v1__ProductVariant" WHERE "shopId" = <shopId>;
 ```
 
 ## The catalogue listing
@@ -93,7 +96,7 @@ SELECT p."title", p."status", p."vendor", p."productType",
 FROM "shopify_products_v1__Product" AS p
 JOIN "shopify_products_v1__ProductVariant" AS v
   ON v."shopId" = p."shopId" AND v."productId" = p."id"
-WHERE p."shopId" = $shop
+WHERE p."shopId" = <shopId>
 ORDER BY p."title", v."position";
 ```
 

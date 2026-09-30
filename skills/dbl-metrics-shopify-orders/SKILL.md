@@ -62,6 +62,9 @@ what was originally ordered. Say which you used.
 Line-item money is **shopMoney only** — there is no presentment pair.
 `discountedTotalAmount` is after line discounts, `originalTotalAmount` before.
 
+In the queries below, replace `<shopId>`, `'<start>'` and `'<end>'` with literal values: `executeSql`
+takes no bind parameters.
+
 ```sql
 SELECT li."sku", li."title",
        SUM(li."currentQuantity")      AS "unitsSold",
@@ -70,8 +73,8 @@ SELECT li."sku", li."title",
 FROM "shopify_orders_v1__OrderLineItem" AS li
 JOIN "shopify_orders_v1__Order" AS o
   ON o."shopId" = li."shopId" AND o."id" = li."orderId"
-WHERE o."shopId" = $shop AND NOT o."test"
-  AND o."shopifyProcessedAt" >= $start AND o."shopifyProcessedAt" < $end
+WHERE o."shopId" = <shopId> AND NOT o."test"
+  AND o."shopifyProcessedAt" >= '<start>' AND o."shopifyProcessedAt" < '<end>'
 GROUP BY li."sku", li."title", li."discountedTotalCurrency"
 ORDER BY "unitsSold" DESC
 LIMIT 50;

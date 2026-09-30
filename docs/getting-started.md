@@ -13,8 +13,14 @@ for the normal hosted-MCP setup.
 
 ## Claude Code
 
-1. Start Claude Code.
-2. Run `/plugin marketplace add databrill/databrill-core-agent-plugin`.
+This section covers Claude Code in a terminal (the `claude` command), the
+Claude Code extension for VS Code, and Claude Code in the Claude desktop app.
+All three read the same user settings file, `~/.claude/settings.json`, so a
+plugin installed for you in every project (the default) is available in all
+three. The numbered steps use a terminal.
+
+1. Start Claude Code in a terminal by running `claude`.
+2. Run `/plugin marketplace add https://github.com/databrill/databrill-core-agent-plugin.git`.
 3. Run `/plugin install databrill-core@databrill`.
 4. When the plugin asks for an MCP URL, leave it empty to use every workspace
    your Databrill login can access, or enter the exact scoped URL supplied by
@@ -22,6 +28,14 @@ for the normal hosted-MCP setup.
 5. Run `/mcp`, select the `core` server under the plugin, and choose Authenticate.
 6. Finish the Databrill sign-in in the browser and return to Claude Code.
 7. Start a new session so the installed skills and connector are loaded.
+
+In the VS Code extension, type `/plugins` in the prompt box to open **Manage
+plugins**, where you can add the marketplace by the URL in step 2 and install
+`databrill-core`; type `/mcp` in the chat panel to reach the sign-in. The
+desktop app installs plugins from its own plugin manager, without a terminal.
+Both let you choose where to install the plugin — for you in every project (the
+normal choice), for everyone working in one project, or only for you in one
+project.
 
 Verify which workspaces the connector can see:
 
@@ -46,8 +60,8 @@ Data calls need no `wsid` argument: the URL fixes which workspace the answer cov
 ## Cowork
 
 1. Open Customize → Plugins.
-2. Add the GitHub marketplace repository supplied by Databrill, or upload the
-   plugin package supplied to you.
+2. Select **Add marketplace** and enter
+   `https://github.com/databrill/databrill-core-agent-plugin`.
 3. Install `databrill-core`.
 4. Leave the MCP URL empty, or enter the exact scoped URL supplied by Databrill.
 5. Connect the `core` server and finish the Databrill OAuth sign-in.
@@ -77,10 +91,12 @@ For more examples, see [Common questions](common-questions.md).
 
 ## Update or remove
 
-In Claude Code, run `/plugin` and use the Installed tab to update, disable, or
-uninstall the plugin. In Cowork, use Customize → Plugins. Disabling or removing
-the plugin removes the packaged skills and connector declaration; it does not
-change your Databrill account permissions.
+In Claude Code in a terminal, run `/plugin` and use the Installed tab to update,
+disable, or uninstall the plugin; in the VS Code extension, type `/plugins` to
+enable or disable it; in the desktop app, use its plugin manager. In Cowork,
+use Customize → Plugins. Disabling or removing the plugin removes the packaged
+skills and connector declaration; it does not change your Databrill account
+permissions.
 
 ## Troubleshooting
 
@@ -116,5 +132,7 @@ currency-conversion method.
 
 - [Use plugins in Cowork](https://claude.com/docs/cowork/guide/plugins)
 - [Discover and install Claude Code plugins](https://code.claude.com/docs/en/discover-plugins)
+- [Claude Code in VS Code](https://code.claude.com/docs/en/vs-code)
+- [Claude Code in the desktop app](https://code.claude.com/docs/en/desktop)
 - [Connect Claude Code to remote MCP servers](https://code.claude.com/docs/en/mcp)
 - [Use custom remote connectors in Claude](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)

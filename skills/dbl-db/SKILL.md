@@ -14,28 +14,25 @@ selected `wsid` to every data tool. A workspace-scoped connector supplies the
 wsid in its URL. Never infer a target from `stores` or from a `listWorkspaces`
 result with one entry.
 
-If no MCP tool covers it:
+If no MCP tool covers it, answer with `executeSql`. Find the relation and its
+columns first: read `${CLAUDE_PLUGIN_ROOT}/docs/schema/<group>/index.tsv` for
+the channel (`amazon`, `walmart`, `shopify`, `tfl`; exchange rates, brand
+configuration and the schema version row are in `common`; a cross-channel
+question reads `common` plus each channel it touches), then
+`${CLAUDE_PLUGIN_ROOT}/docs/schema/<group>/<name>.yaml` for each table you pick
+(its `columns` key is a tab-separated table whose first line names the fields,
+and an empty cell means the field does not apply). Confirm with `listTables` and
+`describeTable`, because a workspace can lack a declared table, have it empty,
+or hold extra rollups the declared schema does not list.
+`${CLAUDE_PLUGIN_ROOT}/docs/sql-reference.md` has the date/store column table,
+quoting, `::numeric`, partitioned rank tables, and the relations whose names
+mislead.
 
-1. identify the workspace, marketplace, period, grain, and currency;
-2. identify the channel — Amazon, Walmart, Shopify or The Fulfillment Lab — and
-   read `${CLAUDE_PLUGIN_ROOT}/docs/schema/<group>/index.tsv` for it (`amazon`,
-   `walmart`, `shopify`, `tfl`; exchange rates, brand configuration and the
-   schema version row are in `common`; a cross-channel question reads `common`
-   plus each channel it touches), then
-   `${CLAUDE_PLUGIN_ROOT}/docs/schema/<group>/<name>.yaml` for each table you
-   pick (its `columns` key is a tab-separated table whose first line names the
-   fields, and an empty cell means the field does not apply); then run
-   `listTables` to see what this workspace actually has and
-   `describeTable` for the exact columns in the database, because a workspace
-   can lack a declared table, have it empty, or hold extra rollups the declared
-   schema does not list;
-3. read `${CLAUDE_PLUGIN_ROOT}/docs/sql-reference.md` for the date/store column
-   table, quoting, `::numeric`, partitioned rank tables, and the relations whose
-   names mislead;
-4. write one bounded read-only query with double-quoted identifiers;
-5. run it with `executeSql`;
-6. validate uniqueness, nulls, min/max dates, row count, and totals;
-7. return the query and explain missing or stale sources.
+Keep the query bounded and read-only, with double-quoted identifiers, and scoped
+to one workspace, marketplace, period, grain and currency. Before answering,
+check the result for duplicate keys at the intended grain, nulls, min/max dates,
+row count and totals; return the query with the answer, and name any source that
+was missing or stale.
 
 These three MCP tools need no local setup and are the normal path. Fall back to
 `${CLAUDE_PLUGIN_ROOT}/scripts/catalog.ts` and
@@ -54,7 +51,9 @@ For any `shopify_*` table, read
 money columns, refresh markers and sparse report days each produce a plausible
 wrong number rather than an error.
 
-Do not guess columns. Do not interpolate values into SQL. Do not use database
-data from one workspace to answer for another. Do not average rates or monetary
-ratios across rows; aggregate their numerators and denominators. Do not claim
-that a declared table is populated without checking it in the database.
+Do not guess columns. `executeSql` takes no bind parameters, so an ad-hoc query
+carries its values as quoted literals; the `$1` rule above is for saved scripts.
+Do not use database data from one workspace to answer for another. Do not
+average rates or monetary ratios across rows; aggregate their numerators and
+denominators. Do not claim that a declared table is populated without checking
+it in the database.

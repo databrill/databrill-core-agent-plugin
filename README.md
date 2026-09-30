@@ -23,7 +23,7 @@ exactly and never guess it or substitute another client's workspace id.
 Add the repository as a marketplace and install the plugin:
 
 ```text
-/plugin marketplace add databrill/databrill-core-agent-plugin
+/plugin marketplace add https://github.com/databrill/databrill-core-agent-plugin.git
 /plugin install databrill-core@databrill
 ```
 
@@ -39,10 +39,9 @@ claude --plugin-dir /path/to/databrill-core-agent-plugin
 
 ## Install in Cowork
 
-Open Customize → Plugins. Add this GitHub repository as a marketplace, or upload
-the plugin package supplied by Databrill. Install `databrill-core`, leave the
-MCP URL empty unless Databrill supplied a scoped one, then connect the `core`
-server and complete OAuth.
+Open Customize → Plugins. Add this GitHub repository as a marketplace. Install
+`databrill-core`, leave the MCP URL empty unless Databrill supplied a scoped
+one, then connect the `core` server and complete OAuth.
 
 The plugin is for Claude Code and Cowork. A plain Claude chat can use the same
 remote connector, but it does not install this skill package.

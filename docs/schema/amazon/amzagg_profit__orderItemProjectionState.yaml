@@ -14,7 +14,7 @@ columns: |
   status	TEXT		"status" IN ('BACKFILLING', 'READY', 'STALE', 'FAILED')	BACKFILLING | READY | STALE | FAILED
   dateCoveredFirst	DATE	true		First marketplace-local bookedDate the last completed rebuild covered, YYYY-MM-DD; null before one completes. Reads outside this window are not served by this table.
   dateCoveredLast	DATE	true		Last marketplace-local bookedDate the last completed rebuild covered, YYYY-MM-DD; null before one completes.
-  rowCount	INTEGER		"rowCount" >= 0	Atoms written by the last completed rebuild of this merchant
+  rowCount	INTEGER		"rowCount" >= 0	Order-item rows written by the last completed rebuild of this merchant
   startedAt	TIMESTAMPTZ			Start of the current or most recent rebuild run
   completedAt	TIMESTAMPTZ	true		Completion time of the last successful rebuild; null until one succeeds
   lastError	TEXT	true		Sanitized failure detail; never contains documents or business identifiers

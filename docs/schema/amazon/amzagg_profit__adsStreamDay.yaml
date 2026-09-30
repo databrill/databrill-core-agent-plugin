@@ -1,0 +1,21 @@
+name: "amzagg_profit__adsStreamDay"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Running estimate of advertising cost per store, booking day and ad product from the Marketing Stream traffic events, each distinct event added once. Readers use amzagg_profit__adsDay for a day when it has one, else this estimate."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "currency"
+  - "dateBooked"
+  - "adProduct"
+columns: |
+  name	type	description
+  merchantId	TEXT	Amazon Seller ID of the store
+  marketplaceId	TEXT	Marketplace of the store
+  currency	TEXT	Currency of adCost, as the events report it
+  dateBooked	DATE	YYYY-MM-DD: the local day, in the merchant's booking time zone, of the hourly window start of the events summed here
+  adProduct	TEXT	Ad product, spelled as amzagg_profit__adsDay spells it
+  adCost	DOUBLE PRECISION	Advertising cost of the events summed here, negative
+  eventCount	INTEGER	Distinct stream events summed into this row
+  windowStartLastAt	TIMESTAMPTZ	The latest hourly window start among the events summed here

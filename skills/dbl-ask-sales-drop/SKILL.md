@@ -33,6 +33,9 @@ fan this diagnosis out silently.
   prior baseline, anchored to each store's latest date.
 - `dropThreshold` (default 0.10) — fractional fall in sales/day that flags a
   drop.
+- `inventoryRunwayMax` (default 14) — flag ASINs whose runway is at or below
+  this many days as a possible cause. `skipInventory` (default false) skips
+  that join; leave it false when diagnosing.
 
 Example: "why did UK sales fall this week" →
 `salesDropDiagnosis({ stores: "GB", recentDays: 7, baselineDays: 28 })`.
@@ -41,9 +44,12 @@ Example: "why did UK sales fall this week" →
 
 Per store: `deltaPct` (sales/day change), `isDrop`, ranked **`causes`** (traffic
 / conversion / price — `share` sums to ~100%; a factor that _rose_ and cushioned
-the drop has a negative share; shares are suppressed for near-flat stores), and
-**`signals`** (ad vs organic channel, ad CR / CPC moves). When sessions are
-missing for a window, `notes` says traffic and conversion couldn't be separated.
+the drop has a negative share; shares are suppressed for near-flat stores),
+**`signals`** (ad vs organic channel, ad CR / CPC moves, and `inventory` when
+stock is low), and **`inventoryFlags`** — each low-runway ASIN with its
+`runway`, `runwayWithInbound`, `inventoryAvailable` and `inbound`. When
+sessions are missing for a window, `notes` says traffic and conversion couldn't
+be separated.
 
 Read it as: which factor moved most, then which channel/efficiency signal
 explains it. If organic drove the fall with healthy inventory, suspect rank /
@@ -52,11 +58,12 @@ buy-box — pull `dbl-metrics-rank` and `dbl-metrics-traffic` to confirm.
 ## Check stock before diagnosing
 
 A stockout produces a sales fall, a conversion collapse and wrecked ad
-efficiency from a single cause that has nothing to do with demand. Check
-`inventoryPacing`, or `fulfillable` in `amazon_fba_inventory_summary` and
-`buy_box_percentage` in `amazon_sales_and_traffic`, before assigning any other
-cause. If stock is at or near zero, say so and hand off to
-`dbl-ask-inventory-pacing`.
+efficiency from a single cause that has nothing to do with demand. Read
+`inventoryFlags` and the `inventory` signal before assigning any other cause.
+The tool does not report buy box: a falling `buy_box_percentage` in
+`amazon_sales_and_traffic` shows the offer failing even while units remain. If
+stock is at or near zero, say so and hand off to `dbl-ask-inventory-pacing`; for
+unit counts use `dbl-metrics-amazon-inventory`.
 
 For the declared columns and types of those tables, or of any other Amazon
 table, read `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that
@@ -69,9 +76,10 @@ average that hides almost everything. A store whose total has barely moved can
 contain a family that has collapsed because it sold out.
 
 So when the store-level verdict is "no meaningful drop", break it down before
-reporting that: `loadTraffic` or `loadAds` with `groupBy: "family"` (or
-`parentAsin`) over the same two windows, ranked by absolute change in sales. For
-a diversified catalogue this is the normal case, not an edge case. See
+reporting that: `loadTraffic` with `groupBy: "family"`, or `loadAds` with
+`groupBy: "family"` or `"parentAsin"`, over the same two windows, ranked by
+absolute change in sales. For a diversified catalogue this is the normal case,
+not an edge case. See
 `${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`.
 
 Also look for **absence, not just decline**. A family that sells out can show it

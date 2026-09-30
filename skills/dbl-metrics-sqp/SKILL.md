@@ -26,7 +26,8 @@ search shares separate by account and marketplace.
 - `timeUnit` — `WEEK` (default) or `MONTH`. (SQP is pre-aggregated by Amazon to
   these periods — this selects rows, it does not re-bucket.)
 - `products` — optional family / ASIN filter (scopes "our" counts).
-- `keywordLimit` — top-N queries by market impressions (default 25).
+- `keywordLimit` — top-N queries by market impressions, a whole number from 1
+  to 200 (default 25); a value outside that range is an error.
 
 Example: "what's our impression share in the US and the top terms" →
 `loadSqp({ stores: "US", when: "P8W" })`.
@@ -42,12 +43,6 @@ Example: "what's our impression share in the US and the top terms" →
 
 Note: SQP only emits ASIN-keyword rows above an impression threshold, and lags;
 missing rows can themselves be a low-velocity signal.
-
-Each row also carries our median price and the market's median price for that
-search term (`asinMedianClickPrice` vs `totalMedianClickPrice`, same for cart
-adds and purchases). When click share is healthy but purchase share is weak,
-that pair is the first place to look — it is already in the row, no extra query
-needed.
 
 Work at family level. An individual ASIN can get too few purchases on a search
 term in a week to conclude anything: pass a family to `products`, or join
@@ -74,6 +69,12 @@ Source: `amzreport_SEARCH_QUERY_PERFORMANCE` (`impressionData`, `clickData`,
 `asin`, `searchQuery`, `dateFirst`, `dateLast`, `searchQueryVolume`). Queries
 must filter `merchantId`, `marketplaceId`, `timeUnit` and a bounded `dateFirst`
 range together or they time out — the index leads with `merchantId`.
+
+`loadSqp` returns no prices. The raw table's `clickData`, `cartAddData` and
+`purchaseData` carry our median price and the market's for each search term
+(`asinMedianClickPrice` vs `totalMedianClickPrice`, and the same for cart adds
+and purchases). When click share is healthy but purchase share is weak, query
+that pair first.
 
 For the declared columns and types of any Amazon table, read
 `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's

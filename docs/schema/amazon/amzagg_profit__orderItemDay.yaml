@@ -1,0 +1,36 @@
+name: "amzagg_profit__orderItemDay"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Per-store, per-day sums of amzagg_profit__orderItem: one row per merchant, marketplace, currency and booked day, rows with no marketplace summed on their own per currency. Kept by the same transactions that write the order-item rows. Money sums are exact to six decimals."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "currency"
+  - "dateBooked"
+columns: |
+  name	type	description
+  merchantId	TEXT	Amazon Seller ID that owns the order-item rows summed here
+  marketplaceId	TEXT	Marketplace of the order-item rows summed here; the empty string for the rows that name no marketplace (reimbursements, refunds whose order does not resolve), summed per currency.
+  currency	TEXT	ISO currency of every money column of the row
+  dateBooked	DATE	The day the summed order-item rows are booked on, YYYY-MM-DD: the marketplace-local day in the merchant's booking time zone, as amzagg_profit__orderItem.dateBooked.
+  rowCount	INTEGER	Order-item rows summed into this row
+  saleOrders	INTEGER	Distinct orders among the sale rows
+  units	INTEGER	Sum of units sold
+  refundedUnits	INTEGER	Sum of refundedUnits
+  returnedUnits	INTEGER	Sum of returnedUnits
+  sellableReturnUnits	INTEGER	Sum of sellableReturnUnits
+  amazonFeesEstimatedUnits	INTEGER	Sum of amazonFeesEstimatedUnits: sold units whose fees are still a forecast
+  saleUnitsWithoutCost	INTEGER	Units of the sale rows that carry no unit cost (no UNIT_COGS covers the sku)
+  sales	DOUBLE PRECISION	Sum of sales, positive
+  promo	DOUBLE PRECISION	Sum of promo, negative
+  shipPromotionDiscount	DOUBLE PRECISION	Sum of shipPromotionDiscount, negative, already netted inside sales
+  refundCost	DOUBLE PRECISION	Sum of refundCost, normally negative
+  reimbursements	DOUBLE PRECISION	Sum of reimbursements, signed
+  amazonFeesSettled	DOUBLE PRECISION	Sum of amazonFeesSettled: fees Amazon charged, negative
+  amazonFeesEstimated	DOUBLE PRECISION	Sum of amazonFeesEstimated: fee-preview forecast, negative
+  cogs	DOUBLE PRECISION	Sum of cogs, negative
+  returnCogsCredit	DOUBLE PRECISION	Sum of cogsCredit on customer-return rows (rows with sellable returned units)
+  reimbursementCogsCredit	DOUBLE PRECISION	Sum of cogsCredit on every other row (units Amazon put back into stock)
+  shipping	DOUBLE PRECISION	Sum of shipping, negative
+  grossProfit	DOUBLE PRECISION	Sum over the rows of sales + promo + refundCost + reimbursements + amazonFeesSettled + amazonFeesEstimated + cogs + cogsCredit + shipping. Advertising and expenses are not in it.

@@ -84,7 +84,8 @@ across our ASIN rows, and `totalClickRate` is not a click-through rate.
 Question: Is organic rank improving?
 
 Preferred path: `loadRank` scoped to the ASIN and marketplace. Lower numeric BSR
-is better. Compare like categories; a product can have several category ranks.
+is better. Compare like categories: `categoryKind` says whether a row is a
+subcategory or a department rank, and a product has ranks in several categories.
 
 ## Inventory
 
@@ -102,10 +103,10 @@ substantially.
 Question: Should advertising change because of Amazon inventory?
 
 Preferred path: `inventoryPacing`. It combines Amazon FBA inventory runway and
-ad spend. Call out the worst-variant caveat and any inbound stock. Its unit
-counts come from the per-seller-SKU table and are overstated where stock is
-commingled, so confirm a `hold` or `ramp` against
-`amzfact_fnsku_fbaInventory_latest` before acting.
+ad spend. Call out the worst-variant caveat and any inbound stock. It counts
+each commingled FNSKU once per merchant and marketplace. Where one stock pool
+serves several marketplaces, as Amazon's Pan-European FBA does, each of those
+marketplaces' runway reads longer than the stock supports.
 
 Question: What stock is held by The Fulfillment Lab?
 
