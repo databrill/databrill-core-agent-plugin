@@ -15,7 +15,7 @@ columns: |
   createdAt	TIMESTAMPTZ	When this target row was first created
   updatedAt	TIMESTAMPTZ	When this target row was last updated
 indexes:
-  - name: "amzspapi_searchCatalogItems_v2020__target__merchantId__marketplaceId__keyword__locale"
+  - name: "amzspapi_searchCatalogItems_v2020__target__keyword_locale"
     columns:
       - "merchantId"
       - "marketplaceId"

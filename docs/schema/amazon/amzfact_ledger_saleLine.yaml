@@ -1,0 +1,37 @@
+name: "amzfact_ledger_saleLine"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "One SKU of one booked sale (a deferred shipment record or a title transfer): its units, its dates and its settlement link. No money; the sale's money is on its postings."
+primaryKey:
+  - "merchantId"
+  - "transactionKey"
+  - "sku"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon sellingPartnerId of the sale
+  transactionKey	TEXT		The sale's amzfact_ledger_transaction
+  sku	TEXT		Seller SKU, or the empty string when neither the document nor a report names one
+  marketplaceId	TEXT		Marketplace of the sale, as on its transaction
+  orderId	TEXT		Amazon order id of the sale
+  shipmentId	TEXT	true	The SHIPMENT_ID of the sale's document, when it names one
+  units	INTEGER		Units of this SKU the sale shipped, summed over its items
+  dateBooked	DATE		The sale transaction's dateBooked, YYYY-MM-DD
+  dateOrder	DATE	true	The order's purchase day in its marketplace zone, from ALL_ORDERS; null when ALL_ORDERS has no row for the order
+  skuSource	TEXT	true	Which source gave the SKU and units: the Finances items, the settlement report or ALL_ORDERS; null when no source names a SKU
+  releaseTransactionKey	TEXT	true	The transactionKey of the sale's release, once its release record is stored
+  dateReleased	DATE	true	The release transaction's dateBooked; null until the release record is stored
+  settlementId	TEXT	true	The settlement that paid the sale line: the settlement report's Order rows of the line at the release instant, else the release document's own SETTLEMENT_ID
+  depositAt	TIMESTAMPTZ	true	Deposit instant of the settlement in settlementId, as its settlement summary states it; null until that summary is stored
+  fulfillmentChannel	TEXT	true	ALL_ORDERS fulfillment_channel of the order line
+  shipCountry	TEXT	true	ALL_ORDERS ship_country of the order line
+indexes:
+  - name: "amzfact_ledger_saleLine__merchantId__orderId"
+    columns:
+      - "merchantId"
+      - "orderId"
+  - name: "amzfact_ledger_saleLine__merchantId__sku__dateBooked"
+    columns:
+      - "merchantId"
+      - "sku"
+      - "dateBooked"

@@ -14,7 +14,7 @@ columns: |
   rank	INTEGER	1-based rank, continuous across page boundaries
   asin	TEXT	The ranked ASIN at this position
 indexes:
-  - name: "amzspapi_searchCatalogItems_v2020__rank__asin__targetId__scrapeTime"
+  - name: "amzspapi_searchCatalogItems_v2020__rank__asin_target_time"
     columns:
       - "asin"
       - "targetId"

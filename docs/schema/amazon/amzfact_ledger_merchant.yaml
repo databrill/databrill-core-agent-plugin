@@ -1,0 +1,21 @@
+name: "amzfact_ledger_merchant"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Per merchant, the state of its accrual ledger: the ledger version and status of the last build, the first day of the books, the merchant's region, and the build's times and counts. Read by the ledger readers, the CLI and the service that keeps flagged merchants built, and by the advertising invoice writer, which starts each marketplace's invoice chain on the first day of the books."
+primaryKey:
+  - "merchantId"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon sellingPartnerId; the ledger covers all its marketplaces
+  region	TEXT		The merchant's Amazon region (EU, NA or FE) as the last build resolved it: its zone dates a transaction whose marketplace is empty or unlisted
+  projectionVersion	INTEGER		Compiled ledger version of the last build. Readers serve the merchant only while it equals the code's version.
+  status	TEXT		BUILDING while a build runs, READY once it completed, FAILED when it stopped on an error or could not take the merchant's ledger lock. Readers serve the merchant only when READY.
+  dateLedgerFirst	DATE		The first day of the books: the merchant's first full day of stored Finances in every zone its transactions are dated in, YYYY-MM-DD
+  startedAt	TIMESTAMPTZ		When the last build of this merchant began. A build writes only while this still holds its own start, so a later build of the same merchant stops an earlier one.
+  completedAt	TIMESTAMPTZ	true	When the last build completed; null while it runs or after it failed
+  lastError	TEXT	true	Why the last build failed; null otherwise
+  transactionsWritten	INTEGER	true	amzfact_ledger_transaction rows the last build wrote; null until it completes
+  postingsWritten	INTEGER	true	amzfact_ledger_posting rows the last build wrote; null until it completes
+  saleLinesWritten	INTEGER	true	amzfact_ledger_saleLine rows the last build wrote; null until it completes
+  diagnosticsWritten	INTEGER	true	amzfact_ledger_diagnostic rows the last build wrote; null until it completes

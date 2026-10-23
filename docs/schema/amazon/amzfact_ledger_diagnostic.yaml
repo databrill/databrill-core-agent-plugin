@@ -1,0 +1,18 @@
+name: "amzfact_ledger_diagnostic"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "What the accrual ledger noticed about one of its transactions: an unmapped breakdown path, an unknown transaction type, a priced sale release record with no deferred record, money left without a SKU because its order has several SKUs or its sources name different ones, a release whose amounts changed, a sale line without an order date, a title transfer without units, a product item with no SKU whose description is a known code for a charge, more units booked for an order line than it ordered, units no configured cost covers, a restock that found no costed unit of its order to take back, a tax posting without a taxable base, tax paid by a configured tax entity whose jurisdiction could not be derived, or a reverse charge in a country the entity recovers no tax in."
+primaryKey:
+  - "merchantId"
+  - "transactionKey"
+  - "kind"
+  - "ordinal"
+columns: |
+  name	type	description
+  merchantId	TEXT	Amazon sellingPartnerId of the transaction
+  transactionKey	TEXT	The amzfact_ledger_transaction this entry describes
+  kind	TEXT	Which diagnostic this is; decides the shape of detail
+  ordinal	INTEGER	Position among this transaction's entries of this kind, from 0 (one unmapped entry per breakdown path, one dateOrderMissing entry per sale line)
+  projectionVersion	INTEGER	Which compiled ledger logic wrote this row
+  detail	JSONB	A JSONB object whose shape depends on kind. unmapped: {path, occurrences, amount}, amount the source's own unnegated amount. excludedType: {transactionType, totalAmount}. shipmentWithoutDeferredRecord: {totalAmount, units}, units one {sku, units} per SKU of its items. attributionHold: {orderId, reason, skus, postings}. releaseAmountChanged: {releaseTransactionId, deferredTotal, releasedTotal}. dateOrderMissing: {orderId, sku}. titleTransferUnitsMissing: {orderId}, orderId null when the transfer names no order. knownItemDescriptionNotInPath: {description, asin}, asin null when the item names none. unitsExceedOrdered: {orderId, sku, unitsOrdered, unitsBooked}. costMissing: {sku, units, costDay, country}. restockWithoutCost: {sku, asin, units, costDay}, asin null when the row names none. taxBaseMissing: {path, sku, amount}, sku null when the posting has none. paidTaxJurisdictionUnknown: {path, reason, country, rateObserved, amount}, reason rateMismatch or noIssuerJurisdiction, country the candidate country or null, rateObserved the tax over its base in percent or null without a base. reverseChargeWithoutRecovery: {invoiceId, country, amount}.

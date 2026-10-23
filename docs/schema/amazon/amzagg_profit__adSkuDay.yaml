@@ -1,0 +1,23 @@
+name: "amzagg_profit__adSkuDay"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Per-SKU daily advertising cost and attributed sales: the Sponsored Ads search-term and placement report summed per merchant, marketplace, day, budget currency, advertised SKU and advertised ASIN, over its rows with an advertised SKU. A day's rows of a store are only ever replaced by a fresh sum of the stored report rows, written with them."
+primaryKey:
+  - "merchantId"
+  - "date"
+  - "marketplaceId"
+  - "currency"
+  - "sku"
+  - "asin"
+columns: |
+  name	type	description
+  merchantId	TEXT	Amazon Seller ID
+  date	DATE	The report's day, YYYY-MM-DD, as the ad report dates it
+  marketplaceId	TEXT	Marketplace of the report rows
+  currency	TEXT	The report rows' budgetCurrency
+  sku	TEXT	The report rows' advertisedProductSku; never the empty string
+  asin	TEXT	The report rows' advertisedProductId; the empty string when they carry none
+  totalCost	DOUBLE PRECISION	Sum of the report rows' totalCost, in currency
+  sales	DOUBLE PRECISION	Sum of the report rows' attributed sales, in currency
+  rowCount	INTEGER	The report rows summed into the row

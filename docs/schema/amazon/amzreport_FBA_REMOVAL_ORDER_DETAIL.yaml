@@ -32,3 +32,8 @@ columns: |
   removal_fee	NUMERIC	true
   currency	TEXT	true
   extras	JSONB	true
+indexes:
+  - name: "amzreport_FBA_REMOVAL_ORDER_DETAIL__merchant_id__order_id"
+    columns:
+      - "merchant_id"
+      - "order_id"

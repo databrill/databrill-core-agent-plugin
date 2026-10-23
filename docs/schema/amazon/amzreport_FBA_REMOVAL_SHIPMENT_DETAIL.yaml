@@ -25,3 +25,8 @@ columns: |
   carrier	TEXT	true
   tracking_number	TEXT	true
   removal_order_type	TEXT	true
+indexes:
+  - name: "amzreport_FBA_REMOVAL_SHIPMENT_DETAIL__merchant_id__order_id"
+    columns:
+      - "merchant_id"
+      - "order_id"

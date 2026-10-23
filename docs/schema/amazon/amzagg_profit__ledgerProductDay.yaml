@@ -1,0 +1,34 @@
+name: "amzagg_profit__ledgerProductDay"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Per-product and per-day dashboard summary of the accrual ledger and the open order lines, the product grain of amzagg_profit__ledgerDay."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "currency"
+  - "sku"
+  - "asin"
+  - "dateDashboard"
+  - "line"
+  - "source"
+  - "flag"
+columns: |
+  name	type	description
+  merchantId	TEXT	Amazon Seller ID
+  marketplaceId	TEXT	Marketplace of the contributing transaction or open order line; the empty string when the transaction names none
+  currency	TEXT	Currency of the contributing transaction or open order line; an open order line that states none takes its marketplace's default currency
+  sku	TEXT	Seller SKU of the posting, sale line or open order line; the empty string when the posting names none
+  asin	TEXT	ASIN of the posting; the empty string when it names none, and on the rows of sale lines, open order lines and orders, which carry none
+  dateDashboard	DATE	The day the dashboard shows the amount on, YYYY-MM-DD, by the rule of amzagg_profit__ledgerDay
+  line	TEXT	The dashboard line, with its child after a colon, as in amzagg_profit__ledgerDay
+  source	TEXT	The source, as in amzagg_profit__ledgerDay
+  flag	TEXT	The contributing transaction's beancount flag; * for open order lines
+  amount	DOUBLE PRECISION	The line's money, signed as it contributes to profit; 0 on the orders line
+  units	INTEGER	Units, as in amzagg_profit__ledgerDay; on orders the (order, SKU) pairs counted
+  rowCount	INTEGER	The postings, sale lines, open order lines and orders summed into the row; a row is deleted when it reaches 0
+indexes:
+  - name: "amzagg_profit__ledgerProductDay__merchantId__dateDashboard"
+    columns:
+      - "merchantId"
+      - "dateDashboard"

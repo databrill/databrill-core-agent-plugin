@@ -2,7 +2,7 @@ name: "amzagg_profit__orderItemContextSku"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Per-SKU context of the P&L order-item fast path: fee-preview fields and the listing title, written by the order-item recalculation from its own calculation, only the rows that changed."
+description: "Per-SKU fee-preview fields the open order lines' fee estimate applies, written by the accrual ledger's rebuild for the SKUs of the open order lines it computes, only the rows that changed."
 primaryKey:
   - "merchantId"
   - "marketplaceId"
@@ -12,8 +12,7 @@ columns: |
   merchantId	TEXT		Amazon Seller ID
   marketplaceId	TEXT		Marketplace of the SKU
   sku	TEXT		Seller SKU
-  asin	TEXT	true	The asin the title was resolved for; a line with another asin resolves its own
-  title	TEXT	true	The title an order-item row of this SKU and asin carries; null when none is known
+  asin	TEXT	true	ASIN of the SKU in the fee preview; null when the preview has none
   hasEstimate	BOOLEAN		False when the fee preview has no row for the SKU (no estimate, not a zero one)
   referralRate	DOUBLE PRECISION	true	Referral fee as a fraction of net revenue, from the fee preview; null when no price backs it out
   referralPerUnit	DOUBLE PRECISION		Referral fee per unit at the fee preview's price, the fallback to the rate

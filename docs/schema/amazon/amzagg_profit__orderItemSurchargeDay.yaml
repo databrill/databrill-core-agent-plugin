@@ -2,14 +2,14 @@ name: "amzagg_profit__orderItemSurchargeDay"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Fee-surcharge rate per marketplace and day, measured from the merchant's settled orders of the 90 days ending on that day; the rate the P&L order-item rows of that day are estimated with."
+description: "Fee-surcharge rate per marketplace and order day, measured from the merchant's settled orders of the 90 days ending on that day; written by the accrual ledger's whole-merchant walk and read by the open order lines' fee estimate."
 primaryKey:
   - "merchantId"
   - "marketplaceId"
-  - "dateBooked"
+  - "dateOrder"
 columns: |
   name	type	description
   merchantId	TEXT	Amazon Seller ID
   marketplaceId	TEXT	Marketplace the rate was measured in
-  dateBooked	DATE	The day whose sale lines take this rate, YYYY-MM-DD
+  dateOrder	DATE	The order day whose open order lines take this rate, YYYY-MM-DD
   surchargeRate	DOUBLE PRECISION	Surcharge as a fraction of the fees it is levied on, over the settled orders of the 90 days ending on the day; 0 where none is charged.

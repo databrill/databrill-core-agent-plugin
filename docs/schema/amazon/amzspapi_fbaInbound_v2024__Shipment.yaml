@@ -25,7 +25,7 @@ columns: |
   trackingDetails	JSONB	true
   lastSeenAt	TIMESTAMPTZ	true
 indexes:
-  - name: "amzspapi_fbaInbound_v2024__Shipment__merchantId__shipmentConfirmationId"
+  - name: "amzspapi_fbaInbound_v2024__Shipment__merchant__confirmationId"
     columns:
       - "merchantId"
       - "shipmentConfirmationId"

@@ -29,3 +29,12 @@ columns: |
   quantity_reimbursed_inventory	NUMERIC	true
   original_reimbursement_id	TEXT	true
   original_reimbursement_type	TEXT	true
+indexes:
+  - name: "amzreport_FBA_REIMBURSEMENTS__merchant_id__amazon_order_id"
+    columns:
+      - "merchant_id"
+      - "amazon_order_id"
+  - name: "amzreport_FBA_REIMBURSEMENTS__merchant__original"
+    columns:
+      - "merchant_id"
+      - "original_reimbursement_id"

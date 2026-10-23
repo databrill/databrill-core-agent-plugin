@@ -2,38 +2,49 @@ name: "amzfact_ledger_transaction"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "One Amazon Finances document as a balanced double-entry transaction: the resolved, deduplicated, flattened form of the source document. Its postings live in amzfact_ledger_posting and its per-SKU dimension in amzfact_ledger_item."
+description: "One balanced transaction of a merchant's accrual ledger: a sale, a release, a refund, a fee, a payout, a day's advertising, an advertising invoice's true-up, payment or reverse charge, the COGS of a shipped sale or title transfer, the cost of a replacement, a unit put back in stock, a return loss for a refunded unit that does not come back to sellable stock, a warehouse loss Amazon paid for, or another booked event, with its marketplace day and, where the source has one, its instant. Its postings are in amzfact_ledger_posting, its sale lines in amzfact_ledger_saleLine and its diagnostics in amzfact_ledger_diagnostic."
 primaryKey:
-  - "transactionId"
+  - "merchantId"
+  - "transactionKey"
 columns: |
-  name	type	nullable	check	description
-  transactionId	TEXT			Amazon's Finances document id; the whole primary key, since one document is one transaction
-  projectionVersion	INTEGER		"projectionVersion" > 0	Which compiled projection logic wrote this row; the first version is 1. Without wholesale rebuilds, rows written by older logic persist after a change and this is the only thing that marks them.
-  kind	TEXT		"kind" IN ('sale', 'refund', 'adjustment', 'expense', 'titleTransfer', 'retrocharge', 'payout', 'ledgerAdjustment', 'chargebackRefund', 'debtRecovery', 'advertisingPayment', 'removalShipment')	Which economic event this is, read from transactionType and description together
-  transactionType	TEXT			Amazon's own transactionType, carried as metadata rather than merged into an account name
-  transactionStatus	TEXT	true		Amazon's transactionStatus: RELEASED, DEFERRED, DEFERRED_RELEASED
-  description	TEXT			Amazon's document description; part of what decides the kind
-  merchantId	TEXT			Amazon sellingPartnerId; the account names carry exactly this value
-  marketplaceId	TEXT			Marketplace the document belongs to. Never an attribution here: every posting names its own marketplace through the account's Amazon:<sp>:<mp> scope segments.
-  currency	TEXT			ISO currency of every money column on the row and on its postings. The document's own code where it states one, the marketplace default otherwise.
-  status	TEXT		"status" IN ('provisional', 'authoritative')	Whether the amounts are Amazon's forecast or the settled figure. Authoritative exactly when transactionStatus is RELEASED, so provisional IS the deferred state; it is the only carrier of that.
-  postedAt	TEXT			Finances postedDate of the surviving emission, as the exact string the export writes: YYYY-MM-DDTHH:MM:SSZ. TEXT, not a timestamp: a timestamp column would re-format the value on the way back out, and the export needs this exact string.
-  bookedDate	DATE			Marketplace-local date of postedAt, YYYY-MM-DD. This is what a period filters on.
-  provisionalAt	TEXT	true		postedDate of the superseded provisional emission, or null when we hold none
-  authoritativeAt	TEXT	true		postedDate of the released emission, or null while still deferred
-  supersededTransactionId	TEXT	true		Document id this emission supersedes (Amazon's DEFERRED_TRANSACTION_ID), or null. This is what the writer deletes by, instead of deleting a date range.
-  orderId	TEXT			Amazon order id; the empty string on a document that names no order
-  groupId	TEXT			SHIPMENT_ID for a sale, REFUND_ID for a refund, the document id otherwise. Refunds never carry a shipment id, so the discriminator has to be per-kind or partial refunds merge.
-  groupIdName	TEXT	true		Which identifier supplied groupId; null when the document carries none
-  settlementId	TEXT	true
-  financialEventGroupId	TEXT	true
-  deferredTransactionId	TEXT	true		Amazon's DEFERRED_TRANSACTION_ID as the document carries it
-  shipmentId	TEXT	true
-  refundId	TEXT	true
-  totalAmount	DOUBLE PRECISION			The document's own totalAmount, UNNEGATED: what the settlement leg posts. Amazon published it independently of the breakdown tree, which is why the two agreeing is a fact being checked.
-  residual	DOUBLE PRECISION			Sum of every posting. Zero exactly when totalAmount agrees with the breakdown tree AND every leaf found an account; non-zero names the size of whichever failed. A document is UNBALANCED when abs(residual) >= 0.005, which is how that diagnostic is derived rather than stored twice.
+  name	type	nullable	description
+  merchantId	TEXT		Amazon sellingPartnerId; the account names carry exactly this value
+  transactionKey	TEXT		The transaction's identity within the merchant: its source and the source's own identifiers, joined by a tab-separated composite key (for a Finances transaction, fin and the Finances transactionId it is keyed by; for an ad day's advertising, ads, the marketplace, the ad day, the ad product and the currency; for an advertising invoice's true-up, adsInvoice and the invoice id; for a payment or refund the invoice states, adsInvoicePayment or adsInvoiceRefund and the invoice id; for its reverse charge, adsInvoiceReverseCharge and the invoice id; for the unit cost of a sale, title transfer or replacement shipment, unitCost and the costed transaction's key; for a customer return's restock or return loss, fbaReturn, the return instant, the order, the FNSKU and the returns row's index; for an FBA reimbursement's restock, fbaReimbursement, the reimbursement id and the row's index, and for the return loss or warehouse loss of its cash units the same followed by cash). A recomputation of the same sources gives the same key.
+  projectionVersion	INTEGER		Which compiled ledger logic wrote this row
+  rebuildKey	TEXT		The rebuild key: every Finances document of one order with that order's unit costs, restocks and return losses, one Finances document that names no order, an in-kind FBA reimbursement whose order is not known, an FBA warehouse loss with its reversals, every advertising transaction of one marketplace and ad day, or every true-up, payment, refund and reverse charge of one marketplace's advertising invoices. A unit cost transaction shares the key of the transaction it costs. A write deletes and rewrites all rows of a rebuild key together.
+  source	TEXT		What produced the transaction: finance (a Finances document by its own rule), financeRelease (a release record moving money from Deferred to Clearing), unclassified (a document the ledger books provisionally), the advertising sources, unitCost (the configured unit cost of the units a sale, title transfer or replacement shipment takes out of stock), fbaReturn (an FBA customer returns row: a restock or a return loss) and fbaReimbursement (an FBA reimbursements row: a restock, a return loss or a warehouse loss)
+  kind	TEXT		Which economic event the transaction is, read from the Finances transactionType and description together; replacementShipment for a sale release record that names no deferred record and totals zero (a free replacement order), booked with no sale line; release for a release record; unclassified for a provisional booking; advertising for the advertising sources; cogs for the cost of goods of a sale or title transfer; replacementCost for the cost of a free replacement shipment's units, an expense of its own; restock for units put back in stock (a sellable customer return, an FBA reimbursement in kind, or a warehouse loss Amazon takes its payment back for), crediting the account their cost was in; returnLoss for refunded units that do not come back to sellable stock (an unsellable, donated or disposed-of return, or a unit Amazon pays for in cash), moving their cost to its own expense account; warehouseLoss for units Amazon lost or damaged in its warehouses or inbound and paid for; reverseCharge for the VAT the seller self-assesses on an advertising invoice issued without VAT from another country
+  flag	TEXT		The beancount flag: * for a booked fact, ! for a provisional booking (an unclassified document, a transaction with a posting to an Unclassified account, or an ad day whose advertising report is not final yet)
+  marketplaceId	TEXT		Marketplace of the source document, or the empty string when it names none. The accounts' Amazon:<sellingPartnerId>:<marketplaceId> scope segments carry the same value.
+  currency	TEXT		ISO currency of every money column of the transaction and its postings
+  dateBooked	DATE		The day the transaction is booked on, YYYY-MM-DD: the day of bookedAt in the marketplace's time zone, or for a document with no marketplace or an unlisted one in the merchant's region zone; for an ad day, the advertising report's day as reported; for an advertising invoice's true-up or reverse charge, the invoice's last day, and for a payment or refund it states, the payment attempt day, both as the invoice states them. Never null.
+  bookedAt	TIMESTAMPTZ	true	The source's instant the transaction is dated by; null only for a day-only source
+  bookingBasis	TEXT		Which event the transaction is booked on: shipment (a sale at its deferred record), posted (the document's own posted instant), release (a release record's instant), the advertising bases adDay (an ad day's advertising) and invoice (an advertising invoice's true-up, reverse charge, or a payment or refund it states), followsCosted (a unit cost transaction, dated with the transaction it costs), customerReturn (a return's restock or return loss, at its return instant) and reimbursementApproval (a reimbursement's restock, return loss or warehouse loss, at its approval instant)
+  linkKey	TEXT	true	The transactionKey of the transaction this one depends on: for a release, the sale or refund it releases, whether or not that transaction is stored; for a unit cost transaction, the transaction it costs; for a restock or return loss of an order, the sale, title transfer or replacement shipment whose costed unit it takes; for a warehouse loss's restock, the warehouse loss; for a REVERSAL_REIMBURSEMENT inventory reimbursement that names an order, the refund it pays back; null otherwise
+  orderId	TEXT	true	Amazon order id of the source document; null when it names none
+  settlementId	TEXT	true	The SETTLEMENT_ID the source document names, as Amazon files it
+  description	TEXT		The source document's description, part of what decides the kind; for an ad day's advertising, the ad product; for an advertising invoice's true-up, payment, refund or reverse charge, the invoice id; for a unit cost transaction, COGS or Replacement cost; for a restock, Customer return, Inventory reimbursement, Replaced unit put back in stock or Warehouse loss reversed; for a return loss, Customer return not restocked or Customer return reimbursed in cash; for a warehouse loss, its reimbursement reason
+  financeTransactionId	TEXT	true	The Finances transactionId of the document the transaction is keyed by; null when no Finances document keys it (an ad day's advertising, an advertising invoice's true-up, payment, refund or reverse charge, a unit cost transaction, a restock, a return loss or a warehouse loss)
+  transactionType	TEXT	true	Amazon's Finances transactionType of that document
+  transactionStatus	TEXT	true	Amazon's Finances transactionStatus of that document, as stored. Carried as metadata only: the ledger pairs and classifies documents by their deferral context and release links.
+  shipmentId	TEXT	true	The SHIPMENT_ID the document names; for an inbound charge that names none, the FBA shipment id its ORDER_ID or an item's TRANSACTION_ID carries; null otherwise
+  refundId	TEXT	true	The REFUND_ID the document names, if any
+  deferredTransactionId	TEXT	true	The DEFERRED_TRANSACTION_ID the document names, if any
+  releaseTransactionId	TEXT	true	The RELEASE_TRANSACTION_ID the document names, if any
+  financialEventGroupId	TEXT	true	The FINANCIAL_EVENT_GROUP_ID the document names, if any
+  totalAmount	DOUBLE PRECISION		The source's own total, unnegated: what the settling posting moves. Published by the source independently of its breakdown, which is why the two agreeing is a check. An ad day's advertising has no published total: its settling posting is the AdvertisingPayable credit, minus the sum of its debits. The same holds for an advertising invoice's true-up and refund, whose settling posting is the AdvertisingPayable credit, for its payment, whose settling posting is the Transit credit, and for its reverse charge, whose settling posting is the credit to Tax:ReverseCharge of the payer's country. A unit cost transaction, a restock or a warehouse loss has no published total either: its totalAmount is the sum of its Inventory postings, and a return loss's the sum of its ReturnLoss postings.
+  residual	DOUBLE PRECISION		Sum of the postings before the imbalance plug: zero when the total agrees with the breakdown and every leaf found an account; otherwise the amount parked in Equity:…:Imbalance
 indexes:
-  - name: "amzfact_ledger_transaction__merchantId__bookedDate"
+  - name: "amzfact_ledger_transaction__merchantId__rebuildKey"
     columns:
       - "merchantId"
-      - "bookedDate"
+      - "rebuildKey"
+  - name: "amzfact_ledger_transaction__merchantId__dateBooked"
+    columns:
+      - "merchantId"
+      - "dateBooked"
+  - name: "amzfact_ledger_transaction__merchantChargeTransactions"
+    columns:
+      - "merchantId"
+      - "dateBooked"
+    where: "NOT (\"kind\" = ANY (ARRAY['sale', 'titleTransfer', 'refund', 'chargebackRefund', 'retrocharge', 'cogs', 'replacementCost', 'restock', 'returnLoss', 'warehouseLoss', 'release']::text[]))"

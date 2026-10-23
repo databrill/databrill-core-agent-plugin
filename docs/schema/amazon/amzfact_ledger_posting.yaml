@@ -2,16 +2,25 @@ name: "amzfact_ledger_posting"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "One posting of a ledger transaction: a signed amount against an account. The postings of one transactionId sum to zero. Keyed on (transactionId, ordinal) because a multi-unit line produces postings identical in every other column."
+description: "One posting of a ledger transaction: a signed amount against an account. The postings of one (merchantId, transactionKey) sum to zero."
 primaryKey:
-  - "transactionId"
+  - "merchantId"
+  - "transactionKey"
   - "ordinal"
 columns: |
-  name	type	nullable	check	description
-  transactionId	TEXT			The amzfact_ledger_transaction this posting belongs to
-  ordinal	INTEGER		"ordinal" >= 0	Position within the transaction's postings, from 0. Required: a multi-unit line can produce several postings identical in every other column. Also the order the beancount export prints.
-  account	TEXT			Full account name, e.g. Income:Amazon:<sellingPartnerId>:<marketplaceId>:ProductCharges. The scope segments are why two marketplaces can never share an account and a multi-currency total is unrepresentable rather than merely avoided. Profit is derived from the ROOT, never a list.
-  amount	DOUBLE PRECISION			Signed amount: Amazon's breakdown amount NEGATED, or the document's totalAmount unnegated on the settlement leg. The postings of one transaction sum to zero.
-  path	JSONB			Breakdown path from level 1 to the deepest node, as a JSONB array. EMPTY on the settlement leg and the imbalance plug, and that emptiness is the discriminator readers test.
-  sku	TEXT	true		The item this posting came from; null at document grain and on the settlement leg. Null rather than an empty-string sentinel, because a sentinel type-checks everywhere a real SKU is expected and would flow silently into per-SKU joins.
-  asin	TEXT	true
+  name	type	nullable	description
+  merchantId	TEXT		Amazon sellingPartnerId of the transaction
+  transactionKey	TEXT		The amzfact_ledger_transaction this posting belongs to
+  ordinal	INTEGER		Position within the transaction's postings, from 0; also the order the export prints
+  account	TEXT		Full account name, <Root>:Amazon:<sellingPartnerId>:<marketplaceId>:..., where <Root> is Income, Expenses, Assets, Liabilities or Equity, derived from the breakdown path; for an ad day's advertising, Expenses:...:Advertising:<ad product> and Liabilities:...:AdvertisingPayable; for unit costs, Expenses:...:COGS (units sold), Expenses:...:Replacements (free replacements), Expenses:...:ReturnLoss (refunded units that do not come back to sellable stock) and Expenses:...:WarehouseLoss (units Amazon lost or damaged and paid for), each against Assets:...:Inventory, the cost moved in and out of inventory by these transactions, not a stock valuation. Income and Expenses are profit; the other roots are not.
+  amount	DOUBLE PRECISION		Signed amount: the breakdown amount negated, or the source's total unnegated on the settling posting; for an ad day's advertising, the spend on each debit and minus their sum on the credit. The postings of one transaction sum to zero.
+  sku	TEXT	true	Seller SKU of the item the posting came from, or the SKU a report or the removal fee rule supplied; null when none is known
+  asin	TEXT	true	ASIN of the item the posting came from; null when the item names none
+  path	JSONB		Breakdown path from level 1 to the deepest node, as a JSONB array, followed by the item's description when the item names no SKU (never a product title); on an advertising invoice's promotion or adjustment, promotions or adjustments followed by its description, raw; empty on postings that transcribe no breakdown node, the postings of COGS, replacement cost, COGS credit and return loss transactions included
+  detail	JSONB	true	A JSONB object or null. skuSource: allOrders or settlement when that report supplied the SKU; customerReturns when the customer returns named a disposal fee's SKU; removalShipmentMatch, removalLineMatch or removalResidualSplit when a removal or disposal fee under a removal order took its SKU from one removal shipment, from one removal order line, or from a split over what the matched fees left of each SKU's report fee. On every tax posting (collected tax and its withheld mirror, tax Amazon charged the seller, an advertising invoice's reverse charge): taxBase, the taxable base in the transaction's currency and in the posting's sign (the sale, fee or charge the tax was computed on, or an invoice's pre-tax amountDue), absent when the document states none; taxRate, the VAT rate in percent (23 for 23 %), present only when exactly one rate of taxCountry's dated rate list fits the tax and its base, and on a reverse charge the payer country's standard rate; taxCountry, the ISO 3166-1 alpha-2 country whose tax the posting is (the ship-to country of collected tax, the jurisdiction of paid tax, the payer's country of a reverse charge), absent when unknown. A tax posting split in two parts or over several SKUs splits its taxBase in the same proportion, so the parts' bases sum to the base. On each COGS, Replacements, ReturnLoss or WarehouseLoss posting of a unit cost, restock, return loss or warehouse loss transaction: units; unitCost, the cost of one unit in the transaction's currency, rounded to six decimals; costDay, YYYY-MM-DD, the day the cost was resolved on.
+indexes:
+  - name: "amzfact_ledger_posting__merchantFeePostings"
+    columns:
+      - "merchantId"
+      - "transactionKey"
+    where: "\"account\" ~ '^Expenses:Amazon:[^:]*:[^:]*:Fees(:|$)'"

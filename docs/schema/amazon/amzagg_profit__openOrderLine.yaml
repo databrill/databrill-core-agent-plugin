@@ -1,0 +1,36 @@
+name: "amzagg_profit__openOrderLine"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Dashboard-only open order lines: each Amazon storefront ALL_ORDERS line not cancelled whose units the accrual ledger has not booked yet, with ordered, booked and open units and the open units' prorated money and fee estimate."
+primaryKey:
+  - "merchantId"
+  - "orderId"
+  - "sku"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon Seller ID
+  orderId	TEXT		Amazon order id, the ALL_ORDERS amazon_order_id
+  sku	TEXT		Seller SKU, the ALL_ORDERS sku
+  marketplaceId	TEXT		The ALL_ORDERS marketplace_id of the line, as stored
+  dateOrder	DATE		The line's purchase day in its marketplace zone, YYYY-MM-DD
+  currency	TEXT	true	The ALL_ORDERS currency of the line; null when the report states none
+  orderStatus	TEXT	true	ALL_ORDERS order_status of the line; never Cancelled
+  itemStatus	TEXT	true	ALL_ORDERS item_status of the line; never Cancelled
+  shipCountry	TEXT	true	ALL_ORDERS ship_country of the line, the input that chooses the VAT rate
+  unitsOrdered	INTEGER		The line's ALL_ORDERS quantity
+  unitsBooked	INTEGER		Units of the line the accrual ledger has booked, at most unitsOrdered
+  units	INTEGER		Open units, unitsOrdered minus unitsBooked; always greater than zero
+  sales	DOUBLE PRECISION		item_price, prorated to the open units
+  shipping	DOUBLE PRECISION		shipping_price plus gift_wrap_price, gross of the shipping promotion, prorated to the open units
+  promo	DOUBLE PRECISION		Negated item_promotion_discount (negative), prorated to the open units
+  shipPromo	DOUBLE PRECISION		Negated ship_promotion_discount (negative), prorated to the open units
+  feesEstimated	DOUBLE PRECISION		Fee estimate from the fee preview and the surcharge rate (negative), for the dashboard only, prorated to the open units
+  vatReported	DOUBLE PRECISION		vat_exclusive_item_price minus item_price when vat_exclusive_item_price is present, else 0; prorated to the open units
+  salesMissingVatExclusive	DOUBLE PRECISION		item_price plus shipping_price plus gift_wrap_price when vat_exclusive_item_price is absent, else 0; prorated to the open units
+indexes:
+  - name: "amzagg_profit__openOrderLine__store__dateOrder"
+    columns:
+      - "merchantId"
+      - "marketplaceId"
+      - "dateOrder"

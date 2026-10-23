@@ -28,3 +28,8 @@ columns: |
   status	TEXT	true
   license_plate_number	TEXT	true
   customer_comments	TEXT	true
+indexes:
+  - name: "amzreport_FBA_CUSTOMER_RETURNS__merchant_id__order_id"
+    columns:
+      - "merchant_id"
+      - "order_id"

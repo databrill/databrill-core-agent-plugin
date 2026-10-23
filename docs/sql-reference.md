@@ -120,13 +120,40 @@ efficiency, call `loadAds` with `groupBy: "asin"` or `"family"`. Query
 `search_asin_placement__byDay` directly only when the question needs campaign,
 ad format, placement, or search term.
 
-Sponsored Brands is reported twice in `search_asin_placement__byDay`: once as a
-campaign aggregate row with an empty `advertisedProductId`, and again as
-per-ASIN breakdown rows that re-report a split of the same metrics. Summing both
-double-counts Sponsored Brands, so keep one of the two, as `loadAds` does. The
-table's `sales` is total attributed sales and **includes** halo sales on other
-ASINs (`sales` = `salesPromoted` + `salesHalo`). `loadAds` reports that total as
-`revenue`; its `revenueHaloOut` is a breakdown of it, not an addition to it. For
+Sponsored Brands can report a key's metrics in two forms in
+`search_asin_placement__byDay`: an aggregate row with an empty
+`advertisedProductId`, and per-ASIN rows that name the ASIN. The key is the
+primary key without `advertisedProductId` (day, campaign, ad group, ad, target
+match type, target, search term, placement). A key can have both forms or either
+form alone. Both forms can carry the same metrics, so summing every row counts
+such a key twice; keeping only the aggregate rows, or only the per-ASIN rows,
+loses the keys that have only the other form. Count each key once: its per-ASIN
+rows when it has any, else its aggregate row, as `loadAds` does at every grain:
+
+```sql
+SELECT sum(r."totalCost") AS "spend"
+FROM "amzadapi_reports_v1__search_asin_placement__byDay" r
+WHERE r."merchantId" = $1 AND r."marketplaceId" = $2
+  AND r."date" BETWEEN $3 AND $4
+  AND NOT (r."adProduct" = 'Sponsored Brands' AND r."advertisedProductId" = ''
+    AND EXISTS (
+      SELECT 1 FROM "amzadapi_reports_v1__search_asin_placement__byDay" t
+      WHERE t."advertisedProductId" <> ''
+        AND t."merchantId" = r."merchantId" AND t."marketplaceId" = r."marketplaceId"
+        AND t."date" = r."date" AND t."adProduct" = r."adProduct"
+        AND t."campaignId" = r."campaignId" AND t."adGroupId" = r."adGroupId"
+        AND t."adId" = r."adId" AND t."targetMatchType" = r."targetMatchType"
+        AND t."target" = r."target" AND t."searchTerm" = r."searchTerm"
+        AND t."placementClassification" = r."placementClassification"))
+```
+
+An aggregate row that counts names no ASIN; `loadAds` gives it the first
+creative ASIN of its ad (`amzadapi_exports_v1__ad`). `product01__byDay` has
+the same two forms per ad, converted product and `productRelevance`.
+
+In `search_asin_placement__byDay`, `sales` is total attributed sales and
+**includes** halo sales on other ASINs (`sales` = `salesPromoted` +
+`salesHalo`). `loadAds` reports that total as `revenue`; its `revenueHaloOut` is a breakdown of it, not an addition to it. For
 promoted-ASIN-only revenue, subtract `revenueHaloOut`. Halo-in (`*HaloIn`)
 comes from `product01__byDay`; a `loadAds` row with `haloInOnly: true` exists
 only through it and has no advertised metrics.
