@@ -7,7 +7,7 @@ wrong.
 
 ## One row = one ASIN × one search query × one period
 
-Columns: `merchantId`, `marketplaceId`, `timeUnit` (`WEEK` / `MONTH`),
+Columns: `merchantId`, `marketplaceId`, `timeUnit` (`WEEK` / `MONTH` / `QUARTER`),
 `dateFirst`, `dateLast`, `asin`, `searchQuery`, `searchQueryScore`,
 `searchQueryVolume`, and four JSONB blocks.
 

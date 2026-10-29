@@ -63,7 +63,8 @@ efficiency from a single cause that has nothing to do with demand. Read
 The tool does not report buy box: a falling `buy_box_percentage` in
 `amazon_sales_and_traffic` shows the offer failing even while units remain. If
 stock is at or near zero, say so and hand off to `dbl-ask-inventory-pacing`; for
-unit counts use `dbl-metrics-amazon-inventory`.
+unit counts use `dbl-metrics-amazon-inventory`, and for the days stock was at
+zero during the period use `dbl-metrics-amazon-inventory-history`.
 
 For the declared columns and types of those tables, or of any other Amazon
 table, read `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that

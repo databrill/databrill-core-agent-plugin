@@ -1,6 +1,6 @@
 ---
 name: dbl-metrics-amazon-inventory
-description: Report how many units of Amazon FBA stock a store holds right now — on-hand, fulfillable, inbound, reserved, unfulfillable — by ASIN, FNSKU, or seller SKU. Use when the user asks how much Amazon inventory they have, what is in stock, what is inbound, how much is unsellable or damaged, or wants an FBA stock list for one marketplace. Do not use for The Fulfillment Lab stock, and do not use for an ads pacing decision.
+description: Report how many units of Amazon FBA stock a store holds right now — on-hand, fulfillable, inbound, reserved, unfulfillable — by ASIN, FNSKU, or seller SKU. Use when the user asks how much Amazon inventory they have, what is in stock, what is inbound, how much is unsellable or damaged, or wants an FBA stock list for one marketplace. Do not use for stock on past days or past stockouts, for The Fulfillment Lab stock, or for an ads pacing decision.
 metadata:
     type: metric
     audience: client
@@ -17,6 +17,10 @@ connector URL supplies that `wsid`. Never infer it from `stores` or from a
 There is no dedicated MCP tool for FBA stock levels yet. Answer with the `core`
 MCP server's `executeSql` against **`amzfact_fnsku_fbaInventory_latest`**, and use no
 other table for a units total.
+
+This guide is for stock now and over the last few days. For a past date or
+period — "were we out of stock in December", "when did it run out" — use
+`dbl-metrics-amazon-inventory-history`, which reads Amazon's inventory ledger.
 
 ## Use `amzfact_fnsku_fbaInventory_latest`, not the raw summary table
 
@@ -43,10 +47,10 @@ Every query MUST carry a `"marketplaceId" = ...` predicate. If the user asks for
 a cross-marketplace or worldwide total, say that this table cannot answer it and
 report per-marketplace figures instead. Do not sum them into one number.
 
-(The cross-marketplace total would need `amzreport_LEDGER_SUMMARY` or
-`amzreport_LEDGER_DETAIL`. That route is not explored yet, Amazon's ledger
-reports lag by several days, and a workspace may not have those tables at all.
-Do not reach for them without the operator's direction.)
+(A physical total across countries comes from the inventory ledger, which is
+keyed by fulfilment centre and so counts each unit once; see
+`dbl-metrics-amazon-inventory-history`. Its newest day trails today by a few
+days, so it is a total as of that day, not now.)
 
 Summing across _merchants_ within one marketplace is fine: different merchants
 own different physical units.
@@ -86,8 +90,8 @@ This table is the current state only. `amzfact_fnsku_fbaInventory_history` has
 one row per FNSKU per marketplace-local day on which its state changed, with the
 lowest, highest, first and last fulfillable and buyable future-supply quantities
 among the changes recorded that day. A missing day means unchanged since the
-previous row, and there are no rows before the history table was deployed to the
-workspace.
+previous row. It has no rows before the workspace began recording it, so use it
+for the days the ledger has not reached yet, never for a period further back.
 
 `…Last` is exact. `…First`, `…Min` and `…Max` leave out the value the FNSKU
 carried into the day, so an FNSKU at 10 all morning that drops to 0 at 15:00 has
@@ -168,6 +172,7 @@ silently fall back to it, and do not report zero stock.
 
 ## Follow-ups
 
+`dbl-metrics-amazon-inventory-history` for stock on past days and stockouts.
 `dbl-ask-inventory-pacing` for the ads decision — read its accuracy caveat
 first. `dbl-metrics-tfl-inventory` for The Fulfillment Lab stock and
 `dbl-metrics-shopify-inventory` for Shopify. Those are three different fulfilment

@@ -84,6 +84,9 @@ contain:
 - FBA stock levels at the FNSKU grain (`amzfact_fnsku_fbaInventory_latest`,
   with `amzfact_sku_identity` for the seller-SKU mapping) — the only correct
   source for a units total, per marketplace;
+- FBA stock on past days (`amzfact_fnsku_ledger_history`, Amazon's inventory
+  ledger by fulfilment centre and day, as far back as Amazon serves it) —
+  `dbl-metrics-amazon-inventory-history`;
 - FBA inventory planning and per-seller-SKU inventory summaries;
 - Shopify stock levels, orders and line items, products and variants, customers,
   discounts, locations, and the daily sales/sessions reports (`shopify_*_v1__*`)

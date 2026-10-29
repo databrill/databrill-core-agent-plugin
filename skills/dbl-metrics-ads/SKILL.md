@@ -74,8 +74,9 @@ too high" or "why did efficiency drop". The short form:
 1. **Check stock first.** A stockout wrecks every ad metric with a cause that
    has nothing to do with ads. Check `inventoryPacing` for the family's runway,
    or `fulfillableQuantity` in `amzfact_fnsku_fbaInventory_latest` (see
-   `dbl-metrics-amazon-inventory`), and `buy_box_percentage`; if stock is at or
-   near zero, say so and hand off to `dbl-ask-inventory-pacing`.
+   `dbl-metrics-amazon-inventory`), and `buy_box_percentage`; for a past
+   period, check the days at zero with `dbl-metrics-amazon-inventory-history`.
+   If stock is at or near zero, say so and hand off to `dbl-ask-inventory-pacing`.
 2. **Never report a ratio alone.** Fetch the store-wide figure for the same
    period (`groupBy: "store"`) and the same product in a prior period. A
    product's ACOS only means something against its store's average and its own

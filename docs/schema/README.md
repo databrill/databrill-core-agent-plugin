@@ -4,7 +4,7 @@ Every table and view Databrill declares for a client workspace, one file per tab
 
 Generated from the schema definitions in the Databrill monorepo. Do not edit anything in this folder by hand: rerun `cd services && deno task generate:agent-schema-docs` instead.
 
-Tenant schema version: `0.1.12`
+Tenant schema version: `0.1.13`
 
 ## Groups
 

@@ -8,21 +8,22 @@ primaryKey:
   - "profileId"
   - "invoiceId"
 columns: |
-  name	type	description
-  merchantId	TEXT	Amazon seller id of the ads profile's store
-  profileId	TEXT	Amazon Ads profile id the invoice belongs to
-  invoiceId	TEXT	Amazon's invoice id
-  createdAt	TIMESTAMPTZ	When this invoice row was first written
-  updatedAt	TIMESTAMPTZ	When this invoice row was last written
-  marketplaceId	TEXT	Amazon marketplace id of the ads profile
-  status	TEXT	Amazon's invoice status as Amazon spells it: ISSUED, PAID_IN_PART, PAID_IN_FULL or WRITTEN_OFF. Plain text, so a status Amazon adds later still stores.
-  paymentMethod	TEXT	Amazon's payment method of the invoice as Amazon spells it, e.g. UNIFIED_BILLING, CREDIT_CARD, ELECTRONICS_FUNDS_TRANSFER
-  fromDate	DATE	First day of the invoiced period, in the profile's days as Amazon states them. Amazon sends YYYYMMDD; stored as ISO YYYY-MM-DD.
-  toDate	DATE	Last day of the invoiced period, in the profile's days as Amazon states them. Amazon sends YYYYMMDD; stored as ISO YYYY-MM-DD.
-  invoiceDate	DATE	Day the invoice was issued, in the profile's days as Amazon states them. Amazon sends YYYYMMDD; stored as ISO YYYY-MM-DD.
-  currencyCode	TEXT	Currency of every amount on the invoice (ISO 4217), the ads profile's currency
-  amountDue	DOUBLE PRECISION	Invoice total before tax: the invoice lines plus adjustments plus promotions, in currencyCode
-  taxAmountDue	DOUBLE PRECISION	Tax on amountDue, stated separately, in currencyCode
-  remainingAmountDue	DOUBLE PRECISION	Part of amountDue still unpaid, before tax, in currencyCode
-  remainingTaxAmountDue	DOUBLE PRECISION	Part of taxAmountDue still unpaid, in currencyCode
-  doc	JSONB	The full invoice as Amazon returned it from GET /invoices/{invoiceId}: the response's payload, unchanged
+  name	type	nullable	description
+  merchantId	TEXT		Amazon seller id of the ads profile's store
+  profileId	TEXT		Amazon Ads profile id the invoice belongs to
+  invoiceId	TEXT		Amazon's invoice id
+  createdAt	TIMESTAMPTZ		When this invoice row was first written
+  updatedAt	TIMESTAMPTZ		When this invoice row was last written
+  marketplaceId	TEXT		Amazon marketplace id of the ads profile
+  status	TEXT		Amazon's invoice status as Amazon spells it: ISSUED, PAID_IN_PART, PAID_IN_FULL or WRITTEN_OFF. Plain text, so a status Amazon adds later still stores.
+  paymentMethod	TEXT		Amazon's payment method of the invoice as Amazon spells it, e.g. UNIFIED_BILLING, CREDIT_CARD, ELECTRONICS_FUNDS_TRANSFER
+  fromDate	DATE		First day of the invoiced period, in the profile's days as Amazon states them. Amazon sends YYYYMMDD; stored as ISO YYYY-MM-DD.
+  toDate	DATE		Last day of the invoiced period, in the profile's days as Amazon states them. Amazon sends YYYYMMDD; stored as ISO YYYY-MM-DD.
+  invoiceDate	DATE		Day the invoice was issued, in the profile's days as Amazon states them. Amazon sends YYYYMMDD; stored as ISO YYYY-MM-DD.
+  currencyCode	TEXT		Currency of every amount on the invoice (ISO 4217), the ads profile's currency
+  amountDue	DOUBLE PRECISION		Invoice total before tax: the invoice lines plus adjustments plus promotions, in currencyCode
+  taxAmountDue	DOUBLE PRECISION		Tax on amountDue, stated separately, in currencyCode
+  remainingAmountDue	DOUBLE PRECISION		Part of amountDue still unpaid, before tax, in currencyCode
+  remainingTaxAmountDue	DOUBLE PRECISION		Part of taxAmountDue still unpaid, in currencyCode
+  doc	JSONB		The full invoice as Amazon returned it from GET /invoices/{invoiceId}: the response's payload, unchanged
+  decodeError	TEXT	true	Why doc does not decode as the invoice schema the code reads, one 'path message' per issue, joined by '; ', or the 4xx a later fetch of the invoice answered ('GET /invoices/<id> answered <status>'); null when it decodes. A row with a decodeError is fetched again on every sync, and its marketplace's invoice entries in the accrual ledger are not rewritten until it decodes

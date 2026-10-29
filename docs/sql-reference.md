@@ -11,7 +11,7 @@ Identifiers that contain a capital letter must be double-quoted, and that
 includes table names:
 
 ```sql
-SELECT "merchantId", "date" FROM "amzreport_SEARCH_QUERY_PERFORMANCE" ...
+SELECT "merchantId", "dateFirst" FROM "amzreport_SEARCH_QUERY_PERFORMANCE" ...
 ```
 
 Unquoted, Postgres lowercases `amzreport_SEARCH_QUERY_PERFORMANCE` and
@@ -21,11 +21,11 @@ everything.
 ## `ROUND` needs `::numeric`
 
 Several columns are `double precision`, and Postgres has no
-`round(double precision, int)`. `ROUND(sum("ad_spend"), 2)` fails with "function
+`round(double precision, int)`. `ROUND(sum("totalAmount"), 2)` fails with "function
 round(double precision, integer) does not exist". Cast first:
 
 ```sql
-ROUND(sum("ad_spend")::numeric, 2)
+ROUND(sum("totalAmount")::numeric, 2)
 ```
 
 The same columns also carry float noise — a whole-number clicks total can come
@@ -47,7 +47,7 @@ rollup tables; camelCase belongs to the raw `amzreport_*` / `amzadapi_*` tables.
 | `amazon_sales_rank__{cc}`                                 | `time` (timestamptz)                      | none — one table per marketplace       |
 | `brand_config_amazon_asin` / `brand_config_amazon_family` | none                                      | none — catalogue config, not per store |
 
-Product keys vary too: `asin` in the ad and rank relations, `child_asin` /
+Product keys vary too: `asin` in the rank relations, `child_asin` /
 `parent_asin` in `amazon_sales_and_traffic`, `childAsin` / `parentAsin` in
 `amzreport_SALES_AND_TRAFFIC__skuByDay`, and `advertisedProductId` in the raw
 `amzadapi_reports_v1__*` tables.
@@ -123,7 +123,7 @@ ad format, placement, or search term.
 Sponsored Brands can report a key's metrics in two forms in
 `search_asin_placement__byDay`: an aggregate row with an empty
 `advertisedProductId`, and per-ASIN rows that name the ASIN. The key is the
-primary key without `advertisedProductId` (day, campaign, ad group, ad, target
+primary key without `advertisedProductId` (store, day, ad product, campaign, ad group, ad, target
 match type, target, search term, placement). A key can have both forms or either
 form alone. Both forms can carry the same metrics, so summing every row counts
 such a key twice; keeping only the aggregate rows, or only the per-ASIN rows,

@@ -100,6 +100,17 @@ cross-marketplace total double counts. Never total
 commingled FNSKU once per label, which overstates fulfillable units
 substantially.
 
+Question: Were we out of stock last month? How much FBA stock did we hold on a past date?
+
+Preferred path: `executeSql` against `amzfact_fnsku_ledger_history`, Amazon's
+inventory ledger by fulfilment centre and day — see
+`dbl-metrics-amazon-inventory-history`. The table is sparse: a day an FNSKU sat
+at zero has no row, so fill the calendar and treat a missing row as zero, or
+every stockout disappears. It has no marketplace column; join
+`amazon_fulfillment_center` for each centre's country. `amzfact_fnsku_fbaInventory_history` starts
+only when the workspace began recording it, so it cannot answer for an older
+period.
+
 Question: Should advertising change because of Amazon inventory?
 
 Preferred path: `inventoryPacing`. It combines Amazon FBA inventory runway and
@@ -183,8 +194,8 @@ columns explicitly instead of returning entire JSON payloads.
 
 Question: Which child ASIN belongs to which family?
 
-Preferred path: the metric tools take family names in `products` and
-`groupBy: "family"` — no SQL needed.
+Preferred path: the metric tools take family names in `products`, and
+`loadAds` and `loadTraffic` take `groupBy: "family"` — no SQL needed.
 
 Database path: use `brand_config_amazon_asin` (ASIN → family) and
 `brand_config_amazon_family`. The better-named `brand_ontology_amazon_asin` and

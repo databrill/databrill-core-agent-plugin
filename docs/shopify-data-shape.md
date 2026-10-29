@@ -194,7 +194,7 @@ after refunds and removals. "Units sold" almost always means `currentQuantity`;
 Every id is a numeric string in a `BIGINT` column — the REST `legacyResourceId`,
 not a GID — **except the discounts family**, where `Discount.id` and
 `DiscountRedeemCode.id` are full GID strings
-(`gid://shopify/DiscountCodeNode/<n>`, `gid://shopify/DiscountAutomaticNode/<n>`)
+(`gid://shopify/DiscountCodeNode/<n>`, `gid://shopify/DiscountAutomaticNode/<n>`, `gid://shopify/DiscountRedeemCode/<n>`)
 and `DiscountRedeemCode.discountGid` joins on one. The full GID is `gid://shopify/<Type>/<id>` and is not stored because
 nothing here rebuilds one. The exception is `OrderLineItem.id`, which is the
 numeric tail of the LineItem GID.

@@ -66,11 +66,11 @@ Put SQL in a file, for example `query.sql`:
 
 ```sql
 SELECT
-	"marketplace_code",
+	"marketplace_id",
 	COUNT(*) AS "listingCount"
 FROM "amazon_listing_open"
-GROUP BY "marketplace_code"
-ORDER BY "marketplace_code";
+GROUP BY "marketplace_id"
+ORDER BY "marketplace_id";
 ```
 
 Run it as JSON:
