@@ -2,7 +2,7 @@ name: "amzagg_profit__openOrderLine"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Dashboard-only open order lines: each Amazon storefront ALL_ORDERS line not cancelled whose units the accrual ledger has not booked yet, with ordered, booked and open units and the open units' prorated money and fee estimate."
+description: "Dashboard-only open order lines: each Amazon storefront ALL_ORDERS line not cancelled whose units the accrual ledger has not booked yet, with ordered, booked and open units and the open units' prorated money, net of VAT, fee estimate, estimated cost of goods and estimated VAT on the fee."
 primaryKey:
   - "merchantId"
   - "orderId"
@@ -17,17 +17,23 @@ columns: |
   currency	TEXT	true	The ALL_ORDERS currency of the line; null when the report states none
   orderStatus	TEXT	true	ALL_ORDERS order_status of the line; never Cancelled
   itemStatus	TEXT	true	ALL_ORDERS item_status of the line; never Cancelled
-  shipCountry	TEXT	true	ALL_ORDERS ship_country of the line, the input that chooses the VAT rate
+  shipCountry	TEXT	true	ALL_ORDERS ship_country of the line; upper-cased, or the marketplace's country when empty, it chooses the VAT rate
   unitsOrdered	INTEGER		The line's ALL_ORDERS quantity
   unitsBooked	INTEGER		Units of the line the accrual ledger has booked, at most unitsOrdered
   units	INTEGER		Open units, unitsOrdered minus unitsBooked; always greater than zero
-  sales	DOUBLE PRECISION		item_price, prorated to the open units
-  shipping	DOUBLE PRECISION		shipping_price plus gift_wrap_price, gross of the shipping promotion, prorated to the open units
-  promo	DOUBLE PRECISION		Negated item_promotion_discount (negative), prorated to the open units
-  shipPromo	DOUBLE PRECISION		Negated ship_promotion_discount (negative), prorated to the open units
+  sales	DOUBLE PRECISION		item_price net of VAT at vatRate, prorated to the open units
+  shipping	DOUBLE PRECISION		shipping_price plus gift_wrap_price, gross of the shipping promotion, net of VAT at vatRate, prorated to the open units
+  promo	DOUBLE PRECISION		Negated item_promotion_discount (negative), net of VAT at vatRate, prorated to the open units
+  shipPromo	DOUBLE PRECISION		Negated ship_promotion_discount (negative), net of VAT at vatRate, prorated to the open units
   feesEstimated	DOUBLE PRECISION		Fee estimate from the fee preview and the surcharge rate (negative), for the dashboard only, prorated to the open units
-  vatReported	DOUBLE PRECISION		vat_exclusive_item_price minus item_price when vat_exclusive_item_price is present, else 0; prorated to the open units
-  salesMissingVatExclusive	DOUBLE PRECISION		item_price plus shipping_price plus gift_wrap_price when vat_exclusive_item_price is absent, else 0; prorated to the open units
+  vat	DOUBLE PRECISION		The VAT taken out of sales, shipping, promo and shipPromo, signed as they are: each column plus its VAT is the report's amount prorated to the open units; 0 when vatRateSource is none
+  vatRate	DOUBLE PRECISION	true	The VAT rate taken out, a fraction such as 0.2; null when vatRateSource is none
+  vatRateSource	TEXT		configured (the SKU's VAT_RATE attribute for the ship-to country on the order day, by the attribute scope order), statutory (that country's standard rate on the order day), or none (no rate known; nothing taken out)
+  cogsEstimated	DOUBLE PRECISION	true	Estimated cost of goods of the open units (negative): the SKU's configured unit cost in the marketplace's country on the order day, in the marketplace's currency, times units; null when no unit cost is configured
+  feeVatNotRecovered	DOUBLE PRECISION	true	Estimated VAT on feesEstimated (negative) that the merchant's tax entity does not recover on the order day, on the line taxNotRecoveredFees; null when feeVatCoverage is none, else 0 where nothing goes on that line
+  feeVatRecoverable	DOUBLE PRECISION	true	Estimated VAT on feesEstimated (negative) that the merchant's tax entity recovers on the order day, on the line taxPaidRecoverable; null when feeVatCoverage is none, else 0 where nothing goes on that line
+  feeVatNotConfigured	DOUBLE PRECISION	true	Estimated VAT on feesEstimated (negative) of a merchant in no tax entity, on the line taxPaidNotConfigured; null when feeVatCoverage is none, else 0 where nothing goes on that line
+  feeVatCoverage	TEXT		full (every part of the fee estimate has a rate), part (a part has none, and the three feeVat columns cover the rest) or none (no part has a rate, or there is no fee estimate; the three are null). A part's rate is the VAT Amazon booked on its fee type over that fee type's booked amount, on the merchant's sales booked in the marketplace in the 30 days before the order day
 indexes:
   - name: "amzagg_profit__openOrderLine__store__dateOrder"
     columns:

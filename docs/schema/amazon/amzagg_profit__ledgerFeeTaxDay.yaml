@@ -1,0 +1,21 @@
+name: "amzagg_profit__ledgerFeeTaxDay"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "Per merchant, marketplace, booked Amazon fee type and booked day: the VAT Amazon booked on that fee of the merchant's sales, the fee's booked amount net of its discount, and the postings summed. The open order lines' estimate of the VAT on their estimated fee takes its rate from these rows."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "feeType"
+  - "dateBooked"
+  - "currency"
+columns: |
+  name	type	description
+  merchantId	TEXT	Amazon Seller ID
+  marketplaceId	TEXT	Marketplace of the sale transactions summed
+  feeType	TEXT	The booked fee type, the breakdown path's second segment under AmazonFees: Commission or FBAPerUnitFulfillmentFee, the two fee types the open lines' fee VAT is rated by
+  dateBooked	DATE	The day the sales booked, YYYY-MM-DD, as amzfact_ledger_transaction.dateBooked
+  currency	TEXT	Currency of the sale transactions summed
+  feeTax	DOUBLE PRECISION	Sum of the fee type's Tax postings (the segment after the fee type) on the merchant's sales booked that day, signed as the postings are: tax charged positive
+  feeNet	DOUBLE PRECISION	Sum of the fee type's Base and Promo postings on the same sales, taxed or not: the fee net of its discount, signed as the postings are, a fee positive and a discount negative
+  rowCount	INTEGER	The postings summed into the row; a row is deleted when it reaches 0

@@ -24,7 +24,7 @@ columns: |
   line	TEXT	The dashboard line, with its child after a colon, as in amzagg_profit__ledgerDay
   source	TEXT	The source, as in amzagg_profit__ledgerDay
   flag	TEXT	The contributing transaction's beancount flag; * for open order lines
-  amount	DOUBLE PRECISION	The line's money, signed as it contributes to profit; 0 on the orders line
+  amount	DOUBLE PRECISION	The line's money, signed as in amzagg_profit__ledgerDay; 0 on the orders line
   units	INTEGER	Units, as in amzagg_profit__ledgerDay; on orders the (order, SKU) pairs counted
   rowCount	INTEGER	The postings, sale lines, open order lines and orders summed into the row; a row is deleted when it reaches 0
 indexes:

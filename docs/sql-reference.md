@@ -33,8 +33,8 @@ back a tiny fraction off — so cast before comparing or displaying counts too.
 
 ## Date and store columns per relation
 
-There is no single convention. Snake_case belongs to the curated views and the
-rollup tables; camelCase belongs to the raw `amzreport_*` / `amzadapi_*` tables.
+There is no single convention. Snake_case belongs to the `amazon_*` curated views and
+the rollup tables; camelCase belongs to the raw `amzreport_*` / `amzadapi_*` tables.
 
 | Relation                                                  | Date column                               | Store columns                          |
 | --------------------------------------------------------- | ----------------------------------------- | -------------------------------------- |

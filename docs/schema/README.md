@@ -8,7 +8,7 @@ Tenant schema version: `0.1.13`
 
 ## Groups
 
-- `amazon/` — 106 tables, 9 views
+- `amazon/` — 107 tables, 9 views
 - `walmart/` — 4 tables, 0 views
 - `shopify/` — 12 tables, 0 views
 - `tfl/` — 12 tables, 0 views
