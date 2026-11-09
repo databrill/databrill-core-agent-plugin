@@ -4,7 +4,7 @@ This guide assumes Databrill has already provisioned a PostgreSQL credential in
 n8n. Do not copy its password into a Code node, expression, workflow note,
 exported workflow, or chat.
 
-Use the Postgres node's Execute Query operation. Prefer the read-only `agent`
+Use the Postgres node's Execute Query operation. Prefer the read-only `w{wsid}_ro`
 database user where available.
 
 ## Query rules

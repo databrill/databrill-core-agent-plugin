@@ -2,8 +2,12 @@
 
 The plugin has one setting: `mcp_url`. Leaving it empty is the normal setup: the
 plugin then uses the user-scoped URL `https://mcp.databrill.com/mcp/user`, which
-covers every workspace the signed-in Databrill user can access. Every data call
-on that scope still names its workspace explicitly.
+covers workspaces the signed-in Databrill user can access that have a usable
+database connection. Every data call on that scope still names its workspace
+explicitly. User- and organization-scoped connections have a limit of 12
+workspaces by default; the configured limit may differ. If the scope exceeds
+it, connection startup fails. Ask Databrill for an organization-scoped URL if
+that organization fits the limit, otherwise a workspace-scoped URL.
 
 Set the value only to narrow the scope deliberately, using a URL supplied by
 Databrill. The shared package contains no client ids, workspace ids, database
@@ -15,7 +19,7 @@ not already have.
 
 ## Hosted MCP URL choices
 
-### Default: everything the signed-in user can access
+### Default: authorized workspaces with a usable database connection
 
 Leave `mcp_url` empty, which is equivalent to setting:
 
@@ -23,10 +27,17 @@ Leave `mcp_url` empty, which is equivalent to setting:
 https://mcp.databrill.com/mcp/user
 ```
 
-The connector exposes every workspace the signed-in user can currently access,
-including workspaces in different organizations. It exposes `listWorkspaces`,
-and every data tool requires `wsid`, even when the `listWorkspaces` result
-contains one entry.
+The connector covers workspaces the signed-in user can currently access that
+have a usable database connection, including workspaces in different
+organizations. It exposes `listWorkspaces`, and every data tool requires
+`wsid`, even when the `listWorkspaces` result contains one entry.
+
+The connection has a limit of 12 workspaces by default; the configured limit
+may differ. If the scope exceeds it, connection startup fails rather than
+returning a partial workspace list. Ask Databrill for an organization-scoped
+URL if that organization's authorized workspaces with usable database
+connections fit the limit, otherwise a workspace-scoped URL. The organization
+scope has the same configured limit.
 
 ### One workspace
 
@@ -50,9 +61,11 @@ Use:
 https://mcp.databrill.com/mcp/org/{orgId}
 ```
 
-The connector exposes `listWorkspaces`. Every data tool requires `wsid`.
-Choose this when the intended workspaces are in one Databrill organization and
-unrelated user memberships should remain outside the Claude session.
+The connector covers the authorized workspaces with a usable database
+connection in that organization and exposes `listWorkspaces`. Every data tool
+requires `wsid`. Choose this when the intended workspaces are in one Databrill
+organization and fit the configured limit, and unrelated user memberships
+should remain outside the Claude session.
 
 ### Read-write: add `/rw` to any of the three
 
@@ -111,9 +124,9 @@ currencies separate and identify any workspace with missing or stale data.
 
 The URL is routing information, not a permission grant, which is why the
 user-scoped default is safe: the hosted server checks the OAuth user's current
-Databrill memberships on every request, and a user with one workspace sees one
-workspace. Never share another client's scoped URL as a template and never put
-credentials in a skill, prompt, repository, n8n expression, or screenshot.
+Databrill memberships on every request. Only authorized workspaces can appear
+in the session. Never share another client's scoped URL as a template and never
+put credentials in a skill, prompt, repository, n8n expression, or screenshot.
 
 ## Direct database scripts
 

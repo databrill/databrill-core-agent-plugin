@@ -36,9 +36,28 @@ both of:
   better number is achievable and gives a target that is defensible instead of
   plucked from the air.
 
-Both are one extra `loadAds` call each (`groupBy: "store"` for the baseline, a
-shifted `when` for the comparison). Do this for any ratio a client calls "too
-high" or "too low": ACOS, conversion rate, CPC, TACOS.
+For advertising ACOS, advertising conversion rate and CPC, each comparison
+takes one extra `loadAds` call with `derived: true`: use `groupBy: "store"`
+and remove the product filter for the store baseline, or keep the product
+filter and shift `when` to the prior period. Advertising conversion is
+purchases per click; `loadTraffic` conversion is units per session. They
+answer different questions.
+
+TACOS needs `loadAds` spend and `loadTraffic` total ordered-product `sales`
+for the product, the store baseline and the product's prior period. For each
+calculation, use the same explicit date interval, merchant/marketplace,
+products and currency across both tools. Use explicit intervals because
+relative durations can end on different latest-data dates. Never substitute
+ad-attributed revenue for total sales.
+
+For the store baseline, remove the product filter from both calls. Use
+`loadAds` with `groupBy: "store"` and aggregate `loadTraffic` rows within
+that store and interval, using `groupBy: "asin"` or `"family"`;
+`loadTraffic` has no `"store"` grouping. For the product's prior period,
+retain the same product scope and shift both calls to the same earlier
+interval. Calculate TACOS as `100 * sum(spend) / sum(sales)` for a
+percentage, keeping currencies separate. Report a missing or non-positive
+sales denominator as unavailable.
 
 ## 2. Why a cost ratio moved: the three-factor decomposition
 

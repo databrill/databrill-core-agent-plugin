@@ -21,12 +21,12 @@ columns: |
   sku	TEXT	Seller SKU of the posting, sale line or open order line; the empty string when the posting names none
   asin	TEXT	ASIN of the posting; the empty string when it names none, and on the rows of sale lines, open order lines and orders, which carry none
   dateDashboard	DATE	The day the dashboard shows the amount on, YYYY-MM-DD, by the rule of amzagg_profit__ledgerDay
-  line	TEXT	The dashboard line, with its child after a colon, as in amzagg_profit__ledgerDay
-  source	TEXT	The source, as in amzagg_profit__ledgerDay
-  flag	TEXT	The contributing transaction's beancount flag; * for open order lines
+  line	TEXT	The dashboard line, with its child after a colon, as in amzagg_profit__ledgerDay. Revenue uses sale, titleTransfer or openOrderLine for those kinds, and otherwise the income name and transaction kind, such as RecommerceLiquidation:removalShipment, RecommerceLiquidation:ledgerAdjustment or MiscAdjustment:ledgerAdjustment; a bare Sales account uses Sales:<kind>. Amazon fees uses the fee's name and transaction kind.
+  source	TEXT	The source, as in amzagg_profit__ledgerDay; the rows of source storageEstimate, an open month's estimate of its monthly storage charge and its tax, have an empty sku and asin, as the charge's rows have
+  flag	TEXT	The contributing transaction's beancount flag; * for open order lines and the rows of source storageEstimate
   amount	DOUBLE PRECISION	The line's money, signed as in amzagg_profit__ledgerDay; 0 on the orders line
   units	INTEGER	Units, as in amzagg_profit__ledgerDay; on orders the (order, SKU) pairs counted
-  rowCount	INTEGER	The postings, sale lines, open order lines and orders summed into the row; a row is deleted when it reaches 0
+  rowCount	INTEGER	The postings, sale lines, open order lines and orders summed into the row, a posting spread over a month counting once on each of its days, and 1 on a row of source storageEstimate; a row is deleted when it reaches 0
 indexes:
   - name: "amzagg_profit__ledgerProductDay__merchantId__dateDashboard"
     columns:

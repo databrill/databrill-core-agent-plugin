@@ -11,8 +11,13 @@ data in Claude Code or Cowork. It combines:
 - diagnosis methods, the product-family hierarchy, and a SQL reference for the
   column names, quoting rules, and data shapes that differ per relation;
 - read-only Deno helpers for users who have a direct database credential;
-- a generated description of every table and view Databrill can provision in a
-  client database, one index per channel group.
+- a generated reference for the declared tables and views, one index per
+  channel group.
+
+The per-marketplace `amazon_sales_rank__<code>` tables are built from a template
+and are absent from the generated index. See the
+[declared schema guidance](docs/schema/README.md) for its scope and workspace
+inspection advice.
 
 Start with [Getting started](docs/getting-started.md). The connector works
 without any URL configuration; if Databrill provides a scoped MCP URL, use it
@@ -49,16 +54,21 @@ remote connector, but it does not install this skill package.
 ## Choose a scope
 
 Leaving the MCP URL setting empty is the normal choice. The plugin then uses
-`https://mcp.databrill.com/mcp/user`, which exposes every workspace the
-signed-in user is allowed to access. Call `listWorkspaces`, then pass the
-selected `wsid` to every data tool.
+`https://mcp.databrill.com/mcp/user`, which covers workspaces the signed-in
+user is allowed to access that have a usable database connection. Call
+`listWorkspaces`, then pass the selected `wsid` to every data tool.
 
 Set the URL explicitly to narrow that:
 
 - `https://mcp.databrill.com/mcp/workspace/{wsid}` keeps a session in one
   workspace.
-- `https://mcp.databrill.com/mcp/org/{orgId}` exposes the authorized workspaces
-  in one organization.
+- `https://mcp.databrill.com/mcp/org/{orgId}` covers the authorized workspaces
+  with a usable database connection in one organization.
+
+User- and organization-scoped connections have a limit of 12 workspaces by
+default; the configured limit may differ. If the scope exceeds it, connection
+startup fails. Ask Databrill for an organization-scoped URL if that
+organization fits the limit, otherwise a workspace-scoped URL.
 
 The URL selects a scope; OAuth permissions remain authoritative. A
 workspace-scoped URL supplies the wsid itself; user- and organization-scoped

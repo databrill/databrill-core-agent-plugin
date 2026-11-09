@@ -1,10 +1,44 @@
 # What data the MCP returns
 
-The hosted MCP is a curated analytics layer, not a general SQL endpoint. Its
-tools return bounded, interpreted result sets for common commercial questions.
-They do not expose credentials or arbitrary tables.
+The hosted MCP offers curated analytics and workspace-scoped SQL. Curated
+tools return bounded, interpreted results for common commercial questions;
+SQL tools query the selected workspace's granted tables and views. This is
+not unrestricted database access, and the tools do not expose credentials.
+SQL reads are available in both read-only and read-write sessions. `writeSql`
+requires `/rw` and existing write authority; see
+[Configuration and workspace scopes](configuration.md#read-write-add-rw-to-any-of-the-three).
 
 ## Available MCP tools
+
+### `listTables`
+
+Lists supported tables and views in the workspace's own schema, with their
+object types. Start here before writing SQL, then use `describeTable` for
+column details. It does not discover other workspaces or system catalogs.
+
+### `describeTable`
+
+Returns column names, data types, nullability and defaults for one relation.
+Pass its exact bare name from `listTables`, without a schema qualifier or
+added quotes.
+
+### `executeSql`
+
+Runs one read-only SQL statement after discovery with `listTables` and
+`describeTable`. Results default to 500 rows, with a maximum of 1000, a 2 MiB
+compact JSON result cap and a 15-second statement timeout. Check the result's
+truncation metadata. SQL applies no curated metric logic: attribution,
+marketplace grain and report deduplication remain the query author's
+responsibility.
+
+### `writeSql`
+
+Runs one statement against granted `brand_config_*` configuration tables.
+It requires a `/rw` session and existing write authority; selecting the mode
+grants no permission. Pipeline data tables are not writable through this tool.
+Result caps limit only the response, not the committed write, and do not undo
+it. Never repeat a truncated write; use `executeSql` to read any remaining
+results.
 
 ### `loadAds`
 
@@ -54,12 +88,18 @@ tool for FBA stock levels yet.
 
 ### `loadTflInventory`
 
-Workspace-specific. It appears in Claude's tool list only when Databrill has
-enabled The Fulfillment Lab for the selected workspace. It returns product
-inventory from each connector's latest daily warehouse snapshot, or the latest
-snapshot on/before a requested date. It includes product ids/names, warehouse,
-on-hand, allocated, available, and product-id-based SKU mappings. It can filter
-by exact product id/name/SKU, warehouse, or maximum available units.
+It appears in Claude's tool list when Databrill has enabled The Fulfillment
+Lab MCP access for at least one workspace covered by the connection. On user-
+and organization-scoped connections, its required `wsid` choices include only
+workspaces with that access enabled; it cannot query other workspaces. On a
+workspace-scoped connection, it appears only if that workspace has access
+enabled, and no `wsid` argument is needed.
+
+It returns product inventory from each connector's latest daily warehouse
+snapshot, or the latest snapshot on/before a requested date. It includes
+product ids/names, warehouse, on-hand, allocated, available, and product-id-based
+SKU mappings. It can filter by exact product id/name/SKU, warehouse, or maximum
+available units.
 
 ### `listWorkspaces`
 
@@ -110,16 +150,20 @@ warehouse rather than a separate pool.
 
 ## Declared does not mean ingested
 
-The [declared schema](schema/README.md) lists every table and view Databrill is
-designed to create in a client target database, one index per channel group. A
-particular workspace may lack a relation, have an empty relation, or have stale
-data because the corresponding pipeline is not configured. Inspect the live
-schema with `scripts/catalog.ts` and check the maximum source date before
-interpreting results.
+The [declared schema](schema/README.md) is a generated reference for the
+declared tables and views, with one index per channel group. The per-marketplace
+`amazon_sales_rank__<code>` tables are built from a template and are absent from
+the generated index.
+
+A particular workspace may lack a relation, have an empty relation, or have
+stale data because the corresponding pipeline is not configured. Inspect the
+workspace with `listTables` and `describeTable`, or `scripts/catalog.ts`, and
+check the maximum source date before interpreting results.
 
 A workspace may also hold rollup tables that the declared schema does not
-declare, such as `custom_report_*` / `r26*_*` relations. `listTables` for the
-workspace is authoritative in both directions.
+declare, such as `custom_report_*` / `r26*_*` relations. Neither inclusion in nor
+omission from the generated index establishes whether a relation exists in a
+workspace. Use `listTables` for the workspace you are querying.
 
 Prefer these views for human-authored SQL where they fit:
 

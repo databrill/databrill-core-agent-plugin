@@ -22,12 +22,18 @@ three. The numbered steps use a terminal.
 1. Start Claude Code in a terminal by running `claude`.
 2. Run `/plugin marketplace add https://github.com/databrill/databrill-core-agent-plugin.git`.
 3. Run `/plugin install databrill-core@databrill`.
-4. When the plugin asks for an MCP URL, leave it empty to use every workspace
-   your Databrill login can access, or enter the exact scoped URL supplied by
-   Databrill.
+4. When the plugin asks for an MCP URL, leave it empty to use workspaces your
+   Databrill login can access that have a usable database connection, or enter
+   the exact scoped URL supplied by Databrill.
 5. Run `/mcp`, select the `core` server under the plugin, and choose Authenticate.
 6. Finish the Databrill sign-in in the browser and return to Claude Code.
 7. Start a new session so the installed skills and connector are loaded.
+
+User- and organization-scoped connections have a limit of 12 workspaces by
+default; the configured limit may differ. If the scope exceeds it, connection
+startup fails. Ask Databrill for an organization-scoped URL if that
+organization fits the limit, otherwise a workspace-scoped URL. This also
+applies to the Cowork setup below.
 
 In the VS Code extension, type `/plugins` in the prompt box to open **Manage
 plugins**, where you can add the marketplace by the URL in step 2 and install
@@ -43,8 +49,9 @@ Verify which workspaces the connector can see:
 Use Databrill to list my available workspaces. Do not query metrics yet.
 ```
 
-Expect one workspace unless your Databrill login covers several. On a
-workspace-scoped URL, `listWorkspaces` always returns just the active workspace.
+On user- and organization-scoped URLs, the list includes only authorized
+workspaces with a usable database connection. On a workspace-scoped URL,
+`listWorkspaces` returns just the active workspace.
 
 Then verify data with:
 
@@ -103,9 +110,14 @@ permissions.
 ### The connector asks for a URL
 
 Leave the field empty unless Databrill supplied a scoped URL. The plugin then
-uses `https://mcp.databrill.com/mcp/user`, which exposes every workspace the
-signed-in user can access. If you were given a URL, paste it complete: do not
-use only `https://mcp.databrill.com`, and do not guess a workspace id.
+uses `https://mcp.databrill.com/mcp/user`, which covers workspaces the signed-in
+user can access that have a usable database connection. User- and
+organization-scoped connections have a limit of 12 workspaces by default; the
+configured limit may differ. If the scope exceeds it, connection startup
+fails. Ask Databrill for an organization-scoped URL if that organization fits
+the limit, otherwise a workspace-scoped URL. If you were given a URL, paste it
+complete: do not use only `https://mcp.databrill.com`, and do not guess a
+workspace id.
 
 ### Authentication succeeds but access is denied
 

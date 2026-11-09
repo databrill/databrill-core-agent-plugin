@@ -28,9 +28,6 @@ round(double precision, integer) does not exist". Cast first:
 ROUND(sum("totalAmount")::numeric, 2)
 ```
 
-The same columns also carry float noise — a whole-number clicks total can come
-back a tiny fraction off — so cast before comparing or displaying counts too.
-
 ## Date and store columns per relation
 
 There is no single convention. Snake_case belongs to the `amazon_*` curated views and
@@ -166,9 +163,10 @@ not as a fifth ad format.
 Rollups such as `custom_report_*` and `r26*_*` are provisioned per workspace
 and are not in the declared schema (for Amazon,
 [`schema/amazon/index.tsv`](schema/amazon/index.tsv); the other groups are
-listed in [`schema/README.md`](schema/README.md)), which only covers the tables
-Databrill creates everywhere. Always `listTables` for the workspace you are
-actually querying rather than assuming either direction.
+listed in [`schema/README.md`](schema/README.md)). The generated index is a
+reference for declared tables and views. Always use `listTables` and
+`describeTable` for the workspace you are actually querying; the index alone
+does not establish whether a relation exists there.
 
 ## Checklist before interpreting a result
 

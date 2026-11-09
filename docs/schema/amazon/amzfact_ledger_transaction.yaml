@@ -48,3 +48,8 @@ indexes:
       - "merchantId"
       - "dateBooked"
     where: "NOT (\"kind\" = ANY (ARRAY['sale', 'titleTransfer', 'refund', 'chargebackRefund', 'retrocharge', 'cogs', 'replacementCost', 'restock', 'returnLoss', 'warehouseLoss', 'release']::text[]))"
+  - name: "amzfact_ledger_transaction__merchantStorageCharges"
+    columns:
+      - "merchantId"
+      - "dateBooked"
+    where: "\"description\" = 'FBAStorageBilling' AND \"kind\" = 'expense'"

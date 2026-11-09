@@ -44,7 +44,8 @@ Use MCP tools for curated metrics:
 MCP calls can have different grains and freshness dates. Do not join rows merely
 because labels look similar. Prefer a configured family or exact ASIN key.
 
-Use Deno/n8n SQL only for measures not exposed by MCP, such as detailed orders,
+Use `executeSql` or the read-only Deno/n8n SQL paths when a dedicated
+analytics tool does not return the needed measure, such as detailed orders,
 returns, listings, TFL monthly movements, Walmart, or settlement data.
 
 ## 3. Validate before drawing

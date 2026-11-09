@@ -124,8 +124,15 @@ Question: What stock is held by The Fulfillment Lab?
 Preferred path when the connector announces it: `loadTflInventory`. It selects
 the latest daily warehouse snapshot independently for each TFL connector and
 joins names and SKU mappings by `productId`. Use `maxAvailable` for a low-stock
-list and `asOf` for the latest snapshot on/before a past date. Its absence means
-TFL MCP access is not enabled for that workspace, not that stock is zero.
+list and `asOf` for the latest snapshot on/before a past date. On user- and
+organization-scoped connections, select a `wsid` from the tool's choices;
+only workspaces with TFL MCP access enabled are offered. A workspace-scoped
+connection needs no `wsid` argument.
+
+If the tool is absent, no workspace covered by the connection has TFL MCP
+access enabled. If a workspace is missing from the tool's `wsid` choices,
+it is not eligible for that tool through this connection. Neither absence
+means stock is zero.
 
 Database fallback: run `scripts/examples/tfl-inventory.sql`. Use
 `tfl_inventorySummary_v1__ProductWarehouse` only for monthly movements; its

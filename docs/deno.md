@@ -43,7 +43,7 @@ for package-manager alternatives and troubleshooting.
 ## Configure a connection
 
 Follow [Configuration and workspace scopes](configuration.md). Prefer a
-Databrill-provisioned read-only `agent` database user. Avoid shell history for a
+Databrill-provisioned read-only `w{wsid}_ro` database user. Avoid shell history for a
 long-lived password; use your operating system's secret manager or an ignored
 environment file where possible.
 
@@ -87,11 +87,23 @@ deno run --allow-env --allow-read --allow-net --allow-write=. scripts/query.ts \
   --wsid 100000001 --format csv --output listing-counts.csv query.sql
 ```
 
-For placeholders, use `$1`, `$2`, and pass a JSON array:
+For a country filter, save this as `query-country.sql`:
+
+```sql
+SELECT
+	"marketplace_id",
+	COUNT(*) AS "listingCount"
+FROM "amazon_listing_open"
+WHERE "country_code" = $1
+GROUP BY "marketplace_id"
+ORDER BY "marketplace_id";
+```
+
+Pass parameters as a JSON array: `$1` uses the first entry,
+`$2` the second when used, and so on.
 
 ```bash
-deno run --allow-env --allow-read --allow-net scripts/query.ts \
-  --wsid 100000001 --params '["US","2026-07-01"]' query.sql
+deno run --allow-env --allow-read --allow-net scripts/query.ts --wsid 100000001 --params '["US"]' query-country.sql
 ```
 
 The helper accepts one read-only statement beginning with `SELECT`, `WITH`,
