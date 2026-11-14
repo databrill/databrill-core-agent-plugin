@@ -1,5 +1,6 @@
+import { Result } from "effect";
 import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.16";
-import { parseWsidArgument } from "./lib/config.ts";
+import { parseWsidArgument } from "./lib/parseWsidArgument.ts";
 import { assertReadOnlyStatement } from "./query.ts";
 
 Deno.test("assertReadOnlyStatement accepts a bounded SELECT", () => {
@@ -51,9 +52,9 @@ Deno.test("assertReadOnlyStatement rejects session changes", () => {
 });
 
 Deno.test("parseWsidArgument requires an explicit nonblank workspace", () => {
-	assertThrows(() => parseWsidArgument([]), Error, "Pass --wsid");
-	assertThrows(() => parseWsidArgument(["--wsid", " "]), Error, "Pass --wsid");
-	assertEquals(parseWsidArgument(["query.sql", "--wsid", " 100000001 "]), {
+	assertThrows(() => Result.getOrThrow(parseWsidArgument([])), Error, "Pass --wsid");
+	assertThrows(() => Result.getOrThrow(parseWsidArgument(["--wsid", " "])), Error, "Pass --wsid");
+	assertEquals(Result.getOrThrow(parseWsidArgument(["query.sql", "--wsid", " 100000001 "])), {
 		wsid: "100000001",
 		rest: ["query.sql"],
 	});

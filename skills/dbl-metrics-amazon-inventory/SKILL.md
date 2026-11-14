@@ -20,7 +20,9 @@ other table for a units total.
 
 This guide is for stock now and over the last few days. For a past date or
 period — "were we out of stock in December", "when did it run out" — use
-`dbl-metrics-amazon-inventory-history`, which reads Amazon's inventory ledger.
+`dbl-metrics-amazon-inventory-history`. It covers `loadAmazonFbaStockouts`, the
+tool for when a product ran out and whether it came back, and the units on past
+days that Amazon's inventory ledger records.
 
 ## Use `amzfact_fnsku_fbaInventory_latest`, not the raw summary table
 
@@ -43,9 +45,9 @@ genuinely about a label (which SKU is which), and get identity from
 FNSKUs are not unique across marketplaces — the same FNSKU value appears in more
 than one marketplace, so a total over several marketplaces double counts.
 
-Every query MUST carry a `"marketplaceId" = ...` predicate. If the user asks for
-a cross-marketplace or worldwide total, say that this table cannot answer it and
-report per-marketplace figures instead. Do not sum them into one number.
+Every query MUST carry a `"marketplaceId" = ...` predicate. This table cannot
+answer a cross-marketplace or worldwide total: what it gives is per-marketplace
+figures, and their sum is not a total of units.
 
 (A physical total across countries comes from the inventory ledger, which is
 keyed by fulfilment centre and so counts each unit once; see
@@ -63,7 +65,8 @@ UK `A1F83G8C2ARO7P`, DE `A1PA6795UKMFR9`. Read `amazon_marketplace` when unsure.
 Key: `merchantId`, `marketplaceId`, `fnsku`. Denormalised: `asin`, `condition`.
 
 Quantities, all nullable — **NULL means Amazon did not report it, not zero**, so
-use `COALESCE(...,0)` when you sum and say so if a figure is mostly NULL:
+a sum needs `COALESCE(...,0)`, and a figure that is mostly NULL is mostly
+unreported:
 
 - `totalQuantity` — everything Amazon holds for the FNSKU.
 - `fulfillableQuantity` — sellable now. This is the number for "in stock".
@@ -80,8 +83,8 @@ use `COALESCE(...,0)` when you sum and say so if a figure is mostly NULL:
   `reservedFutureSupplyQuantity` is the reserved part of future supply.
 
 Freshness: `observedAtPoll` is the instant Amazon reported the state, not our
-write clock. Report `MAX("observedAtPoll")` alongside any total.
-`observedAtStream` is null until the stream writer exists — ignore it.
+write clock, so `MAX("observedAtPoll")` is the instant a total is as of.
+`observedAtStream` is null until the stream writer exists.
 
 An FNSKU that has gone to zero keeps its row, so filter
 `COALESCE("totalQuantity",0) > 0` for a "what do we hold" list.
@@ -92,6 +95,7 @@ lowest, highest, first and last fulfillable and buyable future-supply quantities
 among the changes recorded that day. A missing day means unchanged since the
 previous row. It has no rows before the workspace began recording it, so use it
 for the days the ledger has not reached yet, never for a period further back.
+`loadAmazonFbaStockouts` reads this table for its stockout episodes.
 
 `…Last` is exact. `…First`, `…Min` and `…Max` leave out the value the FNSKU
 carried into the day, so an FNSKU at 10 all morning that drops to 0 at 15:00 has
@@ -166,15 +170,17 @@ LIMIT 50;
 ## If the table is missing or empty
 
 `amzfact_fnsku_fbaInventory_latest` is created on first write, so a workspace the
-fact writer has not reached yet has no table. Say the fact table is not populated in
-that workspace and that the raw per-seller-SKU table overstates units; do not
-silently fall back to it, and do not report zero stock.
+fact writer has not reached yet has no table. A missing or empty table means the
+fact table is not populated in that workspace, not zero stock, and the raw
+per-seller-SKU table is no substitute, since it overstates units (above).
 
 ## Follow-ups
 
-`dbl-metrics-amazon-inventory-history` for stock on past days and stockouts.
-`dbl-ask-inventory-pacing` for the ads decision — read its accuracy caveat
-first. `dbl-metrics-tfl-inventory` for The Fulfillment Lab stock and
+`dbl-metrics-amazon-inventory-history` for stock on past days and stockouts,
+including `loadAmazonFbaStockouts`.
+`dbl-ask-inventory-pacing` for the ads decision; it states its own accuracy
+caveat. `dbl-metrics-tfl-inventory` for The Fulfillment Lab stock and
 `dbl-metrics-shopify-inventory` for Shopify. Those are three different fulfilment
-networks, and Shopify's locations may BE the TFL warehouse, so never add them
-together without saying which figure came from where and as of when.
+networks, and Shopify's locations may BE the TFL warehouse, so a sum of their
+figures can count the same units twice, and each figure has its own source and
+as-of time.

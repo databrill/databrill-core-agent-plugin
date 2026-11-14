@@ -22,18 +22,18 @@ columns: |
   updated_at	TIMESTAMPTZ
   marketplace_id	TEXT
   asin	TEXT	true
-  longest_side	NUMERIC	true
-  median_side	NUMERIC	true
-  shortest_side	NUMERIC	true
+  longest_side	DOUBLE PRECISION	true
+  median_side	DOUBLE PRECISION	true
+  shortest_side	DOUBLE PRECISION	true
   measurement_units	TEXT	true
-  weight	NUMERIC	true
+  weight	DOUBLE PRECISION	true
   weight_units	TEXT	true
-  item_volume	NUMERIC	true
+  item_volume	DOUBLE PRECISION	true
   volume_units	TEXT	true
-  average_quantity_on_hand	NUMERIC	true
-  average_quantity_pending_removal	NUMERIC	true
+  average_quantity_on_hand	DOUBLE PRECISION	true
+  average_quantity_pending_removal	DOUBLE PRECISION	true
   currency	TEXT	true
-  surcharge_age_of_inventory	NUMERIC	true
-  quantity_with_long_term_storage_fee_charge	NUMERIC	true
-  per_unit_volume	NUMERIC	true
+  surcharge_age_of_inventory	DOUBLE PRECISION	true
+  quantity_with_long_term_storage_fee_charge	INTEGER	true
+  per_unit_volume	DOUBLE PRECISION	true
   extras	JSONB	true

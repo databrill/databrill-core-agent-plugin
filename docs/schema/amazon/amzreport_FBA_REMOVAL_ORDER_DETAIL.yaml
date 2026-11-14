@@ -24,12 +24,12 @@ columns: |
   order_status	TEXT	true
   last_updated_date	TIMESTAMPTZ	true
   disposition	TEXT	true
-  requested_quantity	NUMERIC	true
-  cancelled_quantity	NUMERIC	true
-  disposed_quantity	NUMERIC	true
-  shipped_quantity	NUMERIC	true
-  in_process_quantity	NUMERIC	true
-  removal_fee	NUMERIC	true
+  requested_quantity	INTEGER	true
+  cancelled_quantity	INTEGER	true
+  disposed_quantity	INTEGER	true
+  shipped_quantity	INTEGER	true
+  in_process_quantity	INTEGER	true
+  removal_fee	DOUBLE PRECISION	true
   currency	TEXT	true
   extras	JSONB	true
 indexes:

@@ -21,7 +21,7 @@ columns: |
   fnsku	TEXT	true
   shipment_date	TIMESTAMPTZ	true
   disposition	TEXT	true
-  shipped_quantity	NUMERIC	true
+  shipped_quantity	INTEGER	true
   carrier	TEXT	true
   tracking_number	TEXT	true
   removal_order_type	TEXT	true

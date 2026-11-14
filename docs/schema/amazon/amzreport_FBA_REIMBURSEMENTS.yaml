@@ -24,9 +24,9 @@ columns: |
   asin	TEXT	true
   condition	TEXT	true
   currency_unit	TEXT	true
-  amount_total	NUMERIC	true
-  quantity_reimbursed_cash	NUMERIC	true
-  quantity_reimbursed_inventory	NUMERIC	true
+  amount_total	DOUBLE PRECISION	true
+  quantity_reimbursed_cash	INTEGER	true
+  quantity_reimbursed_inventory	INTEGER	true
   original_reimbursement_id	TEXT	true
   original_reimbursement_type	TEXT	true
 indexes:

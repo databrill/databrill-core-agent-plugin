@@ -22,12 +22,12 @@ columns: |
   asin	TEXT	true
   sku	TEXT	true
   reference_id	TEXT	true
-  quantity	NUMERIC	true
+  quantity	INTEGER	true
   fulfillment_center	TEXT	true
   disposition	TEXT	true
   reason	TEXT	true
   country	TEXT	true
-  reconciled_quantity	NUMERIC	true
-  unreconciled_quantity	NUMERIC	true
+  reconciled_quantity	INTEGER	true
+  unreconciled_quantity	INTEGER	true
   date_and_time	TIMESTAMPTZ	true
   extras	JSONB	true

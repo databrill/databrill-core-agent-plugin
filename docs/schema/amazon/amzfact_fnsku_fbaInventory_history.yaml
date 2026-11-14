@@ -24,3 +24,9 @@ columns: |
   futureSupplyBuyableMax	INTEGER	true	Highest buyable future-supply quantity among the changes recorded on the day, which leaves out the value carried in from the previous row; null when no observation reported one
   futureSupplyBuyableFirst	INTEGER	true	Buyable future-supply quantity at observedAtFirst, the day's first recorded change; the value at the start of the day is the previous row's futureSupplyBuyableLast. Null when that observation did not report one
   futureSupplyBuyableLast	INTEGER	true	Buyable future-supply quantity at observedAtLast; null when that observation did not report one
+indexes:
+  - name: "amzfact_fnsku_fbaInventory_history__storeDate"
+    columns:
+      - "merchantId"
+      - "marketplaceId"
+      - "date"

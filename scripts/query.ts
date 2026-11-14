@@ -1,5 +1,7 @@
+import { Effect, Result } from "effect";
 import postgres from "npm:postgres@3.4.8";
-import { parseWsidArgument, resolveConnection } from "./lib/config.ts";
+import { parseWsidArgument } from "./lib/parseWsidArgument.ts";
+import { resolveConnection } from "./lib/resolveConnection.ts";
 
 type OutputFormat = "json" | "csv";
 type QueryParameter =
@@ -63,7 +65,7 @@ function parseParams(value: string): readonly QueryParameter[] {
 }
 
 function parseArguments(args: readonly string[]): QueryArguments {
-	const withWsid = parseWsidArgument(args);
+	const withWsid = Result.getOrThrow(parseWsidArgument(args));
 	const positional: string[] = [];
 	let format: OutputFormat = "json";
 	let output: string | undefined;
@@ -162,8 +164,8 @@ function renderCsv(rows: readonly Record<string, unknown>[]): string {
 async function main(): Promise<void> {
 	const args = parseArguments(Deno.args);
 	const statement = assertReadOnlyStatement(await Deno.readTextFile(args.file));
-	const connection = await resolveConnection(args.wsid);
-	const sql = postgres(connection.postgresUrl, {
+	const connection = await Effect.runPromise(resolveConnection(args.wsid));
+	const sql = postgres(connection.database.postgresUrl, {
 		max: 1,
 		idle_timeout: 5,
 		connect_timeout: 10,

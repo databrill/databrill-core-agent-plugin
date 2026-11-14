@@ -19,7 +19,7 @@ columns: |
   status	TEXT
   glanceViews	INTEGER
   unitsSold	INTEGER
-  revenue	NUMERIC
+  revenue	DOUBLE PRECISION
   revenueCurrencyCode	TEXT
   startDateTime	TIMESTAMPTZ
   endDateTime	TIMESTAMPTZ

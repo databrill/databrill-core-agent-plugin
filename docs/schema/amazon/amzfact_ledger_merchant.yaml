@@ -2,7 +2,7 @@ name: "amzfact_ledger_merchant"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Per merchant, the state of its accrual ledger: the ledger version and status of the last build, the first day of the books, the merchant's region, and the build's times and counts. Read by the ledger readers, the CLI and the service that keeps flagged merchants built, and by the advertising invoice writer, which starts each marketplace's invoice chain on the first day of the books."
+description: "Per merchant, the state of its accrual ledger: the ledger version and status of the last build, the first day of the books, the merchant's region, the build's times and counts, and a running build's progress. Read by the ledger readers, the CLI and the service that keeps flagged merchants built, and by the advertising invoice writer, which starts each marketplace's invoice chain on the first day of the books."
 primaryKey:
   - "merchantId"
 columns: |
@@ -19,3 +19,9 @@ columns: |
   postingsWritten	INTEGER	true	amzfact_ledger_posting rows the last build wrote; null until it completes
   saleLinesWritten	INTEGER	true	amzfact_ledger_saleLine rows the last build wrote; null until it completes
   diagnosticsWritten	INTEGER	true	amzfact_ledger_diagnostic rows the last build wrote; null until it completes
+  buildPhase	TEXT	true	The running build's step: WALK from its claim through its walk over every key, SUMMARIES while it computes the day summaries and fee-tax days month by month after the walk; null once the build is READY or FAILED
+  buildKeysWritten	INTEGER	true	Keys the build's walk has written so far, committed with each batch; 0 at the claim, and it keeps its last value after the build ends
+  buildKeysWrittenLast	INTEGER	true	Keys the walk of the last completed build wrote, set when it is set READY and left alone by a later build's claim, so a running build's buildKeysWritten can be shown against it with no other read; null before a first build completes
+  buildMonthDone	DATE	true	The first day of the last calendar month whose day summaries and fee-tax days the build has committed, YYYY-MM-DD; null at the claim
+  buildMonthsDone	INTEGER	true	Months the step after the walk has committed; null at the claim
+  buildMonthsTotal	INTEGER	true	Months the step after the walk writes; null at the claim

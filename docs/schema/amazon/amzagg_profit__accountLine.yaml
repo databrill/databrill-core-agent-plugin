@@ -1,0 +1,18 @@
+name: "amzagg_profit__accountLine"
+kind: "table"
+access: "read"
+category: "Amazon finances and profit"
+description: "The P&L's rule for which dashboard line a ledger posting goes to: per merchant, one row per account, transaction kind and transaction source its ledger books, with the line (null when the posting reaches none) and whether the line counts the posting's units. Written by the ledger writer when it books a combination not yet stored; a stored row is never updated, and a full build of the ledger clears the merchant's rows first."
+primaryKey:
+  - "merchantId"
+  - "account"
+  - "kind"
+  - "source"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Amazon Seller ID
+  account	TEXT		The posting's account, as amzfact_ledger_posting.account
+  kind	TEXT		The kind of the posting's transaction, as amzfact_ledger_transaction.kind
+  source	TEXT		The source of the posting's transaction, as amzfact_ledger_transaction.source
+  line	TEXT	true	The dashboard line the posting goes to, as amzagg_profit__ledgerDay.line stores it: <line> or <line>:<child>; null for a posting that reaches no line
+  unitsFromDetail	BOOLEAN		Whether the line counts the posting's units, its detail.units, as well as its amount

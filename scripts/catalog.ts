@@ -1,5 +1,7 @@
+import { Effect, Result } from "effect";
 import postgres from "npm:postgres@3.4.8";
-import { parseWsidArgument, resolveConnection } from "./lib/config.ts";
+import { parseWsidArgument } from "./lib/parseWsidArgument.ts";
+import { resolveConnection } from "./lib/resolveConnection.ts";
 
 interface CatalogRow {
 	readonly relation: string;
@@ -41,13 +43,13 @@ function renderMarkdown(
 }
 
 async function main(): Promise<void> {
-	const { wsid, rest } = parseWsidArgument(Deno.args);
+	const { wsid, rest } = Result.getOrThrow(parseWsidArgument(Deno.args));
 	if (rest.length > 0) {
 		throw new Error(`Unknown argument(s): ${rest.join(" ")}`);
 	}
 
-	const connection = await resolveConnection(wsid);
-	const sql = postgres(connection.postgresUrl, {
+	const connection = await Effect.runPromise(resolveConnection(wsid));
+	const sql = postgres(connection.database.postgresUrl, {
 		max: 1,
 		idle_timeout: 5,
 		connect_timeout: 10,
@@ -69,11 +71,11 @@ async function main(): Promise<void> {
 			INNER JOIN "information_schema"."tables" AS "tables"
 				ON "tables"."table_schema" = "columns"."table_schema"
 				AND "tables"."table_name" = "columns"."table_name"
-			WHERE "columns"."table_schema" = ${connection.schema}
+			WHERE "columns"."table_schema" = ${connection.database.schema}
 			ORDER BY "columns"."table_name", "columns"."ordinal_position"
 		`;
 		const label = `${connection.label ?? "workspace"} (${connection.wsid})`;
-		console.log(renderMarkdown(label, connection.schema, rows));
+		console.log(renderMarkdown(label, connection.database.schema, rows));
 	} finally {
 		await sql.end();
 	}

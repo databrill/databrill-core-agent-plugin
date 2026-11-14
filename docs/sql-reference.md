@@ -5,6 +5,14 @@ failed query in testing. It does not replace inspecting the live schema — run
 `listTables` / `describeTable` (or `scripts/catalog.ts`) first — but it answers
 the questions that come up every time.
 
+## Supplying query values
+
+Examples with `$1`, `$2`, and so on bind values through the [Deno helper's](deno.md)
+`scripts/query.ts --params` or the [n8n Postgres node's](n8n.md) Query Parameters field.
+MCP `executeSql` takes no bind parameters: replace each placeholder with a correctly
+quoted/escaped SQL literal before calling it. Use single quotes for strings and
+double an embedded apostrophe, for example `'O''Brien'`.
+
 ## Quoting
 
 Identifiers that contain a capital letter must be double-quoted, and that
@@ -25,8 +33,12 @@ Several columns are `double precision`, and Postgres has no
 round(double precision, integer) does not exist". Cast first:
 
 ```sql
-ROUND(sum("totalAmount")::numeric, 2)
+ROUND(sum("totalAmount"::numeric), 2)
 ```
+
+Money and measurement columns are `double precision`. Cast each value inside the
+aggregate, as here, so the sum is exact, does not depend on the order Postgres
+adds the rows in, and can be rounded.
 
 ## Date and store columns per relation
 
@@ -128,7 +140,7 @@ loses the keys that have only the other form. Count each key once: its per-ASIN
 rows when it has any, else its aggregate row, as `loadAds` does at every grain:
 
 ```sql
-SELECT sum(r."totalCost") AS "spend"
+SELECT sum(r."totalCost"::numeric) AS "spend"
 FROM "amzadapi_reports_v1__search_asin_placement__byDay" r
 WHERE r."merchantId" = $1 AND r."marketplaceId" = $2
   AND r."date" BETWEEN $3 AND $4

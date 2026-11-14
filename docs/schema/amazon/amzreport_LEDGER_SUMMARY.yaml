@@ -25,17 +25,17 @@ columns: |
   marketplace_id	TEXT
   asin	TEXT	true
   sku	TEXT	true
-  starting_warehouse_balance	NUMERIC	true
-  in_transit_between_warehouses	NUMERIC	true
-  receipts	NUMERIC	true
-  customer_shipments	NUMERIC	true
-  customer_returns	NUMERIC	true
-  vendor_returns	NUMERIC	true
-  warehouse_transfer_in_out	NUMERIC	true
-  found	NUMERIC	true
-  lost	NUMERIC	true
-  damaged	NUMERIC	true
-  disposed	NUMERIC	true
-  other_events	NUMERIC	true
-  unknown_events	NUMERIC	true
+  starting_warehouse_balance	INTEGER	true
+  in_transit_between_warehouses	INTEGER	true
+  receipts	INTEGER	true
+  customer_shipments	INTEGER	true
+  customer_returns	INTEGER	true
+  vendor_returns	INTEGER	true
+  warehouse_transfer_in_out	INTEGER	true
+  found	INTEGER	true
+  lost	INTEGER	true
+  damaged	INTEGER	true
+  disposed	INTEGER	true
+  other_events	INTEGER	true
+  unknown_events	INTEGER	true
   extras	JSONB	true

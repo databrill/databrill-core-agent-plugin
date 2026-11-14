@@ -75,21 +75,21 @@ columns: |
   brandedSearches	INTEGER
   brandedSearchesFromClicks	INTEGER
   brandedSearchesFromViews	INTEGER
-  totalCost	NUMERIC
-  sales	NUMERIC
-  salesFromClicks	NUMERIC
-  salesFromViews	NUMERIC
-  salesPromoted	NUMERIC
-  salesFromClicksPromoted	NUMERIC
-  salesFromViewsPromoted	NUMERIC
-  salesHalo	NUMERIC
-  salesFromClicksHalo	NUMERIC
-  salesFromViewsHalo	NUMERIC
-  newToBrandSales	NUMERIC
-  newToBrandSalesFromClicks	NUMERIC
-  newToBrandSalesFromViews	NUMERIC
-  newToBrandSalesPromoted	NUMERIC
-  newToBrandSalesHalo	NUMERIC
+  totalCost	DOUBLE PRECISION
+  sales	DOUBLE PRECISION
+  salesFromClicks	DOUBLE PRECISION
+  salesFromViews	DOUBLE PRECISION
+  salesPromoted	DOUBLE PRECISION
+  salesFromClicksPromoted	DOUBLE PRECISION
+  salesFromViewsPromoted	DOUBLE PRECISION
+  salesHalo	DOUBLE PRECISION
+  salesFromClicksHalo	DOUBLE PRECISION
+  salesFromViewsHalo	DOUBLE PRECISION
+  newToBrandSales	DOUBLE PRECISION
+  newToBrandSalesFromClicks	DOUBLE PRECISION
+  newToBrandSalesFromViews	DOUBLE PRECISION
+  newToBrandSalesPromoted	DOUBLE PRECISION
+  newToBrandSalesHalo	DOUBLE PRECISION
 indexes:
   - name: "amzadapi_reports_v1__search_asin_placement__byDay__date_plus"
     columns:

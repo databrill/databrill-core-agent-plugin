@@ -1,5 +1,8 @@
 {
 	"lock": false,
+	"imports": {
+		"effect": "npm:effect@4.1.2"
+	},
 	"tasks": {
 		"check": "deno check --quiet",
 		"ci": "deno task static:ci && deno task test",

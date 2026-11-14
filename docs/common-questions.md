@@ -100,7 +100,16 @@ cross-marketplace total double counts. Never total
 commingled FNSKU once per label, which overstates fulfillable units
 substantially.
 
-Question: Were we out of stock last month? How much FBA stock did we hold on a past date?
+Question: Were we out of stock last month? When did this product run out, and did it come back?
+
+Preferred path: `loadAmazonFbaStockouts`. It returns stockout episodes per
+merchant, marketplace and FNSKU, from `amzfact_fnsku_fbaInventory_history`
+where the store has it and from the FBA inventory ledger for the days before.
+On ledger days its episodes are a lower bound: a stockout with units reserved
+in the centres is not visible there. See
+`dbl-metrics-amazon-inventory-history` for its fields.
+
+Question: How much FBA stock did we hold on a past date?
 
 Preferred path: `executeSql` against `amzfact_fnsku_ledger_history`, Amazon's
 inventory ledger by fulfilment centre and day — see
@@ -247,7 +256,15 @@ Database path: inspect `wmt_orders_v3__Order`, `wmt_orders_v3__OrderLine`, and
 4. Inspect exact live column names and types with `describeTable`; never guess.
    [SQL quick reference](sql-reference.md) has the ones that differ per relation.
 5. Write one bounded, read-only query with double-quoted identifiers and
-   parameter placeholders.
+   supply values according to the execution path:
+
+   - MCP `executeSql` takes no bind parameters. Put values in the SQL as correctly
+     quoted/escaped literals; replace `$1`, `$2`, and so on in reference examples
+     with those literals before calling it. Use single quotes for strings and
+     double an embedded apostrophe, for example `'O''Brien'`.
+   - The Deno helper binds `$1`, `$2`, and so on through `scripts/query.ts --params`.
+   - The n8n Postgres node binds them through its Query Parameters field.
+
 6. Check row count, duplicates at the intended grain, nulls, min/max dates, and
    currency before interpreting the result.
 7. Save the SQL beside the exported result so the answer is reproducible.

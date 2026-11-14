@@ -168,7 +168,13 @@ Example `databrill.config.json`:
 ```
 
 Select one with required `--wsid 100000001`. Environment placeholders keep
-secrets out of the JSON file. Each URL must authenticate as that workspace's
+secrets out of the JSON file. Every workspace requires a `merchants` object;
+use `{}` when no merchant mapping is needed. Each merchant needs a non-empty
+`countries` array of supported country codes. Optional `features` must be an
+object of boolean flags. The helpers validate the whole registry before
+resolving the requested workspace.
+
+Each URL must authenticate as that workspace's
 Databrill-provisioned role, whose role-level `search_path` already starts with
 the configured schema. The helpers rely on that and never set the path
 themselves, so a URL pointed at the wrong workspace returns that workspace's

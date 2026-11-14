@@ -34,6 +34,9 @@ columns: |
   financialEventGroupId	TEXT	true	The FINANCIAL_EVENT_GROUP_ID the document names, if any
   totalAmount	DOUBLE PRECISION		The source's own total, unnegated: what the settling posting moves. Published by the source independently of its breakdown, which is why the two agreeing is a check. An ad day's advertising has no published total: its settling posting is the AdvertisingPayable credit, minus the sum of its debits. The same holds for an advertising invoice's true-up and refund, whose settling posting is the AdvertisingPayable credit, for its payment, whose settling posting is the Transit credit, and for its reverse charge, whose settling posting is the credit to Tax:ReverseCharge of the payer's country. A unit cost transaction, a restock or a warehouse loss has no published total either: its totalAmount is the sum of its Inventory postings, and a return loss's the sum of its ReturnLoss postings.
   residual	DOUBLE PRECISION		Sum of the postings before the imbalance plug: zero when the total agrees with the breakdown and every leaf found an account; otherwise the amount parked in Equity:…:Imbalance
+  dateDashboard	DATE		The day the P&L shows the transaction on, YYYY-MM-DD, decided by the P&L's rules rather than the booking's: a sale or title transfer on the earliest order day of its sale lines; a unit cost on the day of the transaction it costs; an order's shipping label on its order's earliest order day; a long-term storage charge on the 15th of its booked month; a monthly storage charge on the first day of the month it pays for, spread over dateDashboardDays days; with no order day, and for every other transaction, its dateBooked
+  dateDashboardSource	TEXT		ledgerNoOrderDate when a sale, a title transfer or an order's shipping label (or the unit cost of one) had no order day and is placed on its dateBooked; ledger otherwise. The transaction's rows in amzagg_profit__ledgerDay carry this source
+  dateDashboardDays	INTEGER		How many days from dateDashboard the transaction's amounts are spread over: the days of the month a monthly storage charge pays for, 1 for every other transaction
 indexes:
   - name: "amzfact_ledger_transaction__merchantId__rebuildKey"
     columns:
@@ -48,6 +51,10 @@ indexes:
       - "merchantId"
       - "dateBooked"
     where: "NOT (\"kind\" = ANY (ARRAY['sale', 'titleTransfer', 'refund', 'chargebackRefund', 'retrocharge', 'cogs', 'replacementCost', 'restock', 'returnLoss', 'warehouseLoss', 'release']::text[]))"
+  - name: "amzfact_ledger_transaction__merchantId__dateDashboard"
+    columns:
+      - "merchantId"
+      - "dateDashboard"
   - name: "amzfact_ledger_transaction__merchantStorageCharges"
     columns:
       - "merchantId"

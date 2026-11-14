@@ -21,7 +21,7 @@ columns: |
   marketplace_id	TEXT
   sku	TEXT	true
   asin	TEXT	true
-  quantity	NUMERIC	true
+  quantity	INTEGER	true
   fulfillment_center_id	TEXT	true
   detailed_disposition	TEXT	true
   reason	TEXT	true

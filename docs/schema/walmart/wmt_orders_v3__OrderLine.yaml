@@ -15,9 +15,9 @@ columns: |
   sku	TEXT		`orderLine.item.sku`
   productName	TEXT	true
   quantity	INTEGER		`orderLine.orderLineQuantity.amount`, which arrives as a STRING and is parsed to an int
-  unitPrice	NUMERIC	true
-  shippingPrice	NUMERIC	true
-  taxAmount	NUMERIC	true
+  unitPrice	DOUBLE PRECISION	true
+  shippingPrice	DOUBLE PRECISION	true
+  taxAmount	DOUBLE PRECISION	true
   status	TEXT		`orderLineStatuses.orderLineStatus[0].status`, falling back to the literal 'Unknown'. This is the ONLY place Walmart exposes order status — the order header carries none. Examples: Created, Acknowledged, Shipped, Delivered, Cancelled
   fulfillmentType	TEXT	true
   trackingNumber	TEXT	true

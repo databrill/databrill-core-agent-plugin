@@ -15,5 +15,5 @@ columns: |
   settlement_start_date	TIMESTAMPTZ
   settlement_end_date	TIMESTAMPTZ
   deposit_date	TIMESTAMPTZ
-  total_amount	NUMERIC
+  total_amount	DOUBLE PRECISION
   currency	TEXT

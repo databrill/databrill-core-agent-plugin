@@ -19,20 +19,20 @@ columns: |
   asin	TEXT	true
   product_group	TEXT	true
   fulfilled_by	TEXT	true
-  your_price	NUMERIC	true
-  sales_price	NUMERIC	true
-  longest_side	NUMERIC	true
-  median_side	NUMERIC	true
-  shortest_side	NUMERIC	true
-  length_and_girth	NUMERIC	true
+  your_price	DOUBLE PRECISION	true
+  sales_price	DOUBLE PRECISION	true
+  longest_side	DOUBLE PRECISION	true
+  median_side	DOUBLE PRECISION	true
+  shortest_side	DOUBLE PRECISION	true
+  length_and_girth	DOUBLE PRECISION	true
   unit_of_dimension	TEXT	true
-  item_package_weight	NUMERIC	true
+  item_package_weight	DOUBLE PRECISION	true
   unit_of_weight	TEXT	true
   currency	TEXT	true
-  estimated_referral_fee_per_unit	NUMERIC	true
-  estimated_variable_closing_fee	NUMERIC	true
-  estimated_order_handling_fee_per_order	NUMERIC	true
-  estimated_pick_pack_fee_per_unit	NUMERIC	true
-  estimated_weight_handling_fee_per_unit	NUMERIC	true
-  expected_fulfillment_fee_per_unit	NUMERIC	true
+  estimated_referral_fee_per_unit	DOUBLE PRECISION	true
+  estimated_variable_closing_fee	DOUBLE PRECISION	true
+  estimated_order_handling_fee_per_order	DOUBLE PRECISION	true
+  estimated_pick_pack_fee_per_unit	DOUBLE PRECISION	true
+  estimated_weight_handling_fee_per_unit	DOUBLE PRECISION	true
+  expected_fulfillment_fee_per_unit	DOUBLE PRECISION	true
   extras	JSONB	true

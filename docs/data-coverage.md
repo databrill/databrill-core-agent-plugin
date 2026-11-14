@@ -86,6 +86,17 @@ FNSKU once per merchant and marketplace. For the unit counts themselves, query
 `amzfact_fnsku_fbaInventory_latest` via `executeSql`. There is no dedicated MCP
 tool for FBA stock levels yet.
 
+### `loadAmazonFbaStockouts`
+
+Returns FBA stockout episodes per merchant, marketplace and FNSKU: when
+fulfillable stock ran out and whether it came back, with the FNSKU's ASIN and
+every seller SKU pointing at it. It reads FBA inventory history from the day a
+store's history starts, and the FBA inventory ledger's SELLABLE balance for the
+days of the range before that; ledger episodes are a lower bound, since
+reserved units count in that balance. `meta.stores` says per store where
+history starts and which days came from the ledger.
+`dbl-metrics-amazon-inventory-history` describes its fields.
+
 ### `loadTflInventory`
 
 It appears in Claude's tool list when Databrill has enabled The Fulfillment

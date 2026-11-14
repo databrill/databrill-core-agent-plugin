@@ -42,13 +42,13 @@ columns: |
   purchasesHalo	INTEGER
   purchasesFromClicksHalo	INTEGER
   purchasesFromViewsHalo	INTEGER
-  sales	NUMERIC
-  salesFromClicks	NUMERIC
-  salesFromViews	NUMERIC
-  salesPromoted	NUMERIC
-  salesFromClicksPromoted	NUMERIC
-  salesFromViewsPromoted	NUMERIC
-  salesHalo	NUMERIC
+  sales	DOUBLE PRECISION
+  salesFromClicks	DOUBLE PRECISION
+  salesFromViews	DOUBLE PRECISION
+  salesPromoted	DOUBLE PRECISION
+  salesFromClicksPromoted	DOUBLE PRECISION
+  salesFromViewsPromoted	DOUBLE PRECISION
+  salesHalo	DOUBLE PRECISION
   unitsSold	INTEGER
   unitsSoldFromClicks	INTEGER
   unitsSoldFromViews	INTEGER
@@ -61,9 +61,9 @@ columns: |
   newToBrandPurchasesFromViews	INTEGER
   newToBrandPurchasesPromoted	INTEGER
   newToBrandPurchasesHalo	INTEGER
-  newToBrandSales	NUMERIC
-  newToBrandSalesPromoted	NUMERIC
-  newToBrandSalesHalo	NUMERIC
+  newToBrandSales	DOUBLE PRECISION
+  newToBrandSalesPromoted	DOUBLE PRECISION
+  newToBrandSalesHalo	DOUBLE PRECISION
   newToBrandUnitsSold	INTEGER
   newToBrandUnitsSoldPromoted	INTEGER
   newToBrandUnitsSoldHalo	INTEGER

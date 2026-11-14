@@ -20,7 +20,7 @@ columns: |
   marketplace_name	TEXT	true
   amount_type	TEXT	true
   amount_description	TEXT	true
-  amount	NUMERIC	true
+  amount	DOUBLE PRECISION	true
   fulfillment_id	TEXT	true
   posted_date_time	TIMESTAMPTZ	true
   order_item_code	TEXT	true

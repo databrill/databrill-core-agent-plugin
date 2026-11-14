@@ -25,6 +25,8 @@ columns: |
   depositAt	TIMESTAMPTZ	true	Deposit instant of the settlement in settlementId, as its settlement summary states it; null until that summary is stored
   fulfillmentChannel	TEXT	true	ALL_ORDERS fulfillment_channel of the order line
   shipCountry	TEXT	true	ALL_ORDERS ship_country of the order line
+  countsOrder	BOOLEAN		True on the one line the order is counted on in the orders line of amzagg_profit__ledgerDay, among all its sale lines and its open order lines in amzagg_profit__openOrderLine: the earliest by dashboard day, then by source (ledger, then ledgerNoOrderDate, then an open order line of source openOrderLine), then by marketplaceId, currency, the sale line's transactionKey (an open order line has none) and sku in character order; false on every other line. A sale line takes its transaction's dateDashboard, dateDashboardSource, marketplace and currency. Set when the order is booked, which rewrites all of its lines together
+  countsOrderSku	BOOLEAN		As countsOrder, among the lines of the order's SKU, for the orders line of amzagg_profit__ledgerProductDay; true wherever countsOrder is true
 indexes:
   - name: "amzfact_ledger_saleLine__merchantId__orderId"
     columns:
