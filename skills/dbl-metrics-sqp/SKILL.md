@@ -59,22 +59,25 @@ two traps produce confidently wrong numbers:
   every one of our ASIN rows. Summing them inflates the market by however many
   of our ASINs appeared on the term. Take `MAX` within (search query, period),
   then sum across periods; our own `asin*` counts are summed normally.
-- **`totalClickRate` is not a click-through rate.** It is divided by
-  `searchQueryVolume`, not impressions, so it reads far above the real market
+- **Amazon's per-search rates are not click-through rates.** The table stores no
+  rates or shares; Amazon's `totalClickRate` is `totalClickCount ÷
+  searchQueryVolume`, not impressions, so it reads far above the real market
   CTR. Compute market CTR as `totalClickCount ÷ totalQueryImpressionCount`
-  yourself.
+  yourself, cast to `numeric` (the counts are integers).
 
-Source: `amzreport_SEARCH_QUERY_PERFORMANCE` (`impressionData`, `clickData`,
-`cartAddData`, `purchaseData` JSONB; `timeUnit`, `merchantId`, `marketplaceId`,
-`asin`, `searchQuery`, `dateFirst`, `dateLast`, `searchQueryVolume`). Queries
+Source: `amzreport_SEARCH_QUERY_PERFORMANCE` (`timeUnit`, `merchantId`,
+`marketplaceId`, `asin`, `searchQuery`, `dateFirst`, `dateLast`,
+`searchQueryVolume`, and one integer column per count: `asinImpressionCount`,
+`totalQueryImpressionCount`, `asinClickCount`, `totalClickCount` and so on;
+`sqp-data-shape.md` lists them with the formulas for the shares). Queries
 must filter `merchantId`, `marketplaceId`, `timeUnit` and a bounded `dateFirst`
 range together or they time out — the index leads with `merchantId`.
 
-`loadSqp` returns no prices. The raw table's `clickData`, `cartAddData` and
-`purchaseData` carry our median price and the market's for each search term
-(`asinMedianClickPrice` vs `totalMedianClickPrice`, and the same for cart adds
-and purchases). When click share is healthy but purchase share is weak, query
-that pair first.
+`loadSqp` returns no prices. The raw table's median price columns carry our
+median price and the market's for each search term, in the marketplace's
+default currency (`asinMedianClickPrice` vs `totalMedianClickPrice`, and the
+same for cart adds and purchases). When click share is healthy but purchase
+share is weak, query that pair first.
 
 For the declared columns and types of any Amazon table, read
 `${CLAUDE_PLUGIN_ROOT}/docs/schema/amazon/index.tsv` and then that table's

@@ -79,7 +79,7 @@ is an acquisition opportunity; strong clicks with weak purchases suggests a
 conversion or offer problem — check our median price against the market's median
 price for that term before saying so. Work at family level; per-ASIN purchase
 counts are too small to interpret. If you drop to SQL, read [Search Query Performance data shape](sqp-data-shape.md) first: the market totals repeat
-across our ASIN rows, and `totalClickRate` is not a click-through rate.
+across our ASIN rows, and Amazon's per-search click rate is not a click-through rate.
 
 Question: Is organic rank improving?
 

@@ -2,7 +2,7 @@ name: "amzreport_SEARCH_QUERY_PERFORMANCE"
 kind: "table"
 access: "read"
 category: "Amazon reports"
-description: "Brand Analytics search query performance per (ASIN, search query, reporting period), from GET_BRAND_ANALYTICS_SEARCH_QUERY_PERFORMANCE_REPORT, with the query's score and volume and the impression, click, cart-add and purchase blocks."
+description: "Brand Analytics search query performance per (ASIN, search query, reporting period), from GET_BRAND_ANALYTICS_SEARCH_QUERY_PERFORMANCE_REPORT: the query's score and volume, the ASIN's and the whole query's impression, click, cart-add and purchase counts, the query's click, cart-add and purchase counts by shipping speed, and the median prices in the marketplace's default currency. Rates and shares are not stored; each is 100 times a count divided by its denominator."
 primaryKey:
   - "merchantId"
   - "marketplaceId"
@@ -11,19 +11,36 @@ primaryKey:
   - "asin"
   - "searchQuery"
 columns: |
-  name	type
+  name	type	nullable
+  totalMedianClickPrice	DOUBLE PRECISION	true
+  asinMedianClickPrice	DOUBLE PRECISION	true
+  totalMedianCartAddPrice	DOUBLE PRECISION	true
+  asinMedianCartAddPrice	DOUBLE PRECISION	true
+  totalMedianPurchasePrice	DOUBLE PRECISION	true
+  asinMedianPurchasePrice	DOUBLE PRECISION	true
+  dateFirst	DATE
+  dateLast	DATE
+  searchQueryScore	INTEGER
+  searchQueryVolume	INTEGER
+  totalQueryImpressionCount	INTEGER
+  asinImpressionCount	INTEGER
+  totalClickCount	INTEGER
+  asinClickCount	INTEGER
+  totalCartAddCount	INTEGER
+  asinCartAddCount	INTEGER
+  totalPurchaseCount	INTEGER
+  asinPurchaseCount	INTEGER
+  totalSameDayShippingClickCount	INTEGER
+  totalOneDayShippingClickCount	INTEGER
+  totalTwoDayShippingClickCount	INTEGER
+  totalSameDayShippingCartAddCount	INTEGER
+  totalOneDayShippingCartAddCount	INTEGER
+  totalTwoDayShippingCartAddCount	INTEGER
+  totalSameDayShippingPurchaseCount	INTEGER
+  totalOneDayShippingPurchaseCount	INTEGER
+  totalTwoDayShippingPurchaseCount	INTEGER
+  searchQuery	TEXT
   merchantId	TEXT
   marketplaceId	TEXT
   timeUnit	TEXT
-  dateFirst	DATE
-  dateLast	DATE
   asin	TEXT
-  searchQuery	TEXT
-  createdAt	TIMESTAMPTZ
-  updatedAt	TIMESTAMPTZ
-  searchQueryScore	INTEGER
-  searchQueryVolume	INTEGER
-  impressionData	JSONB
-  clickData	JSONB
-  cartAddData	JSONB
-  purchaseData	JSONB

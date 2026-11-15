@@ -7,23 +7,35 @@ wrong.
 
 ## One row = one ASIN × one search query × one period
 
-Columns: `merchantId`, `marketplaceId`, `timeUnit` (`WEEK` / `MONTH` / `QUARTER`),
-`dateFirst`, `dateLast`, `asin`, `searchQuery`, `searchQueryScore`,
-`searchQueryVolume`, and four JSONB blocks.
+Identity: `merchantId`, `marketplaceId`, `timeUnit` (`WEEK` / `MONTH` / `QUARTER`),
+`dateFirst`, `dateLast`, `asin`, `searchQuery`. Every other column is a plain number:
 
-Each block holds **our** counts for that ASIN and the **whole market's** totals
-for that search query:
+- The query: `searchQueryScore`, `searchQueryVolume` (distinct searches).
+- **Our** counts for that ASIN: `asinImpressionCount`, `asinClickCount`,
+  `asinCartAddCount`, `asinPurchaseCount`.
+- The **whole market's** totals for that search query: `totalQueryImpressionCount`,
+  `totalClickCount`, `totalCartAddCount`, `totalPurchaseCount`.
+- The market's counts by shipping speed:
+  `total{SameDay,OneDay,TwoDay}Shipping{Click,CartAdd,Purchase}Count`.
+- Six median prices: `asinMedianClickPrice` and `totalMedianClickPrice`, and the
+  same pair for `CartAdd` and `Purchase`. Each is an amount in the marketplace's
+  default currency, null when there was no event of that kind and sometimes
+  otherwise.
 
-| Block            | Ours                                                                | Market                                                                                            |
-| ---------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `impressionData` | `asinImpressionCount`, `asinImpressionShare`                        | `totalQueryImpressionCount`                                                                       |
-| `clickData`      | `asinClickCount`, `asinClickShare`, `asinMedianClickPrice`          | `totalClickCount`, `totalClickRate`, `totalMedianClickPrice`, `total{One,Two,Same}Day…ClickCount` |
-| `cartAddData`    | `asinCartAddCount`, `asinCartAddShare`, `asinMedianCartAddPrice`    | `totalCartAddCount`, `totalCartAddRate`, `totalMedianCartAddPrice`                                |
-| `purchaseData`   | `asinPurchaseCount`, `asinPurchaseShare`, `asinMedianPurchasePrice` | `totalPurchaseCount`, `totalPurchaseRate`, `totalMedianPurchasePrice`                             |
+Amazon's rates and shares are not stored. Each is 100 × numerator ÷ denominator,
+null when the denominator is 0:
 
-`*Share` fields are percentages, already computed as ours ÷ market.
-`*MedianPrice` fields are `{ "amount": …, "currencyCode": … }` and can be null
-when we had no event of that type.
+- `asinImpressionShare` = `asinImpressionCount` ÷ `totalQueryImpressionCount`
+- `totalClickRate` = `totalClickCount` ÷ `searchQueryVolume`
+- `asinClickShare` = `asinClickCount` ÷ `totalClickCount`
+- `totalCartAddRate` = `totalCartAddCount` ÷ `searchQueryVolume`
+- `asinCartAddShare` = `asinCartAddCount` ÷ `totalCartAddCount`
+- `totalPurchaseRate` = `totalPurchaseCount` ÷ `searchQueryVolume`
+- `asinPurchaseShare` = `asinPurchaseCount` ÷ `totalPurchaseCount`
+
+The counts are integers, so cast to `numeric` before dividing, or the division
+truncates to a whole number. Over more than one row, apply a formula to the
+summed counts (after Trap 1's `MAX`), never average the per-row percentages.
 
 ## Trap 1: market totals repeat, they do not add up
 
@@ -37,11 +49,11 @@ Take `MAX` within (search query, period) first, then sum across periods:
 ```sql
 WITH per_period AS (
   SELECT "searchQuery", "dateFirst",
-         max(("impressionData"->>'totalQueryImpressionCount')::numeric) AS mkt_impr,
-         max(("clickData"->>'totalClickCount')::numeric)                AS mkt_clicks,
-         max("searchQueryVolume")                                       AS volume,
-         sum(("impressionData"->>'asinImpressionCount')::numeric)       AS our_impr,
-         sum(("clickData"->>'asinClickCount')::numeric)                 AS our_clicks
+         max("totalQueryImpressionCount")::numeric AS mkt_impr,
+         max("totalClickCount")::numeric           AS mkt_clicks,
+         max("searchQueryVolume")::numeric         AS volume,
+         sum("asinImpressionCount")::numeric       AS our_impr,
+         sum("asinClickCount")::numeric            AS our_clicks
   FROM "amzreport_SEARCH_QUERY_PERFORMANCE"
   WHERE "merchantId" = $1 AND "marketplaceId" = $2 AND "timeUnit" = 'WEEK'
     AND "dateFirst" >= $3 AND "dateFirst" < $4
@@ -61,21 +73,21 @@ Our own `asin*` counts are genuinely per ASIN, so they are summed, not maxed.
 All four key columns are required — see the index note in
 [SQL quick reference](sql-reference.md).
 
-## Trap 2: `totalClickRate` is not a click-through rate
+## Trap 2: Amazon's per-search rates are not click-through rates
 
-`totalClickRate`, `totalCartAddRate` and `totalPurchaseRate` are divided by
-`searchQueryVolume` (distinct searches), **not** by impressions. Reading one as
-a click-through rate overstates it by a large factor, and the factor varies by
-term, so it cannot be corrected with a constant.
+Amazon's `totalClickRate`, `totalCartAddRate` and `totalPurchaseRate` are not
+stored, and are computed against `searchQueryVolume` (distinct searches),
+**not** impressions. Reading one as a click-through rate overstates it by a large
+factor, and the factor varies by term, so it cannot be corrected with a constant.
 
-Compute market rates yourself from the counts:
+Compute market rates from the counts:
 
 - market CTR = `totalClickCount ÷ totalQueryImpressionCount`
 - market cart-add rate = `totalCartAddCount ÷ totalClickCount`
 - market purchase rate = `totalPurchaseCount ÷ totalClickCount`
 
-Report the raw `total*Rate` fields only if you also say they are per search, not
-per impression.
+Report a per-search rate (`totalClickCount ÷ searchQueryVolume`) only if you also
+say it is per search, not per impression.
 
 ## Analyse at family level
 
@@ -92,8 +104,8 @@ against the market's typical price for the same search term, and
 purchases. When a term shows healthy click share and weak purchase share, this
 pair is the first place to look — and it is already in the row, no extra query
 needed.
-Watch the currency code and never compare across marketplaces without
-converting.
+Each price is in its marketplace's default currency: never compare prices across
+marketplaces without converting.
 
 ## Coverage
 
