@@ -29,7 +29,9 @@ and types of any `shopify_*` table, read
 
 1. **A missing day in `SalesDaily` means zero sales.** ShopifyQL returns no row
    for a day with none, so that table is sparse while `SessionsDaily` is dense.
-   Always `LEFT JOIN` sessions → sales and `COALESCE` the measures to 0.
+   Always `LEFT JOIN` sessions → sales and `COALESCE` sales and order measures to 0.
+   For cost and profit, use zero only when the sales row is absent; preserve an
+   existing row's NULL as unavailable.
    An `INNER JOIN` silently drops the store's worst days and inflates every
    average.
 2. **`discounts` and `returns` are negative.** They are already signed; adding
@@ -72,7 +74,8 @@ SELECT sh."name",
        COALESCE(sa."orders", 0)      AS "orders",
        COALESCE(sa."discounts", 0)   AS "discounts",   -- negative
        COALESCE(sa."returns", 0)     AS "returns",     -- negative
-       sa."gross_profit",
+       CASE WHEN sa."shopId" IS NULL THEN 0 ELSE sa."gross_profit" END
+                                    AS "gross_profit",
        sa."updatedAt" AS "dayLastRevised"
 FROM "shopify_reports_v1__SessionsDaily" AS se
 JOIN "shopify_shop_v1__Shop" AS sh ON sh."shopId" = se."shopId"
@@ -82,8 +85,15 @@ WHERE se."day" BETWEEN '<start>' AND '<end>'
 ORDER BY sh."name", se."day";
 ```
 
+`cost_of_goods_sold`, `gross_profit` and `gross_margin` can be NULL on an existing
+sales row. The query above preserves unavailable profit and uses zero only for
+an absent sales row. Do not replace unavailable cost or profit with zero or infer
+one measure from another.
+
 Period totals: sum the numerators and denominators, then divide. Never average
-the per-day rates.
+the per-day rates. `SUM` skips NULL, so a cost or profit total is incomplete if
+any returned sales day lacks that measure. Report the total as unavailable, or
+label it as a known-value subtotal and state how many sales days lack the value.
 
 ```sql
 SELECT SUM(se."sessions")                                   AS "sessions",
@@ -127,10 +137,11 @@ settle when the shop-local day closes, so an old `updatedAt` there is normal.
 
 Decompose sales-per-day into sessions × conversion × average order value, all
 from these two tables, then attribute. `gross_profit` and `gross_margin` are
-only as good as the merchant's per-variant cost data — a store keeping none
-reads zero COGS, not null, so check `cost_of_goods_sold` before drawing a margin
-conclusion. `${CLAUDE_PLUGIN_ROOT}/docs/diagnosis-methods.md` has the general
-method.
+only as good as the merchant's per-variant cost data. Check `cost_of_goods_sold`
+and each profit measure before drawing a margin conclusion: NULL means Shopify
+supplied no value, while zero is a supplied value. NULL alone does not establish
+why the value is unavailable or whether the merchant records per-variant costs.
+`${CLAUDE_PLUGIN_ROOT}/docs/diagnosis-methods.md` has the general method.
 
 ## Follow-ups
 

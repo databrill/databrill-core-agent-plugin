@@ -2,7 +2,7 @@ name: "shopify_reports_v1__SalesDaily"
 kind: "table"
 access: "read"
 category: "Shopify"
-description: "One shop-local day of the Shopify ShopifyQL `sales` dataset per (shopId, day). A TIME SERIES, upserted over a trailing re-fetch window and never deleted — unlike every other Shopify tenant table. Every measure is an exact decimal string in NUMERIC, including counts and percentages. total_sales is Shopify's own definition and does not equal the sum of order totals in shopify_orders_v1__Order."
+description: "One shop-local day of the Shopify ShopifyQL `sales` dataset per (shopId, day). A TIME SERIES, upserted over a trailing re-fetch window and never deleted — unlike every other Shopify tenant table. Supplied measures are exact decimal strings in NUMERIC, including counts and percentages. Unavailable cost, profit and nullable ratios are NULL, independently for each measure. total_sales is Shopify's own definition and does not equal the sum of order totals in shopify_orders_v1__Order."
 primaryKey:
   - "shopId"
   - "day"
@@ -28,6 +28,6 @@ columns: |
   returning_customers	NUMERIC		`INTEGER`. Repeat customers within `customers`
   gift_card_discounts	NUMERIC		`MONEY`. May be zero on every day of a store
   tips	NUMERIC		`MONEY`. May be zero on every day of a store
-  cost_of_goods_sold	NUMERIC		`MONEY`, and it depends on the merchant maintaining a cost per variant — a store that does not will read zero here rather than null. Can be negative, so the column admits either sign
-  gross_profit	NUMERIC		`MONEY`. Derived by the source from `net_sales` and `cost_of_goods_sold`; stored as returned rather than recomputed, and therefore only as trustworthy as the cost data behind it
+  cost_of_goods_sold	NUMERIC	true	`MONEY`. The source's cost of goods sold, stored as an exact decimal string when supplied, including zero and negative values. NULL when the source supplies no value; no replacement cost is computed. Independent of whether gross_profit or gross_margin has a value
+  gross_profit	NUMERIC	true	`MONEY`. Derived by the source from `net_sales` and `cost_of_goods_sold`; stored as returned rather than recomputed, and therefore only as trustworthy as the cost data behind it. NULL when the source supplies no value. A supplied value is preserved even when cost_of_goods_sold is NULL
   gross_margin	NUMERIC	true	`PERCENT` as a UNIT FRACTION. Derived by the source, and it can exceed 1.0 when the cost data behind `cost_of_goods_sold` is incomplete. Stored as returned rather than clamped. NULLABLE: it is `gross_profit` over `net_sales`, and the source can return no value for a day
