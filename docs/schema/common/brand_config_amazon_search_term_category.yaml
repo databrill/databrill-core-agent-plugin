@@ -1,0 +1,26 @@
+name: "brand_config_amazon_search_term_category"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable search-term categories of one Amazon store (merchant and marketplace): the named groups the Search intent tab of the PPC dashboard sums advertised search terms into, each group also sharing one conversion prior. A category gets terms only through the SEED rules of brand_config_amazon_search_term_rule."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "termCategory"
+columns: |
+  name	type	nullable	default	description
+  merchantId	TEXT			Amazon merchant (seller) id of the store
+  marketplaceId	TEXT			Amazon marketplace id of the store
+  termCategory	TEXT			Name of the category as shown on the page, unique per store. Never one of the names of the fixed groups: "Excluded", "ASIN, own", "ASIN, other", "No search term", "Unmatched"
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  position	INTEGER			Order of the category on the page, unique per store, lower first. When a search term matches seeds of several categories, the one with the lowest position takes it
+  brand	TEXT	true		OWN | COMPETITOR | PARTNER | COMPLEMENT; null when the category's terms name no brand. OWN: the store owner's brand. COMPETITOR: a brand whose products compete with the store's. PARTNER: a brand or store of the same owner that competes with this one. COMPLEMENT: a brand the store's products are often bought with or used beside
+  comment	TEXT	true		Why the category exists, in a few words
+indexes:
+  - name: "brand_config_amazon_search_term_category__position"
+    columns:
+      - "merchantId"
+      - "marketplaceId"
+      - "position"
+    unique: true

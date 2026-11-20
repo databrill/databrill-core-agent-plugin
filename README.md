@@ -83,6 +83,7 @@ data calls require it as a tool argument. See
 - [Common questions](docs/common-questions.md)
 - [Diagnosis methods](docs/diagnosis-methods.md)
 - [Product families and the catalogue hierarchy](docs/product-hierarchy.md)
+- [Search-term intent rules](docs/search-intent-rules.md)
 - [SQL quick reference](docs/sql-reference.md)
 - [Search Query Performance data shape](docs/sqp-data-shape.md)
 - [Building dashboards](docs/dashboards.md)

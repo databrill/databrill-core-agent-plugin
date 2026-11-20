@@ -149,7 +149,7 @@ contain:
 - Walmart orders, order lines, inventory, and account profile;
 - The Fulfillment Lab orders, shipments, monthly inventory movements, ASNs, and
   OTS shipments beyond the current inventory tool;
-- brand ontology and product-family configuration;
+- brand ontology;
 - exchange rates and marketplace/store dimensions.
 
 Use `executeSql`, or the read-only Deno or n8n path, for these sources.
@@ -180,8 +180,6 @@ Prefer these views for human-authored SQL where they fit:
 
 - `amazon_sales_and_traffic`
 - `amazon_orders_by_day_and_sku`
-- `amazon_fba_inventory_summary` (per seller SKU — for labels only, never for a
-  units total; use `amzfact_fnsku_fbaInventory_latest` for units)
 - `amazon_listing_all` and `amazon_listing_open`
 - `amazon_ads_campaign`, `amazon_ads_adgroup`, `amazon_ads_ad`, and
   `amazon_ads_target`

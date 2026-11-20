@@ -2,7 +2,7 @@ name: "amzfact_ledger_merchant"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Per merchant, the state of its accrual ledger: the ledger version and status of the last build, the first day of the books, the merchant's region, the build's times and counts, and a running build's progress. Read by the ledger readers, the CLI and the service that keeps flagged merchants built, and by the advertising invoice writer, which starts each marketplace's invoice chain on the first day of the books."
+description: "Per merchant, the state of its accrual ledger: the ledger version and status of the last build, the first day of the books, the merchant's region, the build's times and counts, and a running build's progress. Read by the ledger readers, the CLI and the service that keeps flagged merchants built, and by the advertising invoice writer and the SAP report's ledger write, which book each marketplace's invoices and month true-ups from the first day of the books."
 primaryKey:
   - "merchantId"
 columns: |
@@ -25,3 +25,4 @@ columns: |
   buildMonthDone	DATE	true	The first day of the last calendar month whose day summaries and fee-tax days the build has committed, YYYY-MM-DD; null at the claim
   buildMonthsDone	INTEGER	true	Months the step after the walk has committed; null at the claim
   buildMonthsTotal	INTEGER	true	Months the step after the walk writes; null at the claim
+  buildProgressAt	TIMESTAMPTZ	true	When the running build last committed progress, from the writer's clock: set by the claim and by every transaction of the walk and of the step after it; null once the build is READY or FAILED. writeLedgerTables leaves a BUILDING row whose last progress is under 10 minutes old to its build unless forced

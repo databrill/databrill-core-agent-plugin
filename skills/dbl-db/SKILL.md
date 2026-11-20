@@ -46,6 +46,9 @@ For product families and the empty-`brand_ontology_*` trap, read
 `${CLAUDE_PLUGIN_ROOT}/docs/product-hierarchy.md`. To _change_ a
 `brand_config_*` table — families, ASIN mapping, the ontology layer, or an
 effective-dated cost or rate — use `dbl-brand-config`; reading them stays here.
+To draft or change a store's search-term categories and rules, which sort its
+advertised search terms on the Search intent tab of the PPC dashboard, use
+`dbl-search-intent`.
 For any `shopify_*` table, read
 `${CLAUDE_PLUGIN_ROOT}/docs/shopify-data-shape.md` first — that connector's
 money columns, refresh markers and sparse report days each produce a plausible

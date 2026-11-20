@@ -1,0 +1,41 @@
+name: "brand_config_amazon_search_term_rule"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable search-term rules of one Amazon store (merchant and marketplace), set at the store, at one product family or at one ASIN. Each rule is a pattern with an effect: a SEED puts a matching search term into a category of brand_config_amazon_search_term_category with a relevance, a MODIFIER adjusts that relevance, an EXCLUDE puts the term out. The Search intent tab of the PPC dashboard classifies each advertised search term with them; a row it cannot use is shown there with its problem and has no effect."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "level"
+  - "product"
+  - "matchKind"
+  - "pattern"
+  - "effect"
+columns: |
+  name	type	nullable	default	description
+  merchantId	TEXT			Amazon merchant (seller) id of the store
+  marketplaceId	TEXT			Amazon marketplace id of the store
+  level	TEXT			STORE | FAMILY | ASIN: where the rule applies. STORE: every advertised ASIN of the store. FAMILY: the store's advertised ASINs whose family for the marketplace's country is product. ASIN: the one advertised ASIN product
+  product	TEXT			* for STORE; the family value of brand_config_amazon_family for FAMILY; the ASIN for ASIN
+  matchKind	TEXT			EXACT | PHRASE | ALL_WORDS: how pattern is compared with the normalised search term. EXACT: the pattern's words are all the term's words, in order. PHRASE: they appear next to each other and in order. ALL_WORDS: each matches a different word of the term, in any order
+  pattern	TEXT			Lowercase normalised words separated by single spaces; a word may end in * to match every word starting with what precedes it. A pattern that starts and ends with | is a list of such alternatives, |a|b|, and matches when any of them does
+  effect	TEXT			SEED | MODIFIER | EXCLUDE. SEED: the term is relevant to the product, in termCategory, with relevance as its score. MODIFIER: adds relevance to a seed's score, using only words the seed did not use. EXCLUDE: puts the term out for the products the rule applies to, unless a positive rule covering the same words lifts it
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  termCategory	TEXT	true		The category of brand_config_amazon_search_term_category a SEED puts the term in; null for the other effects
+  relevance	INTEGER	true		SEED: 2 to 5, 5 being spot on. MODIFIER: -2, -1, 1 or 2, added to the seed's score. EXCLUDE: null
+  exclusiveWithin	TEXT	true		STORE | FAMILY; null for no claim. Makes the rule a claim: every other ASIN in the scope is excluded for a term the pattern matches, unless that ASIN has a positive rule of its own covering those words. Allowed on a SEED or a positive MODIFIER, at FAMILY level (STORE) or ASIN level (STORE or FAMILY)
+  comment	TEXT	true		Why the rule exists, in a few words
+foreignKeys:
+  - columns:
+      - "merchantId"
+      - "marketplaceId"
+      - "termCategory"
+    references:
+      table: "brand_config_amazon_search_term_category"
+      columns:
+        - "merchantId"
+        - "marketplaceId"
+        - "termCategory"
+    onDelete: "RESTRICT"
+    onUpdate: "CASCADE"

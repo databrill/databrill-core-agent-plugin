@@ -26,4 +26,10 @@ columns: |
   remainingAmountDue	DOUBLE PRECISION		Part of amountDue still unpaid, before tax, in currencyCode
   remainingTaxAmountDue	DOUBLE PRECISION		Part of taxAmountDue still unpaid, in currencyCode
   doc	JSONB		The full invoice as Amazon returned it from GET /invoices/{invoiceId}: the response's payload, unchanged
-  decodeError	TEXT	true	Why doc does not decode as the invoice schema the code reads, one 'path message' per issue, joined by '; ', or the 4xx a later fetch of the invoice answered ('GET /invoices/<id> answered <status>'); null when it decodes. A row with a decodeError is fetched again on every sync, and its marketplace's invoice entries in the accrual ledger are not rewritten until it decodes
+  decodeError	TEXT	true	Why doc does not decode as the invoice schema the code reads, one 'path message' per issue, joined by '; ', or the 4xx a later fetch of the invoice answered ('GET /invoices/<id> answered <status>'); null when it decodes. A row with a decodeError is fetched again on every sync; until it decodes, the accrual ledger books nothing for the invoice and gives the month of its toDate no true-up
+indexes:
+  - name: "amzadapi_billing_v3__invoice__merchantId__marketplaceId__toDate"
+    columns:
+      - "merchantId"
+      - "marketplaceId"
+      - "toDate"

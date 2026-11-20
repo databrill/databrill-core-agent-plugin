@@ -91,8 +91,8 @@ only when the URL asks for them.
 On a read-only session the write tools are not listed at all. So "the write tool
 is missing" is a statement about the URL, not about permissions or about the
 plugin version, and calling such a tool by hand on a read-only session is refused
-anyway. Writing configuration is what these tools are for; the skill that uses
-them is `dbl-brand-config`.
+anyway. Writing configuration is what these tools are for; the skills that use
+them are `dbl-brand-config` and `dbl-search-intent`.
 
 ## Multi-workspace query rules
 

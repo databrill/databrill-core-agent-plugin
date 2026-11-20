@@ -2,7 +2,7 @@ name: "amzagg_profit__ledgerDay"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Per-store and per-day dashboard summary of the accrual ledger and the open order lines: the amount, units and contributing rows of each dashboard line, by the day the dashboard shows them (the order date for a sale, its cost of goods, an open order line and an order's shipping label; the 15th of the booked month for a long-term storage charge, including its paid-tax lines; every day of the month it pays for, for a monthly storage charge, including its paid-tax lines; the booked day otherwise)."
+description: "Per-store and per-day dashboard summary of the accrual ledger and the open order lines: the amount, units and contributing rows of each dashboard line, by the day the dashboard shows them (the order date for a sale, its cost of goods, an open order line and an order's shipping label; the 15th of the booked month for a long-term storage charge, including its paid-tax lines; every day of the month it pays for, for a monthly storage charge, including its paid-tax lines; the booked day otherwise). A merchant's rows are complete only while its amzfact_ledger_merchant row is READY at the current ledger version (projectionVersion): while a build of its ledger runs or after one failed, they are partial or missing."
 primaryKey:
   - "merchantId"
   - "marketplaceId"

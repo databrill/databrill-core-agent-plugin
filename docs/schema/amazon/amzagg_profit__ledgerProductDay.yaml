@@ -2,7 +2,7 @@ name: "amzagg_profit__ledgerProductDay"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Per-product and per-day dashboard summary of the accrual ledger and the open order lines, the product grain of amzagg_profit__ledgerDay."
+description: "Per-product and per-day dashboard summary of the accrual ledger and the open order lines, the product grain of amzagg_profit__ledgerDay. A merchant's rows are complete only while its amzfact_ledger_merchant row is READY at the current ledger version (projectionVersion): while a build of its ledger runs or after one failed, they are partial or missing."
 primaryKey:
   - "merchantId"
   - "marketplaceId"

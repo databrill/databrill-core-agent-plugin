@@ -2,7 +2,7 @@ name: "amzagg_profit__ledgerFeeTaxDay"
 kind: "table"
 access: "read"
 category: "Amazon finances and profit"
-description: "Per merchant, marketplace, booked Amazon fee type and booked day: the VAT Amazon booked on that fee of the merchant's sales, the fee's booked amount net of its discount, and the postings summed. The open order lines' estimate of the VAT on their estimated fee takes its rate from these rows."
+description: "Per merchant, marketplace, booked Amazon fee type and booked day: the VAT Amazon booked on that fee of the merchant's sales, the fee's booked amount net of its discount, and the postings summed. The open order lines' estimate of the VAT on their estimated fee takes its rate from these rows. A merchant's rows are complete only while its amzfact_ledger_merchant row is READY at the current ledger version (projectionVersion): while a build of its ledger runs or after one failed, they are partial or missing."
 primaryKey:
   - "merchantId"
   - "marketplaceId"

@@ -36,9 +36,10 @@ round(double precision, integer) does not exist". Cast first:
 ROUND(sum("totalAmount"::numeric), 2)
 ```
 
-Money and measurement columns are `double precision`. Cast each value inside the
-aggregate, as here, so the sum is exact, does not depend on the order Postgres
-adds the rows in, and can be rounded.
+Many money and measurement columns are `double precision`; the `amazon_*` views and
+the Shopify tables use `numeric`. Cast each value inside the aggregate, as here,
+so the sum is exact, does not depend on the order Postgres adds the rows in, and
+can be rounded.
 
 ## Date and store columns per relation
 

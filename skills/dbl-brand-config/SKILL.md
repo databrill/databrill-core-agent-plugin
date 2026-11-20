@@ -11,8 +11,10 @@ metadata:
 
 Write with the **`core`** MCP server's **`writeSql`** tool. It is the only write
 path in this plugin, it is announced only on a read-write connector session, and
-it reaches the seven customer-editable `brand_config_*` tables and nothing else.
-Reading these same tables is `dbl-db`'s job.
+it reaches the nine customer-editable `brand_config_*` tables and nothing else.
+This skill edits seven of them; the search-term categories and rules
+(`brand_config_amazon_search_term_category`, `brand_config_amazon_search_term_rule`)
+are `dbl-search-intent`'s. Reading these same tables is `dbl-db`'s job.
 
 ## Call
 
@@ -88,7 +90,7 @@ their Databrill login already has; it grants nothing new. See
 `${CLAUDE_PLUGIN_ROOT}/docs/configuration.md`. Do not ask for a database
 password: these edits do not need one.
 
-## Write the seven tables in this order
+## Write this skill's seven tables in this order
 
 Four foreign keys run through this set, all of them `ON DELETE RESTRICT ON UPDATE
 CASCADE`, so an out-of-order insert fails on a constraint.
