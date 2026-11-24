@@ -24,6 +24,14 @@ store's country is
 `COALESCE("countryToFamily"->>'<country code>', "family")` from
 `brand_config_amazon_asin`.
 
+A family name can have parts separated by `:`, outermost first, to put
+families within a family: `Mug:Travel` and `Mug:Desk` both lie within `Mug`.
+Two parent listings of one product line, for example, can keep their own
+families for their statistics and share the line's rules. `Mug` need not be a
+family of its own: a rule on `Mug` applies to every family whose name is `Mug`
+or starts with `Mug:`, and not to `Mugs`. Empty parts are dropped: `Mug::Travel`
+reads as `Mug:Travel`.
+
 ## Categories: `brand_config_amazon_search_term_category`
 
 One row per category of the store. A category is a group of search terms on the
@@ -48,8 +56,8 @@ estimate, so put terms that convert alike in one category.
 
 The page also shows five fixed groups. They are not rows and have no brand:
 
-- `Excluded`: an `EXCLUDE` rule, or another product's claim, puts the term out
-  for this advertised ASIN.
+- `Excluded`: an `EXCLUDE` rule, or a rule of another product with
+  `exclusiveWithin`, puts the term out for this advertised ASIN.
 - `ASIN, own` and `ASIN, other`: a term that is one ASIN (`b0` and eight letters
   or digits) or one ISBN-10 (ten digits, the last may be `x`), matched by no seed
   or exclusion; `own` when the ASIN is one of the store's listings in
@@ -67,8 +75,8 @@ at one product as two rows.
 
 - **`level`** and **`product`**: where the rule applies.
   - `STORE`, `product` `*`: every advertised ASIN of the store.
-  - `FAMILY`, `product` the `family` value: the store's advertised ASINs of
-    that family.
+  - `FAMILY`, `product` a `family` value or its first parts before a `:`: the
+    store's advertised ASINs of that family and of every family within it.
   - `ASIN`, `product` the ASIN in upper case: that one advertised ASIN.
 - **`matchKind`**: how `pattern` is compared with the term's words.
   - `EXACT`: the pattern's words are all of the term's words, in order.
@@ -98,19 +106,24 @@ at one product as two rows.
 - **`termCategory`**: the category a `SEED` puts the term in; `NULL` for the
   other effects.
 - **`relevance`**:
-  - `SEED`: `5` spot on; `4` relevant within the niche of closely related
-    products; `3` relevant within the broader niche; `2` relevant to related
-    products. There is no `1`: exclusion is an effect, not a score.
+  - `SEED`: `3` the shortest name a buyer would give the product; `4` and `5`
+    a longer, more exact name, which is rare: a term usually reaches them
+    through modifiers; `2` a looser name, or one that names other products
+    too. There is no `1`: exclusion is an effect, not a score. `0` puts
+    the term in the seed's category without making it relevant to the product,
+    for a word that groups terms but says nothing about the product: the own
+    brand, an occasion, a gift. Only another seed makes such a term relevant.
   - `MODIFIER`: `-2`, `-1`, `1` or `2`.
   - `EXCLUDE`: `NULL`.
-- **`exclusiveWithin`**: makes the rule a claim. The pattern's words belong to
-  this product, and every other ASIN in the scope is excluded for a term the
-  pattern matches, unless that ASIN has a positive rule of its own covering
+- **`exclusiveWithin`**: makes the pattern's words exclusive to the rule's
+  product within a scope. Every other ASIN in the scope is excluded for a term
+  the pattern matches, unless that ASIN has a positive rule of its own covering
   those words.
   - `STORE`: every other advertised ASIN of the store.
-  - `FAMILY`: every other ASIN of the claimant ASIN's family.
-  - A claim counts whether or not the claimant still sells: an inactive
-    product's claim excludes its siblings like any other.
+  - `FAMILY`: every other ASIN of the rule's ASIN's own family, not of the
+    families around it.
+  - The rule counts whether or not its product still sells: an inactive
+    product's `exclusiveWithin` excludes its siblings like any other.
 - **`comment`**: why the rule exists, in a few words.
 
 ## What a row may hold
@@ -132,24 +145,26 @@ A rule:
 - `level`, `matchKind`, `effect` and `exclusiveWithin` hold one of their listed
   values, in upper case, or `NULL` for `exclusiveWithin`.
 - `product` is `*` exactly when `level` is `STORE`. A `FAMILY` rule's `product`
-  is not empty. An `ASIN` rule's `product` is an ASIN or ISBN-10 in upper case.
+  has at least one part. An `ASIN` rule's `product` is an ASIN or ISBN-10 in
+  upper case.
 - `pattern` is lower case and has at least one word. Each word is letters,
   digits, or a period between two digits, as step 1 leaves them, and may end in
   `*` after at least one other character; `*` alone or inside a word is not
   allowed.
 - A `SEED` names a category of the same store that is itself usable, and has
-  `relevance` 2 to 5.
+  `relevance` 0 or 2 to 5.
 - A `MODIFIER` has `termCategory` `NULL`, `matchKind` `PHRASE` or `ALL_WORDS`
   (an `EXACT` modifier would have to reuse the seed's words), and `relevance`
   `-2`, `-1`, `1` or `2`.
 - An `EXCLUDE` has `termCategory` and `relevance` `NULL`.
 - `exclusiveWithin` is set only on a `SEED` or a `MODIFIER` with positive
-  relevance, at `FAMILY` level (`STORE` only) or at `ASIN` level (`STORE` or
+  relevance (not on a seed with relevance 0), at `FAMILY` level (`STORE` only) or at `ASIN` level (`STORE` or
   `FAMILY`); never at `STORE` level.
 
 **A family name that no ASIN has is not a problem the page reports.** The rule is
 valid and matches nothing. Compare every `FAMILY` rule's `product` with the
-families the store's listings have before writing it.
+families the store's listings have before writing it: it is one of them, or the
+first parts of one before a `:`.
 
 ## How a search term is classified
 
@@ -167,24 +182,28 @@ For one term and one advertised ASIN, in this order:
    (0, 1, 2, …). No word is dropped and none is stemmed. An empty result goes to
    `No search term`.
 2. **Match the chain.** The chain is `STORE` (depth 0), the ASIN's family for
-   the store's country if it has one (depth 1), and the ASIN (depth 2). A match
+   the store's country if it has one and each family it lies within (a family's
+   depth is the number of its parts: 1 for `Mug`, 2 for `Mug:Travel`), and the
+   ASIN, deeper than any family. A match
    records the term positions it used: for `PHRASE` the leftmost occurrence; for
    `ALL_WORDS` the pattern words in order, each given the earliest free position
    that still lets the remaining words match; for `EXACT` every position.
 3. **Collect the exclusions.** Every matched `EXCLUDE` rule, at its own depth.
-   Every claim of the store that matches the term, from any family or ASIN, not
-   only this chain, unless this ASIN is the claimant (the ASIN of an `ASIN`
-   claim, or an ASIN of the family of a `FAMILY` claim). A claim
-   `exclusiveWithin` `STORE` acts as an exclusion at depth 0; a claim
-   `exclusiveWithin` `FAMILY` acts at depth 1 when this ASIN is in the
-   claimant's family, and not at all otherwise.
+   Every rule of the store with `exclusiveWithin` that matches the term, from
+   any family or ASIN, not only this chain, unless this ASIN is the rule's own
+   product (the ASIN of an `ASIN` rule, or an ASIN of the family of a `FAMILY`
+   rule or of a family within it). `exclusiveWithin` `STORE` acts as an
+   exclusion at depth 0; `exclusiveWithin` `FAMILY` acts at the depth of the
+   rule's ASIN's family when this ASIN is in that family, and not at all
+   otherwise.
 4. **Lift what is covered.** An exclusion stands unless a positive match in
-   this ASIN's chain (a `SEED`, or a `MODIFIER` with positive relevance) at the
+   this ASIN's chain (a `SEED` or a `MODIFIER` with positive relevance) at the
    same or a deeper depth covers every position the exclusion used. An `EXACT`
    positive covers every position. An `EXACT` `EXCLUDE` is lifted only by an
    `EXACT` `SEED` at the same or a deeper depth. If any exclusion stands, the
    outcome is `Excluded`.
-5. **An exact seed decides.** If an `EXACT` `SEED` matched, take the deepest
+5. **An exact seed decides.** If an `EXACT` `SEED` with relevance above 0
+   matched, take the deepest
    (then the higher relevance, then the lower category position): its category
    and its relevance are the outcome, and no modifier applies.
 6. **No seed.** If no `SEED` matched, a term that is one ASIN- or ISBN-shaped
@@ -199,7 +218,8 @@ For one term and one advertised ASIN, in this order:
    negatives sharing a position only the one with more words counts, and on a
    tie the more negative. A `-2` lowers the score and never excludes. The result
    is limited to 2 to 5. The seed that gives the best relevance need not be the
-   seed that gave the category.
+   seed that gave the category. Seeds with relevance 0 take no part: when they
+   are the only seeds matched, the relevance is 0 and no modifier applies.
 9. **The cited rules** are the standing exclusions for `Excluded`; otherwise the
    category's seed and the seed and modifiers of the best relevance.
 
@@ -222,36 +242,45 @@ written `\|` in a markdown table.
 
 | #   | level  | product        | matchKind | pattern            | effect   | termCategory         | relevance | exclusiveWithin |
 | --- | ------ | -------------- | --------- | ------------------ | -------- | -------------------- | --------- | --------------- |
-| r1  | STORE  | \*             | ALL_WORDS | `lumora`           | SEED     | Own brand            | 5         |                 |
-| r2  | STORE  | \*             | ALL_WORDS | `brandex`          | SEED     | Competitor brand     | 2         |                 |
-| r3  | STORE  | \*             | ALL_WORDS | `brewlo`           | SEED     | Coffee machine brand | 2         |                 |
-| r4  | STORE  | \*             | ALL_WORDS | `travel mug*`      | SEED     | Travel mug           | 4         |                 |
-| r5  | STORE  | \*             | ALL_WORDS | `\|mug\|mugs\|`    | SEED     | Mug, general         | 3         |                 |
-| r6  | STORE  | \*             | ALL_WORDS | `insulated`        | MODIFIER |                      | 1         |                 |
-| r7  | STORE  | \*             | ALL_WORDS | `ceramic`          | MODIFIER |                      | -1        |                 |
-| r8  | STORE  | \*             | PHRASE    | `replacement lid*` | EXCLUDE  |                      |           |                 |
-| r9  | FAMILY | TRAVEL_MUG     | ALL_WORDS | `kid*`             | EXCLUDE  |                      |           |                 |
-| r10 | FAMILY | KIDS_BOTTLE    | ALL_WORDS | `kid* bottle*`     | SEED     | Kids bottle          | 4         |                 |
-| r11 | ASIN   | (the red mug)  | ALL_WORDS | `red`              | MODIFIER |                      | 1         | FAMILY          |
-| r12 | ASIN   | (the blue mug) | ALL_WORDS | `blue`             | MODIFIER |                      | 1         | FAMILY          |
+| r1  | STORE  | \*             | ALL_WORDS | `lumora`           | SEED     | Own brand            | 0         |                 |
+| r2  | STORE  | \*             | ALL_WORDS | `lumora`           | MODIFIER |                      | 2         |                 |
+| r3  | STORE  | \*             | ALL_WORDS | `brandex`          | SEED     | Competitor brand     | 0         |                 |
+| r4  | STORE  | \*             | ALL_WORDS | `brewlo`           | SEED     | Coffee machine brand | 0         |                 |
+| r5  | FAMILY | TRAVEL_MUG     | ALL_WORDS | `travel mug*`      | SEED     | Travel mug           | 3         |                 |
+| r6  | FAMILY | TRAVEL_MUG     | ALL_WORDS | `\|mug\|mugs\|`    | SEED     | Mug, general         | 2         |                 |
+| r7  | STORE  | \*             | ALL_WORDS | `insulated`        | MODIFIER |                      | 1         |                 |
+| r8  | STORE  | \*             | ALL_WORDS | `ceramic`          | MODIFIER |                      | -1        |                 |
+| r9  | STORE  | \*             | PHRASE    | `replacement lid*` | EXCLUDE  |                      |           |                 |
+| r10 | FAMILY | TRAVEL_MUG     | ALL_WORDS | `kid*`             | EXCLUDE  |                      |           |                 |
+| r11 | FAMILY | KIDS_BOTTLE    | ALL_WORDS | `kid* bottle*`     | SEED     | Kids bottle          | 3         |                 |
+| r12 | ASIN   | (the red mug)  | ALL_WORDS | `red`              | MODIFIER |                      | 1         | FAMILY          |
+| r13 | ASIN   | (the blue mug) | ALL_WORDS | `blue`             | MODIFIER |                      | 1         | FAMILY          |
 
-| term                             | on           | outcome                  | why                                                                                                  |
-| -------------------------------- | ------------ | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `insulated travel mugs`          | either mug   | Travel mug, 5            | r4 and r5 match; Travel mug has the lower position; r4 4 + r6 1 beats r5 3 + r6 1                    |
-| `red travel mug`                 | the red mug  | Travel mug, 5            | r4 4 + r11 1; the red mug is the claimant                                                            |
-| `red travel mug`                 | the blue mug | Excluded                 | r11 claims `red` within the family, and nothing in the blue mug's chain at depth 1 or 2 covers `red` |
-| `brandex travel mug`             | either mug   | Competitor brand, 4      | the category from r2 (position 20), the relevance from r4                                            |
-| `kids water bottle`              | the bottle   | Kids bottle, 4           | r10                                                                                                  |
-| `kids water bottle`              | either mug   | Excluded                 | r9; no positive at the family or the ASIN covers `kids`                                              |
-| `replacement lid for lumora mug` | either mug   | Excluded                 | r8; r1 and r5 match, but neither covers `replacement lid`                                            |
-| `ceramic coffee mug`             | either mug   | Mug, general, 2          | r5 3 + r7 -1                                                                                         |
-| `stainless tumbler`              | any          | Unmatched                | no seed matches                                                                                      |
-| an ASIN typed as the term        | any          | ASIN, own or ASIN, other | no seed matches a single ASIN-shaped word                                                            |
+"A travel mug" and "a kids' bottle" are what a buyer would say is in the bag,
+so they are seeds at 3. "A mug" names other mugs too, so it is 2. The brand
+names say nothing about the product: they are seeds at 0, which only give the
+category, and the own brand adds 2 as a modifier.
 
-Had the draft added a `STORE` seed `red`, it would still not lift r11's claim on
-the blue mug: the claim acts at depth 1, deeper than a `STORE` rule. A claim
-`exclusiveWithin` `STORE` acts at depth 0 instead, so a `STORE` positive that
-covers its word lifts it on every ASIN of the store.
+| term                             | on           | outcome                  | why                                                                                           |
+| -------------------------------- | ------------ | ------------------------ | --------------------------------------------------------------------------------------------- |
+| `insulated travel mugs`          | either mug   | Travel mug, 4            | r5 and r6 match; Travel mug has the lower position; r5 3 + r7 1 beats r6 2 + r7 1             |
+| `red travel mug`                 | the red mug  | Travel mug, 4            | r5 3 + r12 1; `red` is exclusive to the red mug                                               |
+| `red travel mug`                 | the blue mug | Excluded                 | r12 makes `red` exclusive within the family, and nothing in the blue mug's chain covers `red` |
+| `red travel mug`                 | the bottle   | Unmatched                | r5 is a rule of the mugs' family                                                              |
+| `lumora travel mug`              | either mug   | Own brand, 5             | the category from r1 (position 10), the relevance r5 3 + r2 2                                 |
+| `lumora`                         | any          | Own brand, 0             | only r1 matches, and a seed at 0 makes the term relevant to no product                        |
+| `brandex travel mug`             | either mug   | Competitor brand, 3      | the category from r3 (position 20), the relevance from r5                                     |
+| `kids water bottle`              | the bottle   | Kids bottle, 3           | r11                                                                                           |
+| `kids water bottle`              | either mug   | Excluded                 | r10; no positive at the family or the ASIN covers `kids`                                      |
+| `replacement lid for lumora mug` | either mug   | Excluded                 | r9; r1 and r6 match, but neither covers `replacement lid`, and r1 lifts nothing               |
+| `ceramic coffee mug`             | either mug   | Mug, general, 2          | r6 2 + r8 -1, limited to 2                                                                    |
+| `stainless tumbler`              | any          | Unmatched                | no seed matches                                                                               |
+| an ASIN typed as the term        | any          | ASIN, own or ASIN, other | no seed matches a single ASIN-shaped word                                                     |
+
+Had the draft added a `STORE` seed `red`, it would still not lift r12's
+`exclusiveWithin` on the blue mug: that acts at the family's depth, deeper than
+a `STORE` rule. `exclusiveWithin` `STORE` acts at depth 0 instead, so a `STORE`
+positive that covers its word lifts it on every ASIN of the store.
 
 ## The reads
 

@@ -24,7 +24,7 @@ columns: |
   updatedAt	TIMESTAMPTZ		now()
   termCategory	TEXT	true		The category of brand_config_amazon_search_term_category a SEED puts the term in; null for the other effects
   relevance	INTEGER	true		SEED: 2 to 5, 5 being spot on. MODIFIER: -2, -1, 1 or 2, added to the seed's score. EXCLUDE: null
-  exclusiveWithin	TEXT	true		STORE | FAMILY; null for no claim. Makes the rule a claim: every other ASIN in the scope is excluded for a term the pattern matches, unless that ASIN has a positive rule of its own covering those words. Allowed on a SEED or a positive MODIFIER, at FAMILY level (STORE) or ASIN level (STORE or FAMILY)
+  exclusiveWithin	TEXT	true		STORE | FAMILY; null when the rule is not exclusive. Makes the pattern's words exclusive to the rule's product within the scope: every other ASIN in the scope is excluded for a term the pattern matches, unless that ASIN has a positive rule of its own covering those words. Allowed on a SEED or a positive MODIFIER, at FAMILY level (STORE) or ASIN level (STORE or FAMILY)
   comment	TEXT	true		Why the rule exists, in a few words
 foreignKeys:
   - columns:

@@ -1,0 +1,30 @@
+name: "amzspstream_ANY_OFFER_CHANGED_latest"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "The newest Amazon ANY_OFFER_CHANGED notification per merchant, marketplace and ASIN, split into columns: the offers, each element of the notification's Summary, and extras for every key without a column. A notification replaces the row only when its timeOfOfferChange is later, so one delivered late never overwrites a newer state. Every notification is kept in amzspstream_ANY_OFFER_CHANGED."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "asin"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Seller id from AnyOfferChangedNotification.SellerId
+  marketplaceId	TEXT		Marketplace id from OfferChangeTrigger.MarketplaceId
+  asin	TEXT		ASIN from OfferChangeTrigger.ASIN
+  timeOfOfferChange	TIMESTAMPTZ		OfferChangeTrigger.TimeOfOfferChange, when Amazon says the offers changed. Orders the notifications of one key: the row is replaced only by a notification with a later value.
+  eventTime	TIMESTAMPTZ		Notification EventTime. Not the ordering key: it can order two close notifications differently from timeOfOfferChange.
+  receivedAt	TIMESTAMPTZ		When the consumer processed the notification this row holds
+  payloadVersion	TEXT		SP-API PayloadVersion from the envelope
+  itemCondition	TEXT	true	OfferChangeTrigger.ItemCondition; null when the notification has none
+  offerChangeType	TEXT	true	OfferChangeTrigger.OfferChangeType, Amazon's reason for the notification (such as FeaturedOffer, Internal or External); null when the notification has none
+  offers	JSONB	true	The notification's Offers array as Amazon sent it: the offers of every seller, the merchant's own being those whose SellerId equals merchantId. The notification names no SKU. Null when the notification has no Offers array, or one with an offer of another structure (then it is in extras).
+  listPrice	DOUBLE PRECISION	true	Summary.ListPrice.Amount, the list price, in the currency listPriceCurrencyCode names; null when the notification has no ListPrice or one of another structure (then it is in extras)
+  listPriceCurrencyCode	TEXT	true	Summary.ListPrice.CurrencyCode, the currency of listPrice only (every other price in the row carries its own CurrencyCode); null when listPrice is null
+  buyBoxPrices	JSONB	true	Summary.BuyBoxPrices as Amazon sent it (an array of Condition, LandedPrice, ListingPrice and Shipping); null when the notification has none or one of another structure (then it is in extras)
+  lowestPrices	JSONB	true	Summary.LowestPrices as Amazon sent it (an array of Condition, FulfillmentChannel, LandedPrice, ListingPrice and Shipping); null when the notification has none or one of another structure (then it is in extras)
+  numberOfOffers	JSONB	true	Summary.NumberOfOffers as Amazon sent it (an array of Condition, FulfillmentChannel and OfferCount); null when the notification has none or one of another structure (then it is in extras)
+  numberOfBuyBoxEligibleOffers	JSONB	true	Summary.NumberOfBuyBoxEligibleOffers as Amazon sent it (an array of Condition, FulfillmentChannel and OfferCount); null when the notification has none or one of another structure (then it is in extras)
+  salesRankings	JSONB	true	Summary.SalesRankings as Amazon sent it (an array of ProductCategoryId and Rank); null when the notification has none or one of another structure (then it is in extras)
+  competitivePriceThreshold	JSONB	true	Summary.CompetitivePriceThreshold as Amazon sent it ({Amount, CurrencyCode}); null when the notification has none or one of another structure (then it is in extras)
+  extras	JSONB		Every key of the notification payload that has no column, at its place in the payload (top level, under Summary or under OfferChangeTrigger), and any value that did not fit its column, so the columns and extras together hold the whole payload. An empty object when every key has a column.

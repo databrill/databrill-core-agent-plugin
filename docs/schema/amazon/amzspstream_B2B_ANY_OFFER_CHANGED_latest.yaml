@@ -1,0 +1,25 @@
+name: "amzspstream_B2B_ANY_OFFER_CHANGED_latest"
+kind: "table"
+access: "read"
+category: "Amazon notifications"
+description: "The newest Amazon B2B_ANY_OFFER_CHANGED notification per merchant, marketplace and ASIN, split into columns: the offers, each element of the notification's Summary, and extras for every key without a column. A notification replaces the row only when its timeOfOfferChange is later, so one delivered late never overwrites a newer state. Every notification is kept in amzspstream_B2B_ANY_OFFER_CHANGED."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "asin"
+columns: |
+  name	type	nullable	description
+  merchantId	TEXT		Seller id from B2BAnyOfferChangedNotification.SellerId
+  marketplaceId	TEXT		Marketplace id from OfferChangeTrigger.MarketplaceId
+  asin	TEXT		ASIN from OfferChangeTrigger.ASIN
+  timeOfOfferChange	TIMESTAMPTZ		OfferChangeTrigger.TimeOfOfferChange, when Amazon says the offers changed. Orders the notifications of one key: the row is replaced only by a notification with a later value.
+  eventTime	TIMESTAMPTZ		Notification EventTime. Not the ordering key: it can order two close notifications differently from timeOfOfferChange.
+  receivedAt	TIMESTAMPTZ		When the consumer processed the notification this row holds
+  payloadVersion	TEXT		SP-API PayloadVersion from the envelope
+  itemCondition	TEXT	true	OfferChangeTrigger.ItemCondition; null when the notification has none
+  offers	JSONB	true	The notification's Offers array as Amazon sent it, quantity discount tiers included: the offers of every seller, the merchant's own being those whose SellerId equals merchantId. The notification names no SKU. Null when the notification has no Offers array, or one with an offer of another structure (then it is in extras).
+  buyBoxPrices	JSONB	true	Summary.BuyBoxPrices as Amazon sent it (an array, possibly empty, of Condition, OfferType, QuantityTier, ListingPrice and SellerId, some with DiscountType, LandedPrice and Shipping); null when the notification has none or one of another structure (then it is in extras)
+  lowestPrices	JSONB	true	Summary.LowestPrices as Amazon sent it (an array of Condition, FulfillmentChannel, OfferType, QuantityTier and ListingPrice, some with DiscountType, LandedPrice and Shipping); null when the notification has none or one of another structure (then it is in extras)
+  numberOfOffers	JSONB	true	Summary.NumberOfOffers as Amazon sent it (an array of Condition, FulfillmentChannel and OfferCount); null when the notification has none or one of another structure (then it is in extras)
+  buyBoxEligibleOffers	JSONB	true	Summary.BuyBoxEligibleOffers as Amazon sent it (an array of Condition, FulfillmentChannel and OfferCount); null when the notification has none or one of another structure (then it is in extras)
+  extras	JSONB		Every key of the notification payload that has no column, at its place in the payload (top level, under Summary or under OfferChangeTrigger), and any value that did not fit its column, so the columns and extras together hold the whole payload. An empty object when every key has a column.
