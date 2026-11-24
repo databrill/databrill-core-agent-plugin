@@ -40,6 +40,55 @@ Result caps limit only the response, not the committed write, and do not undo
 it. Never repeat a truncated write; use `executeSql` to read any remaining
 results.
 
+### `loadProducts`
+
+Discovers products before choosing subjects for analysis. The default
+`level: "family"` lists configured families with labels and ASIN counts across
+the workspace; it ignores `stores`. Use `parentAsin`, `asin` or `sku` for detail
+in the resolved active real stores, defaulting to all of them. Configured
+family and Amazon parent ASIN are independent groupings, not nested levels.
+
+`stores` accepts comma-separated countries, regions, marketplace IDs, `*` or
+merchant-qualified scopes, as in `loadAds`. `products` accepts comma-separated
+family names, parent ASINs or child ASINs; parent ASINs expand to children
+separately in each selected marketplace. `search` matches a literal,
+case-insensitive substring in title or family, including family labels at
+family level.
+
+`columns` selects a comma-separated projection. Defaults are small;
+`meta.columnsAvailable` lists the level's allowed fields, and unknown names
+are refused. Depending on the level and requested columns, results include
+family labels/counts, parent titles and their configured families, ASIN
+`title`, `brand`, `productType`, `family` and `parentAsin`, or SKU listing
+`price`, `quantity` and `fulfillmentChannel`. Missing labels remain null.
+Localized ASIN titles and parent links use the first available country in
+`meta.titleCountryPriority`. Parent titles come from the parent catalog row;
+SKU titles come from listing snapshots.
+
+SKU rows are non-deleted listing snapshots, not listing history or proof of
+open/active listing status. Their quantity is not an FBA stock total; use the
+FNSKU inventory source described below for that.
+
+`includeUnassigned` defaults to true. False excludes ASINs/SKUs without a
+family; at parent level it excludes unassigned children while retaining parents
+with assigned children. `meta.unassignedCount` reports matching unassigned
+products before exclusion: ASINs at `asin`, SKUs at `sku`, and distinct child
+ASINs at family/parent level.
+
+Results default to 200 rows, with a maximum `limit` of 2000 and an `offset`
+default of 0. `meta.totalCount` is the full matching count after inclusion
+filtering; `meta.rowCount` is the number returned. `meta.isTruncated` and
+`meta.truncatedBy` report whether more rows remain and whether the cap was
+`rows` or `bytes` (null when not truncated). The shared 2 MiB compact-JSON cap
+includes metadata. Advance `offset` by `meta.rowCount`; if no row fits the byte
+cap, request fewer columns rather than retrying the same page.
+
+`meta.missingTables` names absent sources. A missing core configuration,
+catalog or listing table produces empty data. Missing optional traffic tables
+disable only the parent fallback; missing ontology tables disable only the
+population check. Neither optional absence forces an empty result, and
+`meta.ontologyPopulated: false` does not mean configured families are absent.
+
 ### `loadAds`
 
 Returns Amazon advertising impressions, clicks, add-to-cart, purchases, units,
@@ -128,7 +177,8 @@ Depending on the workspace's configured pipelines, the database may also
 contain:
 
 - Amazon orders and order items;
-- listings, catalog attributes, images, and offer snapshots;
+- listing status/history, catalog attributes beyond the `loadProducts`
+  projection, images, and offer snapshots;
 - returns, reimbursements, removals, storage fees, coupons, and promotions;
 - settlement, ledger, transaction, posting, and projected-profit data;
 - advertising campaign/entity exports and Amazon Marketing Stream events;
@@ -153,6 +203,8 @@ contain:
 - exchange rates and marketplace/store dimensions.
 
 Use `executeSql`, or the read-only Deno or n8n path, for these sources.
+`loadProducts` exposes selected catalog and listing fields for discovery, as
+listed above; it does not replace SQL for the remaining fields or history.
 `loadTflInventory` reads TFL daily warehouse stock. `inventoryPacing` remains a
 separate tool that reads Amazon FBA inventory; do not present either source as
 the other, and never add Amazon, TFL and Shopify units together without saying

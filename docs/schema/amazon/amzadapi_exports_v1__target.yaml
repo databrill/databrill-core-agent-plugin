@@ -14,9 +14,10 @@ columns: |
   targetId	TEXT		Amazon advertising target ID
   creationDateTime	TIMESTAMPTZ		Target creation timestamp from Amazon
   lastUpdatedDateTime	TIMESTAMPTZ		Target last updated timestamp from Amazon
+  archivedDetectedAt	TIMESTAMPTZ	true	Time archival was inferred from absence in a complete export; cleared when the entity reappears
   campaignId	TEXT		Amazon advertising campaign ID
   adProduct	TEXT		Ad product type: SPONSORED_PRODUCTS, SPONSORED_DISPLAY, SPONSORED_BRANDS
-  state	TEXT		Target state: ENABLED, PAUSED
+  state	TEXT		Target state: ENABLED, PAUSED, ARCHIVED
   negative	BOOLEAN		Whether this is a negative target
   targetDetails	JSONB		Target details configuration (JSONB)
   targetType	TEXT		Target type: AUTO, KEYWORD, PRODUCT, PRODUCT_AUDIENCE, PRODUCT_CATEGORY

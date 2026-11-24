@@ -1,5 +1,6 @@
-import { Effect, Result } from "effect";
+import { Result } from "effect";
 import postgres from "npm:postgres@3.4.8";
+import { runEffectPromise } from "./lib/effectCompat.ts";
 import { parseWsidArgument } from "./lib/parseWsidArgument.ts";
 import { resolveConnection } from "./lib/resolveConnection.ts";
 
@@ -164,7 +165,7 @@ function renderCsv(rows: readonly Record<string, unknown>[]): string {
 async function main(): Promise<void> {
 	const args = parseArguments(Deno.args);
 	const statement = assertReadOnlyStatement(await Deno.readTextFile(args.file));
-	const connection = await Effect.runPromise(resolveConnection(args.wsid));
+	const connection = await runEffectPromise(resolveConnection(args.wsid));
 	const sql = postgres(connection.database.postgresUrl, {
 		max: 1,
 		idle_timeout: 5,

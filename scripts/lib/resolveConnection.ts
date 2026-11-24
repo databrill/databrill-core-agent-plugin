@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { loadConfig, resolveWorkspace, type Workspace } from "./config.ts";
+import { loadConfig, resolveWorkspace, type Workspace } from "./workspaceRegistry.ts";
 
 /** Load the registry and resolve the explicitly requested database workspace. */
 export function resolveConnection(wsid: string): Effect.Effect<Workspace, Error> {

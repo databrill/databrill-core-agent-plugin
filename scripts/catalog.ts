@@ -1,5 +1,6 @@
-import { Effect, Result } from "effect";
+import { Result } from "effect";
 import postgres from "npm:postgres@3.4.8";
+import { runEffectPromise } from "./lib/effectCompat.ts";
 import { parseWsidArgument } from "./lib/parseWsidArgument.ts";
 import { resolveConnection } from "./lib/resolveConnection.ts";
 
@@ -48,7 +49,7 @@ async function main(): Promise<void> {
 		throw new Error(`Unknown argument(s): ${rest.join(" ")}`);
 	}
 
-	const connection = await Effect.runPromise(resolveConnection(wsid));
+	const connection = await runEffectPromise(resolveConnection(wsid));
 	const sql = postgres(connection.database.postgresUrl, {
 		max: 1,
 		idle_timeout: 5,

@@ -92,7 +92,9 @@ On a read-only session the write tools are not listed at all. So "the write tool
 is missing" is a statement about the URL, not about permissions or about the
 plugin version, and calling such a tool by hand on a read-only session is refused
 anyway. Writing configuration is what these tools are for; the skills that use
-them are `dbl-brand-config` and `dbl-search-intent`.
+them are `dbl-brand-config` and `dbl-search-intent`. The spend aims
+(`brand_config_amazon_spend_aim`) are written with `writeSql` directly or from the
+Harvest & negate page of the PPC dashboard.
 
 ## Multi-workspace query rules
 

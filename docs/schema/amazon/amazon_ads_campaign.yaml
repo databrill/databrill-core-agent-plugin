@@ -2,14 +2,14 @@ name: "amazon_ads_campaign"
 kind: "view"
 access: "read"
 category: "Curated views"
-description: "Merged live view of Amazon advertising campaigns: the periodic Export table (amzadapi_exports_v1__campaign) reconciled with the near-realtime Amazon Marketing Stream snapshot (amzms_v1__campaigns). `state` and `name` come from whichever side is fresher, so a console change shows within seconds of being made instead of waiting for the next Export. Delivery and serving fields are Export-only."
+description: "Merged live view of Amazon advertising campaigns: the periodic Export table (amzadapi_exports_v1__campaign) reconciled with the near-realtime Amazon Marketing Stream snapshot (amzms_v1__campaigns). Export ARCHIVED state takes precedence; otherwise `state` comes from whichever side is fresher. `name` always comes from whichever side is fresher. Delivery and serving fields are Export-only."
 columns: |
   name	type	description
   merchant_id	TEXT
   marketplace_id	TEXT
   campaign_id	TEXT
   ad_product	TEXT
-  state	TEXT	Fresher of Export/stream state (ENABLED/PAUSED)
+  state	TEXT	ARCHIVED when inferred by Export; otherwise the fresher Export/stream state
   name	TEXT	Fresher of Export/stream campaign name
   delivery_status	TEXT	Export-only serving status
   delivery_reasons	JSONB	Export-only delivery reasons (JSONB)
@@ -34,7 +34,8 @@ definition: |
     COALESCE(e."marketplaceId", s."marketplace_id") AS marketplace_id,
     COALESCE(e."campaignId", s."campaignId") AS campaign_id,
     COALESCE(e."adProduct", s."adProduct") AS ad_product,
-    CASE WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
+    CASE WHEN e."state" = 'ARCHIVED' THEN e."state"
+      WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
       THEN s."state" ELSE e."state" END AS state,
     CASE WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
       THEN s."name" ELSE e."name" END AS name,

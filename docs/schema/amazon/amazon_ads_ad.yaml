@@ -11,7 +11,7 @@ columns: |
   ad_group_id	TEXT
   campaign_id	TEXT
   ad_product	TEXT
-  state	TEXT	Fresher of Export/stream state (ENABLED/PAUSED)
+  state	TEXT	ARCHIVED when inferred by Export; otherwise the fresher Export/stream state
   name	TEXT	Export-only ad name
   ad_type	TEXT
   creative	JSONB	Export-only creative payload (JSONB)
@@ -31,7 +31,8 @@ definition: |
     COALESCE(e."adGroupId", s."adGroupId") AS ad_group_id,
     COALESCE(e."campaignId", s."campaignId") AS campaign_id,
     COALESCE(e."adProduct", s."adProduct") AS ad_product,
-    CASE WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
+    CASE WHEN e."state" = 'ARCHIVED' THEN e."state"
+      WHEN s."lastUpdatedDateTime" > COALESCE(e."lastUpdatedDateTime", '-infinity')
       THEN s."state" ELSE e."state" END AS state,
     e."name" AS name,
     e."adType" AS ad_type,

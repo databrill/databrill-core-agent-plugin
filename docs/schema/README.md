@@ -4,7 +4,7 @@ Every table and view Databrill declares for a client workspace, one file per tab
 
 Generated from the schema definitions in the Databrill monorepo. Do not edit anything in this folder by hand: rerun `cd services && deno task generate:agent-schema-docs` instead.
 
-Tenant schema version: `0.1.18`
+Tenant schema version: `0.1.19`
 
 ## Groups
 
@@ -12,7 +12,7 @@ Tenant schema version: `0.1.18`
 - `walmart/` — 4 tables, 0 views
 - `shopify/` — 12 tables, 0 views
 - `tfl/` — 12 tables, 0 views
-- `common/` — 12 tables, 4 views
+- `common/` — 13 tables, 4 views
 
 A workspace that sells on one channel needs one group. `common` holds what is not channel-specific: exchange rates, the brand ontology and product configuration, and the schema version row.
 

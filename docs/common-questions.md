@@ -202,6 +202,14 @@ is per seller SKU and must not be totalled.
 
 ## Listings and catalog
 
+Question: Which Amazon products, families, ASINs or seller SKUs are available?
+
+Preferred path: [loadProducts](data-coverage.md#loadproducts). Browse configured
+families with the default `level: "family"`, or choose `parentAsin`, `asin` or
+`sku` for store-scoped detail. Use `products` for known families/ASINs, `stores`
+for marketplace scope and `search` for a literal title/family substring. The
+tool reference covers returned fields and paging.
+
 Question: Which listings are open, missing, inactive, or changing price?
 
 Database path: start with `amazon_listing_open` and `amazon_listing_all`. Use
@@ -210,8 +218,11 @@ columns explicitly instead of returning entire JSON payloads.
 
 Question: Which child ASIN belongs to which family?
 
-Preferred path: the metric tools take family names in `products`, and
-`loadAds` and `loadTraffic` take `groupBy: "family"` — no SQL needed.
+Preferred path: `loadProducts` with `level: "asin"`, the relevant `stores`
+and the known child ASIN in `products`; read its configured `family` field.
+Use family level to browse families. After choosing products, the metric tools
+take family names in `products`, and `loadAds` and `loadTraffic` take
+`groupBy: "family"` — no SQL needed for that analysis.
 
 Database path: use `brand_config_amazon_asin` (ASIN → family) and
 `brand_config_amazon_family`. The better-named `brand_ontology_amazon_asin` and

@@ -14,10 +14,11 @@ columns: |
   adGroupId	TEXT		Amazon advertising ad group ID
   creationDateTime	TIMESTAMPTZ		Ad group creation timestamp from Amazon
   lastUpdatedDateTime	TIMESTAMPTZ		Ad group last updated timestamp from Amazon
+  archivedDetectedAt	TIMESTAMPTZ	true	Time archival was inferred from absence in a complete export; cleared when the entity reappears
   campaignId	TEXT		Amazon advertising campaign ID that this ad group belongs to
   adProduct	TEXT		Ad product type: SPONSORED_DISPLAY, SPONSORED_BRANDS, SPONSORED_PRODUCTS
   name	TEXT		Ad group name
-  state	TEXT		Ad group state: PAUSED, ENABLED
+  state	TEXT		Ad group state: ENABLED, PAUSED, ARCHIVED
   deliveryStatus	TEXT		Delivery status: NOT_DELIVERING, DELIVERING
   bid	JSONB	true	Bid configuration: defaultBid, currencyCode (JSONB)
   deliveryReasons	JSONB	true	Delivery reasons array (e.g., CAMPAIGN_PAUSED) (JSONB)

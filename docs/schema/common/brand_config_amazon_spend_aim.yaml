@@ -1,0 +1,25 @@
+name: "brand_config_amazon_spend_aim"
+kind: "table"
+access: "readwrite"
+category: "Brand ontology and product configuration"
+description: "Customer-editable spend aims of one Amazon store (merchant and marketplace): what the ad spend of the store, a campaign, an ad group or a target is meant to achieve, optionally for one search term or one advertised ASIN. The Harvest & negate page of the PPC dashboard judges each search-term source by the aim that applies to it; a row it cannot use is shown there with its problem and has no effect."
+primaryKey:
+  - "merchantId"
+  - "marketplaceId"
+  - "level"
+  - "entityId"
+  - "subjectType"
+  - "subject"
+columns: |
+  name	type	nullable	default	description
+  merchantId	TEXT			Amazon merchant (seller) id of the store
+  marketplaceId	TEXT			Amazon marketplace id of the store
+  level	TEXT			STORE | CAMPAIGN | AD_GROUP | TARGET: what the aim is set on. For a search-term row the most specific level with an aim wins: TARGET, then AD_GROUP, then CAMPAIGN, then STORE
+  entityId	TEXT			* for STORE; else the campaignId, adGroupId or targetId of amzadapi_exports_v1__campaign, amzadapi_exports_v1__adgroup or amzadapi_exports_v1__target
+  subjectType	TEXT			NONE | SEARCH | ASIN. NONE: everything the entity serves. SEARCH: the search terms of one close-variant form. ASIN: one advertised ASIN. Within a level a SEARCH row beats an ASIN row, and either beats the NONE row
+  subject	TEXT			Empty for NONE; the search term for SEARCH, compared by its close-variant form; the ASIN in upper case for ASIN
+  createdAt	TIMESTAMPTZ		now()
+  updatedAt	TIMESTAMPTZ		now()
+  aimType	TEXT			PROFIT | BREAKEVEN | ORDERS | TOS_IS: what the ad spend is meant to achieve. PROFIT: the most net profit. BREAKEVEN: the most orders at break-even. ORDERS: the most orders within the budget. TOS_IS: the most top-of-search impression share within the budget
+  data	JSONB	true		PROFIT and BREAKEVEN: null, or {"shareOfSales": s, "perOrder": p}, the net profit required per order, s × the order value + p, s a fraction of sales and p money per order in the store's currency; either may be negative, and a missing key is 0, so null is break-even. ORDERS and TOS_IS: null
+  comment	TEXT	true		Why the aim was set, in a few words

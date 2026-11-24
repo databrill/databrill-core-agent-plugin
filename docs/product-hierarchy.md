@@ -11,6 +11,17 @@ you should have been looking at its family.
 
 ## Use the tools first
 
+Start with [loadProducts](data-coverage.md#loadproducts) to discover families
+across the workspace, or choose `level: "asin"` and the relevant stores to
+look up an ASIN's configured family. These bounded examples use a synthetic
+ASIN; a null `family` means the returned row has no configured family:
+
+```text
+loadProducts({ level: "family", columns: "family,label,asinCount", limit: 20 })
+loadProducts({ level: "asin", stores: "US", products: "B012345678", columns: "asin,family,parentAsin,title", limit: 20 })
+```
+
+After choosing products, use the metric tools for analysis.
 `loadAds`, `loadTraffic`, `loadEconomics`, `loadRank` and `loadSqp` all accept
 family names in `products`, and `loadAds` / `loadTraffic` accept
 `groupBy: "family"`. `inventoryPacing` is family-native. This is the supported

@@ -14,10 +14,11 @@ columns: |
   campaignId	TEXT		Amazon advertising campaign ID
   creationDateTime	TIMESTAMPTZ		Campaign creation timestamp from Amazon
   lastUpdatedDateTime	TIMESTAMPTZ		Campaign last updated timestamp from Amazon
+  archivedDetectedAt	TIMESTAMPTZ	true	Time archival was inferred from absence in a complete export; cleared when the entity reappears
   adProduct	TEXT		Ad product type: SPONSORED_DISPLAY, SPONSORED_BRANDS, SPONSORED_PRODUCTS
   name	TEXT		Campaign name
   startDate	DATE		Campaign start date (YYYY-MM-DD format)
-  state	TEXT		Campaign state: PAUSED, ENABLED
+  state	TEXT		Campaign state: ENABLED, PAUSED, ARCHIVED
   deliveryStatus	TEXT		Delivery status: NOT_DELIVERING, DELIVERING
   budgetCaps	JSONB		Budget caps configuration (JSONB)
   optimization	JSONB	true	Optimization settings: bidStrategy, goalSetting, autoPlacementBidAdjustments (JSONB)

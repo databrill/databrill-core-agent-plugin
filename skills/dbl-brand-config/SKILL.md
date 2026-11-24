@@ -11,10 +11,13 @@ metadata:
 
 Write with the **`core`** MCP server's **`writeSql`** tool. It is the only write
 path in this plugin, it is announced only on a read-write connector session, and
-it reaches the nine customer-editable `brand_config_*` tables and nothing else.
+it reaches the ten customer-editable `brand_config_*` tables and nothing else.
 This skill edits seven of them; the search-term categories and rules
 (`brand_config_amazon_search_term_category`, `brand_config_amazon_search_term_rule`)
-are `dbl-search-intent`'s. Reading these same tables is `dbl-db`'s job.
+are `dbl-search-intent`'s. The spend aims (`brand_config_amazon_spend_aim`) are
+written with `writeSql` directly or from the Harvest & negate page of the PPC
+dashboard. Reading these same
+tables is `dbl-db`'s job.
 
 ## Call
 

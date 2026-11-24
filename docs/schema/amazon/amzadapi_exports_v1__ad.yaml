@@ -14,10 +14,11 @@ columns: |
   adId	TEXT		Amazon advertising ad ID
   creationDateTime	TIMESTAMPTZ		Ad creation timestamp from Amazon
   lastUpdatedDateTime	TIMESTAMPTZ		Ad last updated timestamp from Amazon
+  archivedDetectedAt	TIMESTAMPTZ	true	Time archival was inferred from absence in a complete export; cleared when the entity reappears
   adGroupId	TEXT		Amazon advertising ad group ID
   campaignId	TEXT		Amazon advertising campaign ID
   adProduct	TEXT		Ad product type: SPONSORED_DISPLAY, SPONSORED_BRANDS, SPONSORED_PRODUCTS
-  state	TEXT		Ad state: ENABLED, PAUSED
+  state	TEXT		Ad state: ENABLED, PAUSED, ARCHIVED
   adType	TEXT		Ad type: PRODUCT_AD, VIDEO, BRAND_VIDEO, PRODUCT_COLLECTION
   creative	JSONB		Creative configuration: products, videos, customImages, brandLogo, landingPage, headline, brandName (JSONB)
   deliveryStatus	TEXT		Delivery status: NOT_DELIVERING, DELIVERING
